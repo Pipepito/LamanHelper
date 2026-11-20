@@ -552,3 +552,25 @@ function Settings.SetOnValueChangedCallback() end
 function CreateSettingsButtonInitializer(name, text, fn, tooltip) return { kind = "button", name = name, text = text, fn = fn } end
 function CreateSettingsListSectionHeaderInitializer(name) return { kind = "header", name = name } end
 MinimapUtil = nil
+
+-------------------------------------------------------------------------------
+-- CVars and console (Task 19)
+-------------------------------------------------------------------------------
+Enum.ConsoleCommandType = { Cvar = 0, Command = 1, Macro = 2 }
+Enum.ConsoleCategory = { Debug = 0, Graphics = 1, Console = 2, Combat = 3, Game = 4, Default = 5, Net = 6, Sound = 7, Gm = 8, Reveal = 9, None = 10 }
+C_CVar = {}
+function C_CVar.GetCVar(name) local c = S().cvars and S().cvars[name]; return c and tostring(c.value) end
+function C_CVar.GetCVarDefault(name) local c = S().cvars and S().cvars[name]; return c and tostring(c.default) end
+function C_CVar.SetCVar(name, value)
+  record("SetCVar", name, value)
+  S().cvars = S().cvars or {}
+  local c = S().cvars[name]
+  if c then c.value = tostring(value) else S().cvars[name] = { value = tostring(value), default = tostring(value) } end
+  return true
+end
+function C_CVar.GetCVarBool(name) local v = C_CVar.GetCVar(name); return v == "1" end
+function GetCVar(name) return C_CVar.GetCVar(name) end
+function SetCVar(name, value) return C_CVar.SetCVar(name, value) end
+function GetCVarDefault(name) return C_CVar.GetCVarDefault(name) end
+C_Console = {}
+function C_Console.GetAllCommands() return S().consoleCommands or {} end

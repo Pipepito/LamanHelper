@@ -16,6 +16,7 @@ Spellbook.lua
 Highlight.lua
 Panel.lua
 Options.lua
+Camera.lua
 Data_Buffs.lua
 Rules\Bags.lua
 Rules\Simple.lua

@@ -94,6 +94,30 @@ local T = {
   GEAR_UPGRADE_TITLE = "Mejora de equipo en las bolsas",
   GEAR_UPGRADE_HELP = "Esto compara solo el nivel de objeto, así que tómalo como una pista. Abre tus bolsas y lee la descripción del objeto.",
   GEAR_UPGRADE_ROW = "Un objeto de tus bolsas parece una mejora: %s",
+
+  -- Camera settings
+  OPT_CAMERA = "Cámara",
+  OPT_CAMERA_NOTE = "Son ajustes del juego que la ventana de opciones de Blizzard no muestra. Los guarda el propio juego.",
+  OPT_CAMERA_OTHER = "Otras variables de cámara",
+  OPT_CAMERA_RESET = "Restablecer la cámara",
+  CAM_MAX_ZOOM = "Distancia máxima de la cámara",
+  CAM_MAX_ZOOM_TT = "Hasta dónde puedes alejar la cámara. 2,6 es lo máximo que permite el juego.",
+  CAM_ZOOM_SPEED = "Velocidad del zoom",
+  CAM_ZOOM_SPEED_TT = "Lo rápido que hace zoom la rueda del ratón.",
+  CAM_KEEP_CENTERED = "Mantener el personaje centrado",
+  CAM_KEEP_CENTERED_TT = "Desactivado deja que la cámara se desplace hacia un lado (estilo ActionCam).",
+  CAM_REDUCE_MOVEMENT = "Reducir movimientos bruscos de la cámara",
+  CAM_REDUCE_MOVEMENT_TT = "Suaviza los giros bruscos de la cámara.",
+  CAM_DYNAMIC_PITCH = "Inclinación dinámica",
+  CAM_DYNAMIC_PITCH_TT = "Inclina la cámara al hacer zoom.",
+  CAM_OVER_SHOULDER = "Desplazamiento sobre el hombro",
+  CAM_OVER_SHOULDER_TT = "Desplaza la cámara a un lado del personaje. 0 es centrado.",
+  CAM_FOCUS_ENEMY = "Enfocar la cámara al objetivo enemigo",
+  CAM_FOCUS_ENEMY_TT = "La cámara gira suavemente hacia tu enemigo actual.",
+  CAM_FOCUS_INTERACT = "Enfocar la cámara al interactuar",
+  CAM_FOCUS_INTERACT_TT = "La cámara gira hacia los PNJ con los que hablas.",
+  CAM_HEAD_MOVEMENT = "Intensidad del movimiento de cabeza",
+  CAM_HEAD_MOVEMENT_TT = "Cuánto sigue la cámara la cabeza de tu personaje. 0 lo desactiva.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
