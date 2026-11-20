@@ -120,6 +120,7 @@ bag. Bag inventory slots are 31–34.
 | mount | Level 30–39 with under 100 gold; level 40 without Riding (skill ID 762). | Reach 100 gold; learn to ride. |
 | weapon_skill | Equip a weapon type whose skill is 20+ below its cap (skills under C_SkillInfo, category 6). | Train it on weak enemies. |
 | legacy | Reach level 25 (one nudge until you press Y); have unviewed Legacy challenges. | Open the Legacy window; view the challenges. |
+| flight_path | Stand in a zone whose flight master you have not visited (`/dump C_TaxiMap.GetTaxiNodesForMap(C_Map.GetBestMapForUnit("player"))` shows nodes with `state`). | Talk to the flight master. |
 | vendor (not a rule) | Open a merchant with grey items and damaged gear. | Chat says what was sold and what the repair cost; "Repairing would cost X" when too poor. |
 | tooltips (not a rule) | Hover an item away from a vendor. | "Sell price: X each" line; none at a vendor or for 0-value items. |
 

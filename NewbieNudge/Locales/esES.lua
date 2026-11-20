@@ -502,6 +502,11 @@ local T = {
   LEGACY_HELP = "Los desafíos y ventajas de cuenta de Forever se abren hacia el nivel 25 (pulsa Y). Te avisa una vez, y siempre que haya desafíos nuevos por ver.",
   LEGACY_ROW_UNLOCK = "El sistema de Legado está abierto. Pulsa Y para gastar tu primer punto.",
   LEGACY_ROW_CHALLENGES = "Tienes desafíos de Legado nuevos por ver (pulsa Y).",
+  -- Flight paths
+  FLIGHT_PATH_TITLE = "Ruta de vuelo por desbloquear",
+  FLIGHT_PATH_HELP = "Cada zona tiene maestros de vuelo; hablar con uno una vez desbloquea esa ruta para siempre. Muestra los de tu zona actual que aún no has visitado.",
+  FLIGHT_PATH_ROW = "Ruta de vuelo por desbloquear en %s: %s.",
+  FLIGHT_PATH_ROW_MANY = "Rutas de vuelo por desbloquear en %s: %s y %d más.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

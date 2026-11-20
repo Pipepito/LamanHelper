@@ -502,4 +502,9 @@ NN.L = setmetatable({
   LEGACY_HELP = "Forever's account-wide challenges and perks open around level 25 (press Y). Reminds you once, and whenever new challenges wait to be looked at.",
   LEGACY_ROW_UNLOCK = "The Legacy system is open. Press Y to spend your first point.",
   LEGACY_ROW_CHALLENGES = "You have new Legacy challenges to look at (press Y).",
+  -- Flight paths
+  FLIGHT_PATH_TITLE = "Flight path to unlock",
+  FLIGHT_PATH_HELP = "Each zone has flight masters; talking to one once unlocks that flight path for good. Shows the ones in your current zone you have not visited yet.",
+  FLIGHT_PATH_ROW = "Flight path to unlock in %s: %s.",
+  FLIGHT_PATH_ROW_MANY = "Flight paths to unlock in %s: %s and %d more.",
 }, { __index = function(_, key) return key end })

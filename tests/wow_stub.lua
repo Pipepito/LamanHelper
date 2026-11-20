@@ -44,6 +44,7 @@ local DEFAULT_STATE = {
   gossipOptions = {}, bindLocation = "Goldshire", subZone = "Goldshire", zone = "Elwynn Forest",
   money = 10000, merchantOpen = false, canRepair = false, repairCost = 0,
   tooltipCalls = {}, tooltipItem = nil,
+  taxiNodes = {}, -- [uiMapID] = { { name=, state=, position= }, ... }
 }
 
 function WOW.Reset()
@@ -407,6 +408,9 @@ function GetRepairAllCost() return S().repairCost, S().repairCost > 0 end
 function RepairAllItems(guild) record("RepairAllItems", guild); S().money = S().money - S().repairCost; S().repairCost = 0 end
 function GetSubZoneText() return S().subZone end
 function GetZoneText() return S().zone end
+Enum.FlightPathState = { Current = 0, Reachable = 1, Unreachable = 2 }
+C_TaxiMap = {}
+function C_TaxiMap.GetTaxiNodesForMap(mapID) return S().taxiNodes[mapID] or {} end
 C_GossipInfo = {}
 function C_GossipInfo.GetOptions() return S().gossipOptions end
 function ToggleWorldMap() record("ToggleWorldMap") end
