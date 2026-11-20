@@ -102,6 +102,18 @@ NN:RegisterRule({
   sample = function() return { { text = L.BAG_UNEQUIPPED_ROW_EMPTY, icon = BAG_ICON } } end,
 })
 
+-- Free slots across the regular bags (0-4, family 0), or NN.UNKNOWN.
+function NN.RegularFreeSlots()
+  local free = 0
+  for bag = 0, 4 do
+    local n, family = C_Container.GetContainerNumFreeSlots(bag)
+    n, family = NN.Plain(n), NN.Plain(family)
+    if n == nil then return NN.UNKNOWN end
+    if (family or 0) == REGULAR_FAMILY then free = free + n end
+  end
+  return free
+end
+
 NN:RegisterRule({
   name = "bag_full",
   title = L.BAG_FULL_TITLE,
@@ -111,13 +123,8 @@ NN:RegisterRule({
   applies = function() return true end,
   check = function()
     if not NN.bagsLoaded then return nil end
-    local free = 0
-    for bag = 0, 4 do
-      local n, family = C_Container.GetContainerNumFreeSlots(bag)
-      n, family = NN.Plain(n), NN.Plain(family)
-      if n == nil then return NN.UNKNOWN end
-      if (family or 0) == REGULAR_FAMILY then free = free + n end
-    end
+    local free = NN.RegularFreeSlots()
+    if free == NN.UNKNOWN then return NN.UNKNOWN end
     if free < 3 then
       return { text = L.BAG_FULL_ROW:format(free), icon = BAG_ICON, onClick = ToggleAllBags, highlight = "bags" }
     end

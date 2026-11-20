@@ -413,6 +413,7 @@ function C_Item.GetItemInfo(idOrLink)
          info.classID or 0, info.subclassID or 0
 end
 function C_Item.GetItemFamily(id) local info = S().itemInfo[id]; return info and info.family or 0 end
+function C_Item.GetItemMaxStackSizeByID(id) local info = S().itemInfo[id]; return info and info.stackCount or 1 end
 function C_Item.GetDetailedItemLevelInfo(link) local _, info = itemByLink(link); return info and info.itemLevel end
 function C_Item.GetItemCount(id) return S().itemCounts[id] or 0 end
 function GetItemCount(id) return S().itemCounts[id] or 0 end

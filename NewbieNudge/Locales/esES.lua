@@ -136,6 +136,10 @@ local T = {
   QUEST_GREY_TITLE = "Misiones grises",
   QUEST_GREY_HELP = "Las misiones grises ya casi no dan experiencia. Hazlas al final o abandónalas para liberar el registro.",
   QUEST_GREY_ROW = "%d misión(es) gris(es) casi no dan XP: hazlas al final o abandónalas.",
+  -- Quest bag slots
+  QUEST_SLOTS_TITLE = "Espacio en las bolsas para misiones",
+  QUEST_SLOTS_HELP = "Calcula cuántos huecos ocuparán los objetos que recogen tus misiones actuales y las recompensas de las completas. Es una estimación.",
+  QUEST_SLOTS_ROW = "Deja %d huecos libres en las bolsas para tus misiones (tienes %d).",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

@@ -136,4 +136,8 @@ NN.L = setmetatable({
   QUEST_GREY_TITLE = "Grey quests",
   QUEST_GREY_HELP = "Grey quests give almost no experience any more. Do them last, or abandon them to free the log.",
   QUEST_GREY_ROW = "%d grey quest(s) give almost no XP: do them last or abandon them.",
+  -- Quest bag slots
+  QUEST_SLOTS_TITLE = "Bag space for quests",
+  QUEST_SLOTS_HELP = "Estimates how many bag slots the items your current quests collect, and the rewards of complete quests, will take. It is an estimate.",
+  QUEST_SLOTS_ROW = "Keep %d bag slots free for your quests (you have %d).",
 }, { __index = function(_, key) return key end })
