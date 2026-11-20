@@ -126,4 +126,14 @@ NN.L = setmetatable({
   OPT_MAP_DESATURATE = "Unexplored areas in grey",
   SLASH_MAP_ON = "Unexplored areas are now shown on the map.",
   SLASH_MAP_OFF = "Unexplored areas are now hidden on the map.",
+  -- Quest planning
+  QUEST_TURNIN_TITLE = "Quests ready to turn in",
+  QUEST_TURNIN_HELP = "Counts the quests in your log that are complete and only need handing in.",
+  QUEST_TURNIN_ROW = "%d quest(s) complete: turn them in.",
+  QUEST_SOON_TITLE = "Quests about to turn grey",
+  QUEST_SOON_HELP = "Quests stop giving full experience once you outlevel them. These will within two levels.",
+  QUEST_SOON_ROW = "%d quest(s) stop giving full XP within 2 levels: finish them soon.",
+  QUEST_GREY_TITLE = "Grey quests",
+  QUEST_GREY_HELP = "Grey quests give almost no experience any more. Do them last, or abandon them to free the log.",
+  QUEST_GREY_ROW = "%d grey quest(s) give almost no XP: do them last or abandon them.",
 }, { __index = function(_, key) return key end })

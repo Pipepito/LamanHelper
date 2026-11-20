@@ -15,8 +15,9 @@ NN.MAX_ROWS = 10
 NN.CHECK_DELAY = 0.5
 NN.TICK_SECONDS = 30
 NN.PRIORITY = {
-  "durability", "bag_unequipped", "bag_full", "talents", "spell_ranks", "buffs", "ammo", "pet",
-  "tracking", "hearthstone", "quests", "mail", "professions", "gear_upgrade", "rested",
+  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "buffs", "ammo", "pet",
+  "tracking", "hearthstone", "quests", "quest_item", "quest_turnin", "quest_slots", "quest_soon", "quest_grey", "mail",
+  "professions", "profession_rank", "trainer_spells", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
 NN.testMode = false
 
@@ -314,6 +315,7 @@ function NN:DisableRuleForSession(rule, message)
 end
 
 function NN:RunChecks()
+  self.generation = (self.generation or 0) + 1 -- lets helpers memoise for one pass
   local restricted = self:IsRestricted()
   for _, rule in ipairs(self.rules) do
     local state = self.ruleState[rule.name]

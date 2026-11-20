@@ -34,6 +34,7 @@ local DEFAULT_STATE = {
   cursor = nil,
   gameMenuShown = false,
   explored = {}, mapLayers = {},
+  questLog = nil, trivialRange = 5,
 }
 
 function WOW.Reset()
@@ -507,8 +508,38 @@ function C_SkillInfo.GetNumSkillLines() return #S().skillLines end
 function C_SkillInfo.GetSkillLineInfo(i) local l = S().skillLines[i]; if l then return { skillName = l.name, isHeader = l.isHeader or false, skillRank = l.rank or 1 } end end
 
 C_QuestLog = {}
-function C_QuestLog.GetNumQuestLogEntries() return S().quests.num + 2, S().quests.num end
+-- WOW.Quest({ questID=, title=, level=, isHeader=, isComplete=, trivial=, objectives=, rewards=, choices= })
+-- appends an entry to the fake quest log (creating it) and returns it.
+function WOW.Quest(fields)
+  S().questLog = S().questLog or {}
+  local entry = fields
+  S().questLog[#S().questLog + 1] = entry
+  return entry
+end
+local function questByID(id)
+  for _, q in ipairs(S().questLog or {}) do if q.questID == id then return q end end
+end
+function C_QuestLog.GetNumQuestLogEntries()
+  local log = S().questLog
+  if not log then return S().quests.num + 2, S().quests.num end
+  local quests = 0
+  for _, q in ipairs(log) do if not q.isHeader then quests = quests + 1 end end
+  return #log, quests
+end
 function C_QuestLog.GetMaxNumQuestsCanAccept() return S().quests.max end
+function C_QuestLog.GetInfo(i)
+  local q = S().questLog and S().questLog[i]
+  if not q then return nil end
+  return { questID = q.questID, title = q.title, level = q.level, isHeader = q.isHeader or false, isHidden = false,
+           difficultyLevel = q.level, isComplete = q.isComplete or false }
+end
+function C_QuestLog.IsComplete(id) local q = questByID(id); return q and q.isComplete or false end
+function C_QuestLog.IsQuestTrivial(id) local q = questByID(id); return q and q.trivial or false end
+function C_QuestLog.GetQuestDifficultyLevel(id) local q = questByID(id); return q and q.level end
+function C_QuestLog.GetQuestObjectives(id) local q = questByID(id); return q and q.objectives or {} end
+function GetNumQuestLogRewards(id) local q = questByID(id); return q and #(q.rewards or {}) or 0 end
+function GetNumQuestLogChoices(id) local q = questByID(id); return q and #(q.choices or {}) or 0 end
+function UnitQuestTrivialLevelRange(unit) return S().trivialRange end
 
 C_RestrictedActions = nil
 

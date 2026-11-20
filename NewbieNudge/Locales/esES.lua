@@ -126,6 +126,16 @@ local T = {
   OPT_MAP_DESATURATE = "Zonas sin explorar en gris",
   SLASH_MAP_ON = "Las zonas sin explorar ahora se muestran en el mapa.",
   SLASH_MAP_OFF = "Las zonas sin explorar ahora se ocultan en el mapa.",
+  -- Quest planning
+  QUEST_TURNIN_TITLE = "Misiones listas para entregar",
+  QUEST_TURNIN_HELP = "Cuenta las misiones de tu registro que ya están completas y solo falta entregar.",
+  QUEST_TURNIN_ROW = "%d misión(es) completa(s): entrégalas.",
+  QUEST_SOON_TITLE = "Misiones a punto de quedarse grises",
+  QUEST_SOON_HELP = "Las misiones dejan de dar toda la experiencia cuando las superas de nivel. Estas lo harán en dos niveles.",
+  QUEST_SOON_ROW = "%d misión(es) dejarán de dar toda la XP en 2 niveles: termínalas pronto.",
+  QUEST_GREY_TITLE = "Misiones grises",
+  QUEST_GREY_HELP = "Las misiones grises ya casi no dan experiencia. Hazlas al final o abandónalas para liberar el registro.",
+  QUEST_GREY_ROW = "%d misión(es) gris(es) casi no dan XP: hazlas al final o abandónalas.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
