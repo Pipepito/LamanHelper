@@ -11,7 +11,7 @@ local T = {
   ROW_HINT_SNOOZE = "Clic derecho: posponer %d minutos. Mayús+clic derecho: posponer hasta la próxima conexión.",
   ROW_STALE = "No se actualiza durante el combate.",
   MORE_ROWS = "…y %d más",
-  SLASH_HELP = "Comandos: /nudge (opciones), /nudge lock, /nudge list, /nudge on <nombre>, /nudge off <nombre>, /nudge reset, /nudge test",
+  SLASH_HELP = "Comandos: /nudge (opciones), /nudge lock, /nudge list, /nudge on <nombre>, /nudge off <nombre>, /nudge reset, /nudge test, /nudge map",
   SLASH_LIST_HEADER = "Recordatorios de este personaje:",
   SLASH_LIST_LINE = "  %s (%s): %s",
   STATE_ON = "activado",
@@ -118,6 +118,14 @@ local T = {
   CAM_FOCUS_INTERACT_TT = "La cámara gira hacia los PNJ con los que hablas.",
   CAM_HEAD_MOVEMENT = "Intensidad del movimiento de cabeza",
   CAM_HEAD_MOVEMENT_TT = "Cuánto sigue la cámara la cabeza de tu personaje. 0 lo desactiva.",
+  -- Map reveal
+  OPT_MAP = "Mapa",
+  OPT_MAP_REVEAL = "Mostrar zonas sin explorar en el mapa del mundo",
+  OPT_MAP_REVEAL_TT = "Dibuja más oscuras las partes de la zona que aún no has visitado, para que veas el mapa completo.",
+  OPT_MAP_BRIGHTNESS = "Brillo de las zonas sin explorar (%)",
+  OPT_MAP_DESATURATE = "Zonas sin explorar en gris",
+  SLASH_MAP_ON = "Las zonas sin explorar ahora se muestran en el mapa.",
+  SLASH_MAP_OFF = "Las zonas sin explorar ahora se ocultan en el mapa.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

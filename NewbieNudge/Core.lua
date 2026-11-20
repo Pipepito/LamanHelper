@@ -31,6 +31,7 @@ NN.defaults = {
   snoozeMinutes = 60,
   errors = {},
   seen = { rules = {} },
+  map = { reveal = true, brightness = 0.6, desaturate = true },
 }
 
 -------------------------------------------------------------------------------
@@ -412,6 +413,10 @@ function NN:HandleSlash(msg)
     self:MarkAllDirty()
     self:Schedule()
     self:Say(L.SLASH_TEST_ON)
+  elseif command == "map" then
+    self.db.map.reveal = not self.db.map.reveal
+    if self.MapReveal then self.MapReveal:Refresh() end
+    self:Say(self.db.map.reveal and L.SLASH_MAP_ON or L.SLASH_MAP_OFF)
   else
     self:Say(L.SLASH_HELP)
   end

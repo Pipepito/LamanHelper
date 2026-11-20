@@ -33,11 +33,13 @@ local DEFAULT_STATE = {
   quests = { num = 5, max = 25 }, newMail = false,
   cursor = nil,
   gameMenuShown = false,
+  explored = {}, mapLayers = {},
 }
 
 function WOW.Reset()
   WOW.state = deepcopy(DEFAULT_STATE)
   WOW.calls, WOW.printed, WOW.timers, WOW.eventFrames, WOW.settings = {}, {}, {}, {}, {}
+  if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
 end
 WOW.Reset()
 local S = function() return WOW.state end
@@ -509,6 +511,53 @@ function C_QuestLog.GetNumQuestLogEntries() return S().quests.num + 2, S().quest
 function C_QuestLog.GetMaxNumQuestsCanAccept() return S().quests.max end
 
 C_RestrictedActions = nil
+
+-------------------------------------------------------------------------------
+-- World map, exploration, texture pools
+-------------------------------------------------------------------------------
+C_Map = {}
+function C_Map.GetMapArtLayers(mapID) return S().mapLayers[mapID] or { { tileWidth = 256, tileHeight = 256 } } end
+C_MapExplorationInfo = {}
+function C_MapExplorationInfo.GetExploredMapTextures(mapID) return S().explored[mapID] end
+
+function CreateTexturePool(parent, layer, subLevel)
+  local pool = { active = {}, free = {} }
+  function pool:Acquire()
+    local t = table.remove(self.free)
+    if not t then t = parent:CreateTexture(nil, layer) end
+    t.subLevel = subLevel
+    self.active[#self.active + 1] = t
+    return t
+  end
+  function pool:ReleaseAll()
+    for _, t in ipairs(self.active) do t:Hide(); t:ClearAllPoints(); self.free[#self.free + 1] = t end
+    self.active = {}
+  end
+  function pool:EnumerateActive()
+    local i = 0
+    return function() i = i + 1; return self.active[i] end
+  end
+  function pool:GetNumActive() return #self.active end
+  return pool
+end
+
+WorldMapFrame = CreateFrame("Frame", "WorldMapFrame", UIParent)
+WorldMapFrame.shown = false
+WorldMapFrame.pins = {}
+function WorldMapFrame:EnumeratePinsByTemplate(template)
+  local i = 0
+  return function() i = i + 1; return self.pins[i] end
+end
+function WOW.NewMapPin(mapID)
+  local pin = CreateFrame("Frame")
+  pin.layerIndex = 1
+  pin.mapID = mapID
+  pin.map = { GetMapID = function() return pin.mapID end, AddMaskableTexture = function(_, t) record("AddMaskableTexture", t) end }
+  function pin:GetMap() return self.map end
+  function pin:RefreshOverlays(full) record("RefreshOverlays", full) end
+  WorldMapFrame.pins[#WorldMapFrame.pins + 1] = pin
+  return pin
+end
 
 -------------------------------------------------------------------------------
 -- UI actions (recorded)
