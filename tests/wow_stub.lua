@@ -40,6 +40,7 @@ local DEFAULT_STATE = {
   professionInfo = {},
   instance = { name = "", type = "none", instanceID = 0 }, zoneNames = {}, completedQuests = {},
   faction = "Alliance", mapID = nil, mapInfo = {},
+  gamepad = { enabled = false, deviceID = 0 },
 }
 
 function WOW.Reset()
@@ -742,3 +743,10 @@ function SetCVar(name, value) return C_CVar.SetCVar(name, value) end
 function GetCVarDefault(name) return C_CVar.GetCVarDefault(name) end
 C_Console = {}
 function C_Console.GetAllCommands() return S().consoleCommands or {} end
+
+-- Gamepad: the real client returns a font glyph from GetBindingText for pad
+-- buttons, so the stub does the same and nothing may rely on it for labels.
+C_GamePad = {}
+function C_GamePad.IsEnabled() return S().gamepad.enabled end
+function C_GamePad.GetActiveDeviceID() return S().gamepad.deviceID end
+function GetBindingText(key) return "|" end

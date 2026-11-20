@@ -161,9 +161,10 @@ function CVarSection:AddControl(category, entry, label, tooltip)
   end
 end
 
-function CVarSection:AddControls(category, layout)
+-- entries defaults to the curated list; a caller may pass a transformed copy.
+function CVarSection:AddControls(category, layout, entries)
   local note = self.note and ("\n\n|cff999999" .. L[self.note] .. "|r") or ""
-  for _, entry in ipairs(self.CURATED) do
+  for _, entry in ipairs(entries or self.CURATED) do
     if entry.header then
       NN.Options.AddHeader(layout, L[entry.header])
     else
