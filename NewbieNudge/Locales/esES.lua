@@ -481,6 +481,14 @@ local T = {
   VENDOR_SOLD = "Vendido(s) %d objeto(s) de chatarra por %s.",
   VENDOR_REPAIRED = "Equipo reparado por %s.",
   VENDOR_REPAIR_POOR = "Reparar costaría %s; tienes %s.",
+  -- Tooltips and one-bag view
+  OPT_TOOLTIPS = "Descripciones",
+  OPT_TOOLTIP_PRICE = "Mostrar el precio de venta en las descripciones de objetos",
+  OPT_TOOLTIP_PRICE_TT = "Añade lo que paga un vendedor por un objeto a su descripción cuando no estás en un vendedor, para saber qué merece la pena guardar.",
+  TOOLTIP_SELL_PRICE = "Precio de venta",
+  TOOLTIP_SELL_EACH = "%s cada uno",
+  GS_combinedBags = "Vista de una sola bolsa (todas las bolsas en una ventana)",
+  GS_combinedBags_TT = "Abre todas tus bolsas como una sola ventana. El preajuste Clásico de Forever lo desactiva; prueba ambos.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

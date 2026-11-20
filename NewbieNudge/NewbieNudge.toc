@@ -30,6 +30,7 @@ Data\IcyTalents.lua
 MapReveal.lua
 BagFull.lua
 Vendor.lua
+Tooltips.lua
 TalentBuild.lua
 Rules\Bags.lua
 Rules\MaterialsBag.lua

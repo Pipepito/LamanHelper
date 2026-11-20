@@ -37,6 +37,7 @@ NN.defaults = {
   controller = { boost = true, scale = 1.25, hints = true },
   talentBadges = true,
   vendor = { sellJunk = true, repair = true },
+  tooltipPrice = true,
 }
 
 -------------------------------------------------------------------------------

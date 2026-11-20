@@ -481,4 +481,12 @@ NN.L = setmetatable({
   VENDOR_SOLD = "Sold %d junk item(s) for %s.",
   VENDOR_REPAIRED = "Repaired your gear for %s.",
   VENDOR_REPAIR_POOR = "Repairing would cost %s; you have %s.",
+  -- Tooltips and one-bag view
+  OPT_TOOLTIPS = "Tooltips",
+  OPT_TOOLTIP_PRICE = "Show the vendor sell price on item tooltips",
+  OPT_TOOLTIP_PRICE_TT = "Adds what a vendor pays for an item to its tooltip when you are not at a vendor, so you know what is worth keeping.",
+  TOOLTIP_SELL_PRICE = "Sell price",
+  TOOLTIP_SELL_EACH = "%s each",
+  GS_combinedBags = "One-bag view (all bags in one window)",
+  GS_combinedBags_TT = "Opens all your bags as a single window. Forever's Classic preset turns this off; try both.",
 }, { __index = function(_, key) return key end })

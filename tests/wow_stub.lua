@@ -43,6 +43,7 @@ local DEFAULT_STATE = {
   gamepad = { enabled = false, deviceID = 0 },
   gossipOptions = {}, bindLocation = "Goldshire", subZone = "Goldshire", zone = "Elwynn Forest",
   money = 10000, merchantOpen = false, canRepair = false, repairCost = 0,
+  tooltipCalls = {}, tooltipItem = nil,
 }
 
 function WOW.Reset()
@@ -281,6 +282,17 @@ function GameTooltip:ClearLines() self.lines = {} end
 function GameTooltip:AddLine(text) self.lines[#self.lines + 1] = text end
 function GameTooltip:AddDoubleLine(l, r) self.lines[#self.lines + 1] = l .. " | " .. tostring(r) end
 function GameTooltip:SetText(text) self.lines = { text } end
+function GameTooltip:GetItem() local link = S().tooltipItem; if link then return (C_Item.GetItemInfo(link)), link end end
+-- WOW.ShowItemTooltip(link) runs every registered item tooltip post-call on GameTooltip.
+function WOW.ShowItemTooltip(link)
+  S().tooltipItem = link
+  GameTooltip:SetOwner(UIParent, "ANCHOR_NONE"); GameTooltip:SetText("Item")
+  for _, fn in ipairs(S().tooltipCalls) do fn(GameTooltip, { type = 0 }) end
+end
+TooltipDataProcessor = {}
+function TooltipDataProcessor.AddTooltipPostCall(kind, fn) S().tooltipCalls[#S().tooltipCalls + 1] = fn end
+Enum.TooltipDataType = { Item = 0, Spell = 1, Unit = 2 }
+SELL_PRICE = "Sell Price"
 GameMenuFrame = CreateFrame("Frame", "GameMenuFrame", UIParent)
 LootFrame = CreateFrame("Frame", "LootFrame", UIParent)
 LootFrame.shown = false

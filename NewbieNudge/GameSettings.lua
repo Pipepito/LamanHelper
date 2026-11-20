@@ -33,7 +33,7 @@ local CURATED = {
   { header = "GS_GROUP_QUESTS" },
   cb("autoQuestWatch"), cb("autoQuestProgress"), cb("showQuestObjectivesInLog"), cb("questPOI"), cb("ShowQuestUnitCircles"),
   cb("showTutorials"), cb("showNPETutorials"), cb("screenEdgeFlash"), cb("doNotFlashLowHealthWarning"),
-  cb("mapFade"), cb("rotateMinimap"), cb("statusText"), dd("statusTextDisplay", STATUS), cb("expandBagBar"),
+  cb("mapFade"), cb("rotateMinimap"), cb("statusText"), dd("statusTextDisplay", STATUS), cb("expandBagBar"), cb("combinedBags"),
   dd("Outline", OUTLINE), dd("findYourselfMode", FIND), cb("chatBubbles"), cb("guildMemberNotify"), cb("Sound_EnableErrorSpeech"),
 }
 
