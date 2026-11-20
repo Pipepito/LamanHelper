@@ -46,6 +46,33 @@ Write the `fam` value into `NN.REAGENT_BAG_FAMILY` and the `sub` value into
 of them is set the rule never shows. Confirmed 2026-11-20: bag inventory
 slots are 31–34 and the materials slot is 35 (`ContainerIDToInventoryID`).
 
+### v2 shapes (confirmed 2026-11-20 on a warrior, enUS)
+
+- `GetProfessionInfo(index)` returns the rank cap as max skill (`Blacksmithing 22 75`).
+- `C_QuestLog.GetQuestObjectives(questID)` entries: `type="item"`, `text="0/4 Venomtail Poison Sac"`, `numFulfilled`, `numRequired`, `finished`.
+- `UnitQuestTrivialLevelRange("player") = 5`; `C_QuestLog.IsQuestTrivial` exists.
+- `GetRealZoneText(36) = "Deadmines"`; `C_GamePad.IsEnabled() = true`.
+- `GetBindingText("PADRTRIGGER")` returns a font glyph, so pad names come from the addon's own table.
+- Bag inventory slots 31–34, materials slot 35; Icy Veins `nodeId`/rank-1 spell match the client (warrior node 105926 = Improved Intercept, spell 20504, 2 ranks).
+
+### v2 shapes still to confirm
+
+| In chat | Feature | Expected |
+|---|---|---|
+| `/run local n=0 for p in WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate") do n=n+1 print("pin",p.layerIndex,type(p.RefreshOverlays)) end print("pins",n)` (open the map once first) | map reveal | `pins 1`, `RefreshOverlays` a function |
+| `/dump #C_MapExplorationInfo.GetExploredMapTextures(C_Map.GetBestMapForUnit("player")), C_Map.GetMapArtLayers(C_Map.GetBestMapForUnit("player"))[1]` | map reveal | a count and a layer with `tileWidth`/`tileHeight` |
+| `/run local f=PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame or ClassTalentFrame and ClassTalentFrame.TalentsTab print(f and f:GetName(),f and type(f.GetTalentButtonByNodeID))` (open talents once first) | talent build glow | a frame name and `function` |
+| `/dump type(ContainerFrameUtil_EnumerateContainerFrames), type(ContainerFrameCombinedBags)` | quest item glow | `function` and `table` |
+| `/dump C_Container.GetContainerItemQuestInfo(0,1), Enum.ItemClass.Questitem, Enum.ItemClass.Projectile, Enum.ItemClass.Reagent, Enum.ItemClass.Key` | bag-full helper | table with `isQuestItem`, and 12, 6, 5, 13 |
+| `/dump type(LootFrame), ERR_INV_FULL, type(OpenWorldMap), type(StaticPopup_Show), type(Settings.RegisterVerticalLayoutSubcategory), type(Settings.CreateDropdown), type(C_Traits.GetTreeNodes)` | several | all present |
+| `/dump GetCVar("GamePadCursorLeftClick"), GetCVar("GamePadFaceMovementMaxAngle"), GetCVar("SoftTargetInteract"), GetCVar("countdownForCooldowns"), GetCVar("statusTextDisplay")` | controller, game settings | values, not nil |
+
+### Presets to confirm
+
+- [ ] Options → Controller → "Apply the Steam Deck preset" on the Deck: movement, camera and interact feel right; note anything to change in `Controller.PRESETS.deck`.
+- [ ] "Apply the controller preset" on an Xbox pad: same, `Controller.PRESETS.pad`.
+- [ ] Options → Game settings → "Recommended for new players": chat says how many changed; auto loot, enemy health bars, NPC names and cooldown numbers are on afterwards.
+
 ## 1. Panel and commands
 
 - [ ] `/nudge test` shows up to 10 rows plus "…and N more"; icons and text readable; hover a row shows title, help and hints.
@@ -58,6 +85,11 @@ slots are 31–34 and the materials slot is 35 (`ContainerIDToInventoryID`).
 - [ ] `/console addonCombatRestrictionsForced 1` → panel becomes an icon strip; stale icons are dim; hover shows text. `/console addonCombatRestrictionsForced 0` → list again. Try once in a real fight on a low-level mob too.
 - [ ] Options: untick "Show compact strip in combat", repeat: the panel hides in combat.
 - [ ] Spanish: set the client to Español (EU) in Battle.net, log in, every row, tooltip and option label is Spanish; no raw KEY_NAMES visible.
+- [ ] Options has subcategories under NewbieNudge: Camera, Controller, Game settings, Map, Bags, Talent build; each opens and its controls read the live value.
+- [ ] Map: open a partly explored zone: unexplored parts are dimmed grey; `/nudge map` hides them; Options → Map brightness changes them while the map is open.
+- [ ] Bags full: with 0 free slots, loot a mob: the "Bags full" window appears next to the loot; grey items first; Destroy on a grey item frees the slot; a green item asks "Sure?". `/nudge trash` opens it with free slots too and only the close button closes it.
+- [ ] Talent build: paste an "Open in Calculator" link via Options → Talent build or `/nudge build <link>`; chat confirms the point count; with an unspent point the panel names the next talent and it glows in the talent window.
+- [ ] Controller (Deck): after moving the stick, the panel is bigger and row tooltips say "RT: open."; Key Bindings → NewbieNudge lists four actions; bind "Show or hide the reminder panel" to a pad combo and press it.
 
 ## 2. Rules: make it appear / make it disappear
 
@@ -78,6 +110,17 @@ slots are 31–34 and the materials slot is 35 (`ContainerIDToInventoryID`).
 | mail | Have someone mail you. | Open the mailbox. |
 | rested | Open the game menu (Escape) in the open world below max level: row and one chat line. Open it again: no second chat line. | Close the menu, or walk into an inn. |
 | gear_upgrade | `/nudge on gear_upgrade`; carry a cloth chest 5+ ilvl above yours (mage). | Equip it. Plate in a mage's bags must not show. |
+| materials_bag | (after the constants are set) carry a materials bag with the materials slot empty. | Equip it. |
+| quest_item | Loot an item that starts a quest. The backpack glows; open the bags: the item glows. | Right-click it and accept the quest. |
+| quest_turnin | Complete a quest's objectives. | Hand it in. |
+| quest_soon | Hold a quest whose level is 2 below "grey". | Level past it (becomes quest_grey) or finish it. |
+| quest_grey | Hold a quest far below your level. | Abandon or finish it. |
+| quest_slots | Have more item objectives than free slots. | Free slots or finish the objectives. |
+| trainer_spells | Level up with a new rank available. | Train it (or do the class quest). |
+| profession_rank | Reach 50/75 in a primary at level 10+. | Learn Journeyman. |
+| dungeon_ready | Be in a dungeon's level range for your faction. | Enter it once, or complete half its quests. |
+| zone_level | Walk into a zone 3+ levels below or above you. | Leave it or snooze. |
+| talent_build | Set a build and have an unspent point. | Pick the named talent. |
 
 ## 3. Edge cases
 

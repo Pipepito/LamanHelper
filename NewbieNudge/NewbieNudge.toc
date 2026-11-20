@@ -3,7 +3,7 @@
 ## Title-esES: NewbieNudge
 ## Notes: Reminders and highlights for new players: unspent talents, missing buffs, unused bags and more.
 ## Notes-esES: Recordatorios y avisos para jugadores nuevos: talentos sin gastar, buffs que faltan, bolsas sin usar y más.
-## Version: 0.1.0
+## Version: 0.2.0
 ## X-License: GPL-3.0
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
 ## SavedVariablesPerCharacter: NewbieNudgeDB

@@ -8,6 +8,12 @@ the problem is gone. In combat the list shrinks to a row of icons.
 
 English and Spanish (Spain) are included; the game's language setting decides.
 
+Beyond the checklist it also: shows the unexplored parts of a zone on the
+world map, dimmed; lists the cheapest things to destroy when your bags are
+full; follows an Icy Veins leveling build and names the next talent; gathers
+the game's own new-player settings and the hidden controller and camera
+settings in its options; and scales up for a controller or a Steam Deck.
+
 ## Install
 
 Copy the `NewbieNudge` folder into:
@@ -28,6 +34,10 @@ Then start the game or type `/reload`.
 | `/nudge off <name>` / `/nudge on <name>` | Turn one reminder off or on for this character. |
 | `/nudge reset` | Clear snoozes and leave test mode. |
 | `/nudge test` | Show every reminder with sample text, to check the layout. |
+| `/nudge map` | Toggle the dimmed unexplored areas on the world map. |
+| `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
+| `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
+| `/nudge show` | Bring the panel back after hiding it with the key binding. |
 
 Right-click a row to snooze it for an hour (configurable). Shift+right-click
 snoozes it until your next login. Left-click a row to open the related window,
@@ -41,10 +51,66 @@ unspent talent points · long-duration self-buffs missing (the bar button glows)
 on · damaged or broken gear · out of ammo · hunter pet not summoned, unhappy or
 with unspent training points · no profession by level 10 · no Hearthstone ·
 quest log nearly full · new mail · logging out outside an inn or city · gear
-upgrade sitting in your bags (off by default: `/nudge on gear_upgrade`).
+upgrade sitting in your bags (off by default: `/nudge on gear_upgrade`) ·
+materials bag not equipped · an item in your bags that starts a quest (the
+item glows) · quests ready to turn in · quests about to turn grey · grey
+quests · bag slots your current quests will need · new spells for your level
+you haven't learned · next profession rank available · a dungeon that fits
+your level · the zone you are in is below or above your level · the next
+talent of your Icy Veins build.
 
-The options page also has a **Camera** section with game settings Blizzard's
-own window hides, such as the maximum camera distance.
+Every reminder has its own checkbox in the options.
+
+## World map
+
+Zones you have not fully explored show their missing parts dimmed and in grey
+instead of blank, so you can see the shape of the whole zone. Options → Map
+sets the brightness, turns the grey off, or turns the feature off;
+`/nudge map` toggles it.
+
+## Bags full
+
+When the game says your inventory is full, or you open loot with no free
+slot, a small window appears next to the loot listing the cheapest stacks to
+destroy: grey items first, then by vendor value, with a Destroy button per
+row. Quest items, items that start a quest, items your quests still need,
+bags, ammo, reagents, keys, the Hearthstone, and white or green gear are
+never listed. Grey items go with one click; white and green ones ask "Sure?"
+first. It closes by itself once a slot is free and the loot window is gone.
+`/nudge trash` opens it at any time. Options → Bags.
+
+## Talent builds from Icy Veins
+
+Open the Icy Veins leveling guide for your class, pick a build under
+"Leveling Talent Build", click **Open in Calculator** and copy that page's
+address. Paste it with `/nudge build <link>` or through Options → Talent
+build. The panel then names the next talent to pick, with how many points it
+has, and the talent glows in the talent window. If you stray from the build,
+a second row says so and the suggestion keeps following the build's order.
+
+The link carries the whole order: one character per talent point. The
+addon only needs a table of talent identifiers, refreshed with
+`tools/import_icy_talents.py`.
+
+## Playing with a controller or a Steam Deck
+
+With the game's own controller support on, Options → Controller gathers the
+gamepad and soft-targeting settings Blizzard's window hides, with plain
+labels, plus two one-click presets (Steam Deck, plain controller) that never
+touch your button assignments. Once a controller is in use, the panel and
+the combat strip scale up (Options → Controller sets the factor) and row
+tooltips name the pad buttons instead of mouse buttons. Four actions can be
+bound to pad combinations in the game's Key Bindings window under
+"NewbieNudge": show/hide the panel, open the top reminder, snooze the top
+reminder, open the options.
+
+## Game settings for new players
+
+Options → Game settings lists the game's own options a new player should set
+(auto loot, enemy health bars, NPC names, cast on key down, cooldown numbers,
+quest tracking, and so on) with plain labels, and a **Recommended for new
+players** button that applies them in one go. Camera has its own page with
+the maximum camera distance and other hidden camera settings.
 
 ## Adding a reminder
 
