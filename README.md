@@ -57,7 +57,10 @@ item glows) · quests ready to turn in · quests about to turn grey · grey
 quests · bag slots your current quests will need · new spells for your level
 you haven't learned · next profession rank available · a dungeon that fits
 your level · the zone you are in is below or above your level · the next
-talent of your Icy Veins build.
+talent of your Icy Veins build · no food, drink or bandages in your bags ·
+quests that need a group · the next rank of Cooking, First Aid or Fishing
+(trainer, book or quest) · an innkeeper who could set your Hearthstone nearby
+· saving up for your mount from level 30, and learning to ride at 40.
 
 Every reminder has its own checkbox in the options.
 
@@ -78,6 +81,13 @@ bags, ammo, reagents, keys, the Hearthstone, and white or green gear are
 never listed. Grey items go with one click; white and green ones ask "Sure?"
 first. It closes by itself once a slot is free and the loot window is gone.
 `/nudge trash` opens it at any time. Options → Bags.
+
+## Vendors and tooltips
+
+Opening a merchant sells every grey item and repairs your gear when the
+merchant can and you can afford it, each with a chat line saying what
+happened; both are on by default under Options → Vendors. Item tooltips show
+the vendor sell price when you are not at a vendor (Options → Tooltips).
 
 ## Talent builds from Icy Veins
 
