@@ -457,4 +457,9 @@ NN.L = setmetatable({
   MAP_BUTTON_TT = "Left-click: map settings. Right-click: show or hide the unexplored areas.",
   OPT_BUILD_BADGES = "Show the build on the talent window",
   OPT_BUILD_BADGES_TT = "On each talent the build uses: bottom-right, the points you have of the points the build puts there (green when done, yellow in progress); top-left, the level the build first takes it at, until you start it.",
+  -- Supplies
+  SUPPLIES_TITLE = "Food and bandages",
+  SUPPLIES_HELP = "Food, drink and bandages cover the gaps between fights. Reminds you when your bags hold none at all; bandages only count if you know First Aid.",
+  SUPPLIES_ROW_FOOD = "You have no food or drink in your bags.",
+  SUPPLIES_ROW_BANDAGE = "You have no bandages. First Aid makes them from cloth.",
 }, { __index = function(_, key) return key end })

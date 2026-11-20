@@ -457,6 +457,11 @@ local T = {
   MAP_BUTTON_TT = "Clic izquierdo: ajustes del mapa. Clic derecho: mostrar u ocultar las zonas sin explorar.",
   OPT_BUILD_BADGES = "Mostrar la build en la ventana de talentos",
   OPT_BUILD_BADGES_TT = "En cada talento que usa la build: abajo a la derecha, los puntos que tienes de los que la build pone ahí (verde al completar, amarillo en progreso); arriba a la izquierda, el nivel en que la build lo empieza, hasta que lo empieces.",
+  -- Supplies
+  SUPPLIES_TITLE = "Comida y vendas",
+  SUPPLIES_HELP = "La comida, la bebida y las vendas cubren los huecos entre peleas. Te avisa cuando no llevas nada; las vendas solo cuentan si sabes Primeros Auxilios.",
+  SUPPLIES_ROW_FOOD = "No llevas comida ni bebida en las bolsas.",
+  SUPPLIES_ROW_BANDAGE = "No llevas vendas. Primeros Auxilios las hace con tela.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

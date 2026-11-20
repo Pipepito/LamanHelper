@@ -114,6 +114,7 @@ Enum = {
   ItemClass = { Consumable = 0, Container = 1, Weapon = 2, Armor = 4, Reagent = 5, Projectile = 6, Tradegoods = 7, Quiver = 11, Questitem = 12, Key = 13 },
   ItemArmorSubclass = { Generic = 0, Cloth = 1, Leather = 2, Mail = 3, Plate = 4 },
   SpellBookSpellBank = { Player = 0, Pet = 1 },
+  ItemConsumableSubclass = { Generic = 0, Potion = 1, Elixir = 2, Flask = 3, Scroll = 4, FoodDrink = 5, ItemEnhancement = 6, Bandage = 7, Other = 8 },
   SpellBookItemType = { None = 0, Spell = 1, FutureSpell = 2, PetAction = 3, Flyout = 4 },
 }
 
@@ -383,7 +384,7 @@ function GetNumGroupMembers() return 0 end
 function HasNewMail() return S().newMail end
 function UnitUsesAmmo(unit) return S().usesAmmo end
 function HasPetUI() return S().pet.hasUI, S().pet.isHunterPet end
-function GetProfessions() local p = S().professions; return p.prof1, p.prof2, nil, nil, nil end
+function GetProfessions() local p = S().professions; return p.prof1, p.prof2, p.arch, p.fishing, p.cooking, p.firstAid end
 function GetProfessionInfo(index)
   local p = S().professionInfo[index]
   if p then return p.name, p.icon or 136240, p.skill, p.maxSkill, 0, 0, p.skillLine or 0 end
