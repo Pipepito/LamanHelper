@@ -112,6 +112,9 @@ function MapReveal:HookPins()
         self.hooked[pin] = true
         self.pin = pin
         hooksecurefunc(pin, "RefreshOverlays", function(p) MapReveal:OnRefresh(p) end)
+        -- A pin found while the map is already open has drawn its view before
+        -- our hook existed: draw ours now rather than after the next redraw.
+        if WorldMapFrame:IsShown() then self:OnRefresh(pin) end
       end
     end
   end

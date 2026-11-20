@@ -79,12 +79,13 @@ return {
     assert_eq(NewbieNudge.db.map.reveal, false)
     assert_true(WOW.printed[#WOW.printed]:find(NewbieNudge.L.SLASH_MAP_OFF, 1, true))
   end,
-  pins_found_on_first_map_show = function()
+  pins_found_on_first_map_show_and_drawn_at_once = function()
     load_addon() -- no pin yet at login
     NewbieNudge.MapReveal:HookPins()
     fog(1412, { { 100, 100, 0, 0, 7 } }); WOW.state.explored[1412] = {}
     local pin = WOW.NewMapPin(1412)
-    WorldMapFrame:Show()
+    WorldMapFrame:Show() -- Blizzard has already drawn this view before our OnShow hook runs
+    assert_eq(#activeTextures(pin), 1, "our tiles appear on the very first open, without waiting for a redraw")
     pin:RefreshOverlays()
     assert_eq(#activeTextures(pin), 1)
   end,
