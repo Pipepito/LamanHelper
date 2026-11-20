@@ -149,6 +149,6 @@ return {
     NewbieNudge:HandleSlash("test")
     WOW.AdvanceTime(0.5)
     assert_true(NewbieNudgePanel:IsShown())
-    assert_eq(row_texts(), { "T_a" })
+    assert_true(tContains(row_texts(), "T_a"))
   end,
 }

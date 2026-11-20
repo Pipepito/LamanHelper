@@ -35,12 +35,15 @@ return {
   one_checkbox_per_rule_in_order = function()
     withRules()
     local boxes = callsNamed("checkbox")
-    assert_eq(boxes[3][2], "NN_rule_first_rule")
-    assert_eq(boxes[4][2], "NN_rule_second_rule")
+    local byVar, order = {}, {}
+    for i, c in ipairs(boxes) do byVar[c[2]] = c; order[c[2]] = i end
+    for _, rule in ipairs(NewbieNudge.rules) do assert_true(byVar["NN_rule_" .. rule.name], "checkbox for " .. rule.name) end
+    assert_true(order["NN_rule_first_rule"] < order["NN_rule_second_rule"])
+    assert_true(order["NN_rule_first_rule"] > order["NN_combatStrip"], "rules come after general")
     assert_eq(WOW.settings["NN_rule_first_rule"].name, "First")
-    assert_true(boxes[3][3]:find("Help first", 1, true))
-    assert_true(boxes[4][3]:find(NewbieNudge.L.OPT_NOT_RELEVANT, 1, true), "non-applying rule says so")
-    assert_true(not boxes[3][3]:find(NewbieNudge.L.OPT_NOT_RELEVANT, 1, true))
+    assert_true(byVar["NN_rule_first_rule"][3]:find("Help first", 1, true))
+    assert_true(byVar["NN_rule_second_rule"][3]:find(NewbieNudge.L.OPT_NOT_RELEVANT, 1, true), "non-applying rule says so")
+    assert_true(not byVar["NN_rule_first_rule"][3]:find(NewbieNudge.L.OPT_NOT_RELEVANT, 1, true))
   end,
   rule_checkbox_setter_disables_rule = function()
     withRules()

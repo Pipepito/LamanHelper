@@ -37,4 +37,13 @@ NN.L = setmetatable({
   OPT_RESET_POS = "Reset position",
   OPT_BUTTON_DO = "Reset",
   OPT_NOT_RELEVANT = "Not relevant for this character",
+
+  -- Rules
+  BAG_UNEQUIPPED_TITLE = "Unused bag",
+  BAG_UNEQUIPPED_HELP = "Bags give you more room for loot. Open your bags and drag the bag onto an empty bag slot next to your backpack.",
+  BAG_UNEQUIPPED_ROW_EMPTY = "You have a bag in your inventory that isn't equipped.",
+  BAG_UNEQUIPPED_ROW_BIGGER = "A bag in your inventory is bigger than one you're using.",
+  BAG_FULL_TITLE = "Bags nearly full",
+  BAG_FULL_HELP = "Sell grey items to any vendor, or get bigger bags.",
+  BAG_FULL_ROW = "Your bags are almost full (%d slots left).",
 }, { __index = function(_, key) return key end })

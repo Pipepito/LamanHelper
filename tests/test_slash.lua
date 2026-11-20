@@ -36,12 +36,13 @@ return {
     rule("a"); rule("b"); rule("c", function() return false end)
     NewbieNudge:SetRuleEnabled("b", false)
     NewbieNudge:Snooze("a", 30)
+    local before = #WOW.printed
     NewbieNudge:HandleSlash("list")
-    local n = #WOW.printed
-    assert_eq(WOW.printed[n - 3], L().CHAT_PREFIX .. L().SLASH_LIST_HEADER)
-    assert_eq(WOW.printed[n - 2], L().SLASH_LIST_LINE:format("T_a", "a", L().STATE_SNOOZED))
-    assert_eq(WOW.printed[n - 1], L().SLASH_LIST_LINE:format("T_b", "b", L().STATE_OFF))
-    assert_eq(WOW.printed[n], L().SLASH_LIST_LINE:format("T_c", "c", L().STATE_NA))
+    assert_eq(WOW.printed[before + 1], L().CHAT_PREFIX .. L().SLASH_LIST_HEADER)
+    assert_eq(#WOW.printed - before, 1 + #NewbieNudge.rules)
+    assert_true(tContains(WOW.printed, L().SLASH_LIST_LINE:format("T_a", "a", L().STATE_SNOOZED)))
+    assert_true(tContains(WOW.printed, L().SLASH_LIST_LINE:format("T_b", "b", L().STATE_OFF)))
+    assert_true(tContains(WOW.printed, L().SLASH_LIST_LINE:format("T_c", "c", L().STATE_NA)))
   end,
   off_disables_rule = function()
     load_addon()

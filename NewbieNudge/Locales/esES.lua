@@ -37,6 +37,15 @@ local T = {
   OPT_RESET_POS = "Restablecer posición",
   OPT_BUTTON_DO = "Restablecer",
   OPT_NOT_RELEVANT = "No aplica a este personaje",
+
+  -- Rules
+  BAG_UNEQUIPPED_TITLE = "Bolsa sin usar",
+  BAG_UNEQUIPPED_HELP = "Las bolsas te dan más espacio para el botín. Abre tus bolsas y arrastra la bolsa a un hueco vacío junto a tu mochila.",
+  BAG_UNEQUIPPED_ROW_EMPTY = "Tienes una bolsa en el inventario que no está equipada.",
+  BAG_UNEQUIPPED_ROW_BIGGER = "Una bolsa de tu inventario es más grande que una de las que usas.",
+  BAG_FULL_TITLE = "Bolsas casi llenas",
+  BAG_FULL_HELP = "Vende los objetos grises a cualquier vendedor o consigue bolsas más grandes.",
+  BAG_FULL_ROW = "Tus bolsas están casi llenas (quedan %d huecos).",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
