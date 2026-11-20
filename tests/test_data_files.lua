@@ -36,4 +36,14 @@ return {
     -- confirmed in game 2026-11-20: warrior node 105926 = Improved Intercept, spell 20504, 2 ranks
     assert_eq(t.WARRIOR.u, { node = 105926, spell = 20504, maxRank = 2 })
   end,
+  real_warrior_link_parses_against_live_data = function()
+    -- a link the user copied from the Icy Veins arms warrior guide on 2026-11-20
+    WOW.keepData = true; WOW.state.class = "WARRIOR"; load_addon()
+    local link = "https://www.icy-veins.com/wow-forever/warrior-talent-calculator#tc-zzzzzCCCDDFFDEHJIIIHNNNMHOOOOOP222iiiiikkkkkqqqqqQ1~70755-d1899b7d"
+    local b, why = NewbieNudge.TalentBuild.Parse(link, "WARRIOR")
+    assert_true(b, tostring(why))
+    assert_eq(#b.picks, 51); assert_eq(b.version, "70755-d1899b7d"); assert_nil(b.warning)
+    assert_true(NewbieNudge.TalentBuild:Set(link))
+    assert_eq(#NewbieNudge.db.build.picks, 51)
+  end,
 }
