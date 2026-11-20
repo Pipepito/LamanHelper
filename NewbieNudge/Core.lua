@@ -36,6 +36,7 @@ NN.defaults = {
   bagfull = { enabled = true, maxQuality = 2, onLoot = true, point = "LEFT", x = 40, y = 0 },
   controller = { boost = true, scale = 1.25, hints = true },
   talentBadges = true,
+  vendor = { sellJunk = true, repair = true },
 }
 
 -------------------------------------------------------------------------------

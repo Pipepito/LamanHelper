@@ -472,4 +472,13 @@ NN.L = setmetatable({
   HEARTH_BIND_TITLE = "Set your Hearthstone nearby",
   HEARTH_BIND_HELP = "When you talk to an innkeeper far from where your Hearthstone is set, reminds you that this inn can become your home instead.",
   HEARTH_BIND_ROW = "Your Hearthstone is set to %s. This innkeeper can set it here.",
+  -- Vendor automation
+  OPT_BAGS_VENDOR = "Vendors",
+  OPT_VENDOR_SELL = "Sell grey items when you open a vendor",
+  OPT_VENDOR_SELL_TT = "Every grey (poor quality) stack is sold as soon as a merchant window opens; a chat line says how much you got.",
+  OPT_VENDOR_REPAIR = "Repair your gear when you open a vendor that can",
+  OPT_VENDOR_REPAIR_TT = "Repairs everything you wear when the merchant offers repairs and you can afford it; a chat line says what it cost.",
+  VENDOR_SOLD = "Sold %d junk item(s) for %s.",
+  VENDOR_REPAIRED = "Repaired your gear for %s.",
+  VENDOR_REPAIR_POOR = "Repairing would cost %s; you have %s.",
 }, { __index = function(_, key) return key end })

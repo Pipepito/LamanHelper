@@ -472,6 +472,15 @@ local T = {
   HEARTH_BIND_TITLE = "Vincula tu Piedra de hogar cerca",
   HEARTH_BIND_HELP = "Cuando hablas con un posadero lejos de donde está vinculada tu Piedra de hogar, te recuerda que esta posada puede ser tu hogar.",
   HEARTH_BIND_ROW = "Tu Piedra de hogar está vinculada a %s. Este posadero puede vincularla aquí.",
+  -- Vendor automation
+  OPT_BAGS_VENDOR = "Vendedores",
+  OPT_VENDOR_SELL = "Vender los objetos grises al abrir un vendedor",
+  OPT_VENDOR_SELL_TT = "Cada montón gris (calidad pobre) se vende en cuanto se abre la ventana de un mercader; una línea en el chat dice cuánto has ganado.",
+  OPT_VENDOR_REPAIR = "Reparar el equipo al abrir un vendedor que pueda",
+  OPT_VENDOR_REPAIR_TT = "Repara todo lo que llevas puesto cuando el mercader ofrece reparaciones y te lo puedes permitir; una línea en el chat dice cuánto ha costado.",
+  VENDOR_SOLD = "Vendido(s) %d objeto(s) de chatarra por %s.",
+  VENDOR_REPAIRED = "Equipo reparado por %s.",
+  VENDOR_REPAIR_POOR = "Reparar costaría %s; tienes %s.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

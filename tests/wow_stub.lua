@@ -42,6 +42,7 @@ local DEFAULT_STATE = {
   faction = "Alliance", mapID = nil, mapInfo = {},
   gamepad = { enabled = false, deviceID = 0 },
   gossipOptions = {}, bindLocation = "Goldshire", subZone = "Goldshire", zone = "Elwynn Forest",
+  money = 10000, merchantOpen = false, canRepair = false, repairCost = 0,
 }
 
 function WOW.Reset()
@@ -49,6 +50,7 @@ function WOW.Reset()
   WOW.calls, WOW.printed, WOW.timers, WOW.eventFrames, WOW.settings = {}, {}, {}, {}, {}
   if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
   if LootFrame then LootFrame.shown = false end
+  if MerchantFrame then MerchantFrame.shown = false end
   PlayerSpellsFrame = nil
 end
 WOW.Reset()
@@ -381,6 +383,15 @@ function GetRealZoneText(id) return S().zoneNames[id] end
 function UnitFactionGroup(unit) return S().faction, S().faction end
 function OpenWorldMap(mapID) record("OpenWorldMap", mapID) end
 function GetBindLocation() return S().bindLocation end
+-- Merchant: WOW.OpenMerchant()/WOW.CloseMerchant() fire the events and flip MerchantFrame.
+MerchantFrame = CreateFrame("Frame", "MerchantFrame", UIParent)
+MerchantFrame.shown = false
+function WOW.OpenMerchant() S().merchantOpen = true; MerchantFrame:Show(); WOW.FireEvent("MERCHANT_SHOW") end
+function WOW.CloseMerchant() S().merchantOpen = false; MerchantFrame:Hide(); WOW.FireEvent("MERCHANT_CLOSED") end
+function GetMoney() return S().money end
+function CanMerchantRepair() return S().canRepair end
+function GetRepairAllCost() return S().repairCost, S().repairCost > 0 end
+function RepairAllItems(guild) record("RepairAllItems", guild); S().money = S().money - S().repairCost; S().repairCost = 0 end
 function GetSubZoneText() return S().subZone end
 function GetZoneText() return S().zone end
 C_GossipInfo = {}
@@ -425,6 +436,16 @@ function C_Container.PickupContainerItem(id, slot)
   local b = bag(id)
   if b and b.items[slot] then S().cursor = { type = "item", bag = id, slot = slot } end
   record("PickupContainerItem", id, slot)
+end
+-- Selling at a merchant removes the stack and pays its vendor value.
+function C_Container.UseContainerItem(id, slot)
+  record("UseContainerItem", id, slot)
+  local b = bag(id); local it = b and b.items[slot]
+  if it and S().merchantOpen then
+    local info = S().itemInfo[it.itemID] or {}
+    S().money = S().money + (info.sellPrice or 0) * (it.count or 1)
+    b.items[slot] = nil
+  end
 end
 function CursorHasItem() local c = S().cursor; return c ~= nil and c.type == "item" end
 function DeleteCursorItem()
