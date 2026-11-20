@@ -1125,9 +1125,9 @@ return {
 **Files:** Create `NewbieNudge/Controller.lua`, `tests/test_controller.lua`; modify Options (page "Controller"), stub, locales, checklist (preset confirmation lines).
 
 **Interfaces:**
-- Produces: `NN.Controller = NN.CVarSection.New{...}` with the curated list of spec §17.1 (kinds checkbox/slider/dropdown; `padbutton` entries are declared as `kind = "padbutton"` and expanded to dropdowns by `Controller:PadOptions()` before `AddControls`); `Controller.PAD_BUTTONS` (list from spec), `Controller.PRESETS = { deck = {...}, pad = {...} }` (values from spec §17.1 table), `Controller:ApplyPreset(name) -> changed` (prints `L.CONTROLLER_PRESET_DONE:format(changed)`), `Controller:PadLabel(token) -> string` (`GetBindingText(token)` when non-empty and different from token, else token; `"none"` → `L.PAD_NONE`).
+- Produces: `NN.Controller = NN.CVarSection.New{...}` with the curated list of spec §17.1 (kinds checkbox/slider/dropdown; `padbutton` entries are declared as `kind = "padbutton"` and expanded to dropdowns by `Controller:PadOptions()` before `AddControls`); `Controller.PAD_BUTTONS` (list from spec), `Controller.PRESETS = { deck = {...}, pad = {...} }` (values from spec §17.1 table), `Controller:ApplyPreset(name) -> changed` (prints `L.CONTROLLER_PRESET_DONE:format(changed)`), `Controller:PadLabel(token) -> string` from `Controller.PAD_NAMES` (own table, Xbox-style: `PADRTRIGGER = "RT"`, `PADLTRIGGER = "LT"`, `PADRSHOULDER = "RB"`, `PADLSHOULDER = "LB"`, `PAD1 = "A"`, `PAD2 = "B"`, `PAD3 = "X"`, `PAD4 = "Y"`, `PAD5 = "Pad 5"`, `PAD6 = "Pad 6"`, `PADLSTICK = "LS"`, `PADRSTICK = "RS"`, `PADBACK = "Back"`, `PADFORWARD = "Start"`, `PADSYSTEM = "Guide"`, `PADSOCIAL = "Share"`, `PADPADDLE1..4 = "Paddle 1..4"`, `PADDUP/DDOWN/DLEFT/DRIGHT = "D-pad up/down/left/right"`), falling back to the raw token; `"none"` → `L.PAD_NONE`. In-game check 2026-11-20: `GetBindingText("PADRTRIGGER")` returns a font glyph ("|"), unusable as a label, so the client's own names are not used.
 
-- [ ] **Step 1: Stub** — `C_GamePad = { IsEnabled = function() return S().gamepad.enabled end, GetActiveDeviceID = function() return S().gamepad.deviceID end }` with state `gamepad = { enabled = false, deviceID = 0 }`; `GetBindingText(key)` → `S().bindingText[key] or key` with defaults `bindingText = { PADRTRIGGER = "RT", PADRSHOULDER = "RB", PADLTRIGGER = "LT" }`.
+- [ ] **Step 1: Stub** — `C_GamePad = { IsEnabled = function() return S().gamepad.enabled end, GetActiveDeviceID = function() return S().gamepad.deviceID end }` with state `gamepad = { enabled = false, deviceID = 0 }`; `GetBindingText(key)` → `"|"` (the glyph the real client returns; the stub mirrors it so no code relies on it).
 
 - [ ] **Step 2: Failing tests**
 
@@ -1150,7 +1150,7 @@ return {
     local dd = has(callsNamed("dropdown"), function(c) return c[2] == "NN_cvar_GamePadCursorLeftClick" end)
     assert_true(dd)
     assert_eq(dd[3][1], { value = "none", label = L().PAD_NONE })
-    assert_true(has(dd[3], function(o) return o.value == "PADRTRIGGER" and o.label == "RT" end))
+    assert_true(has(dd[3], function(o) return o.value == "PADRTRIGGER" and o.label == "RT" end)) -- from PAD_NAMES, not GetBindingText
     assert_eq(dd[3][#dd[3]], { value = "PADPADDLE9", label = "PADPADDLE9" })
   end,
   preset_applies_table_and_says_once = function()
@@ -1484,7 +1484,7 @@ Append to `test_highlight.lua`:
 **Files:** Modify `README.md`, `docs/testing-checklist.md`, `NewbieNudge/NewbieNudge.toc` (`## Version: 0.2.0`), `NewbieNudge/Locales/esES.lua` (final parity sweep).
 
 - [ ] **Step 1: README** — Features list (v1 + the seven v2 items in one line each), Commands table (`map`, `trash`, `build <link>`, `build clear`), "Playing with a controller" paragraph (presets, bindings, hints), "Talent builds from Icy Veins" paragraph (the one-sentence instruction), "Refreshing game data" (both commands), "Credits and licence".
-- [ ] **Step 2: Checklist** — §0 adds a block per feature listing the `/dump` lines from spec §20 and §13.5/§24.4, and a "presets" block; §2 adds appear/disappear lines for each new rule; §1 adds the bag-full frame, the map toggle and the build popup.
+- [ ] **Step 2: Checklist** — mark as confirmed on 2026-11-20 (warrior, enUS): `GetProfessionInfo` caps per rank (`Blacksmithing 22 75`); `GetQuestObjectives` entries `{ type="item", text="0/4 Venomtail Poison Sac", numFulfilled, numRequired, finished }`; `UnitQuestTrivialLevelRange("player") = 5` and `C_QuestLog.IsQuestTrivial` present; `GetRealZoneText(36) = "Deadmines"`; `C_GamePad.IsEnabled() = true`; bag inventory slots 31–34, materials slot 35 (`ContainerIDToInventoryID`). §0 adds a block per feature listing the `/dump` lines from spec §20 and §13.5/§24.4, and a "presets" block; §2 adds appear/disappear lines for each new rule; §1 adds the bag-full frame, the map toggle and the build popup.
 - [ ] **Step 3: Full suite and a grep for untranslated keys**
 
 Run: `python tests/run.py` → all PASS. Run: `grep -c '= "' NewbieNudge/Locales/enUS.lua NewbieNudge/Locales/esES.lua` → equal counts (parity test already enforces the key set).
