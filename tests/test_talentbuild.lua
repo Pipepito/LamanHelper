@@ -132,4 +132,34 @@ return {
     load_addon()
     assert_true(NewbieNudgeBuildButton)
   end,
+  -- badges on the talent window: bottom-right "taken/total", top-left start level until started
+  badges_show_points_and_start_level = function()
+    setup(); WOW.state.level = 12
+    WOW.state.talents = { configID = 1, treeID = 10, unspent = 1, nodes = {
+      [11] = { ranks = 1, maxRanks = 2, spellID = 1001 }, [12] = { ranks = 0, maxRanks = 5, spellID = 1002 },
+      [13] = { ranks = 0, maxRanks = 1, spellID = 1003 }, [14] = { ranks = 0, maxRanks = 3, spellID = 1004 } } }
+    load_addon(); local f = WOW.NewTalentFrame(); WOW.FireEvent("ADDON_LOADED", "Blizzard_PlayerSpells")
+    NewbieNudge.TalentBuild:Set("#tc-11BBz~3-c") -- picks: 1,1,B,B,z -> node 11 x2 from L10, node 12 x2 from L12, node 13 x1 at L14
+    f:Show()
+    local b11, b12, b13, b14 = f.buttons[11].NewbieNudgeBadge, f.buttons[12].NewbieNudgeBadge, f.buttons[13].NewbieNudgeBadge, f.buttons[14].NewbieNudgeBadge
+    assert_true(b11 and b11:IsShown()); assert_eq(b11.points:GetText(), "1/2"); assert_eq(b11.points.textColor, { 1, 0.85, 0.2 }); assert_true(not b11.level:IsShown())
+    assert_eq(b12.points:GetText(), "0/2"); assert_eq(b12.points.textColor, { 1, 1, 1 }); assert_true(b12.level:IsShown()); assert_eq(b12.level:GetText(), "L12")
+    assert_eq(b13.points:GetText(), "0/1"); assert_eq(b13.level:GetText(), "L14")
+    assert_true(b14 == nil or not b14:IsShown(), "talents the build never takes get no badge")
+    WOW.state.talents.nodes[11].ranks = 2; WOW.FireEvent("TRAIT_NODE_CHANGED")
+    assert_eq(b11.points:GetText(), "2/2"); assert_eq(b11.points.textColor, { 0.3, 1, 0.3 })
+  end,
+  badges_hidden_when_option_off_or_build_cleared = function()
+    setup(); WOW.state.level = 12
+    WOW.state.talents = { configID = 1, treeID = 10, unspent = 1, nodes = { [11] = { ranks = 0, maxRanks = 2, spellID = 1001 } } }
+    load_addon(); local f = WOW.NewTalentFrame(); WOW.FireEvent("ADDON_LOADED", "Blizzard_PlayerSpells")
+    NewbieNudge.TalentBuild:Set("#tc-11~3-c"); f:Show()
+    assert_true(f.buttons[11].NewbieNudgeBadge:IsShown())
+    WOW.settings["NN_build_badges"].setter(false)
+    assert_true(not f.buttons[11].NewbieNudgeBadge:IsShown())
+    WOW.settings["NN_build_badges"].setter(true)
+    assert_true(f.buttons[11].NewbieNudgeBadge:IsShown())
+    NewbieNudge.TalentBuild:Clear()
+    assert_true(not f.buttons[11].NewbieNudgeBadge:IsShown())
+  end,
 }

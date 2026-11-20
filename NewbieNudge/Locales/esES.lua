@@ -455,6 +455,8 @@ local T = {
   MAP_BUTTON_STATE_ON = "Zonas sin explorar: visibles, atenuadas.",
   MAP_BUTTON_STATE_OFF = "Zonas sin explorar: ocultas.",
   MAP_BUTTON_TT = "Clic izquierdo: ajustes del mapa. Clic derecho: mostrar u ocultar las zonas sin explorar.",
+  OPT_BUILD_BADGES = "Mostrar la build en la ventana de talentos",
+  OPT_BUILD_BADGES_TT = "En cada talento que usa la build: abajo a la derecha, los puntos que tienes de los que la build pone ahí (verde al completar, amarillo en progreso); arriba a la izquierda, el nivel en que la build lo empieza, hasta que lo empieces.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

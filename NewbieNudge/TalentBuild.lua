@@ -57,6 +57,7 @@ function TalentBuild:Set(text)
   NN:Say(L.BUILD_SET:format(#build.picks))
   if build.warning == "old_version" then NN:Say(L.BUILD_WARN_OLD) end
   recheck()
+  if self.UpdateBadges then self:UpdateBadges() end
   return true
 end
 
@@ -64,6 +65,7 @@ function TalentBuild:Clear()
   NN.db.build = nil
   NN:Say(L.BUILD_CLEARED)
   recheck()
+  if self.UpdateBadges then self:UpdateBadges() end
 end
 
 -------------------------------------------------------------------------------
@@ -252,8 +254,90 @@ function TalentBuild:EnsureButton()
   end)
   button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   self.button = button
+  if parent.HookScript then parent:HookScript("OnShow", function() TalentBuild:UpdateBadges() end) end
+  if not parent.IsShown or parent:IsShown() then self:UpdateBadges() end
   return button
 end
+
+-------------------------------------------------------------------------------
+-- Badges on the talent window: bottom-right "taken/total" points, top-left
+-- the level at which the build first takes a talent (until it is started).
+-------------------------------------------------------------------------------
+
+local COLOR_DONE, COLOR_PARTIAL, COLOR_NONE = { 0.3, 1, 0.3 }, { 1, 0.85, 0.2 }, { 1, 1, 1 }
+local FIRST_TALENT_LEVEL = 10
+
+-- { [node] = { total =, firstLevel = } } for the build's picks.
+function TalentBuild.BuildSummary(picks, data)
+  local summary = {}
+  for i, id in ipairs(picks) do
+    local entry = data[id]
+    if entry then
+      local s = summary[entry.node]
+      if not s then s = { total = 0, firstLevel = FIRST_TALENT_LEVEL + i - 1 }; summary[entry.node] = s end
+      s.total = s.total + 1
+    end
+  end
+  return summary
+end
+
+local function ensureBadge(button)
+  local badge = button.NewbieNudgeBadge
+  if badge then return badge end
+  badge = CreateFrame("Frame", nil, button)
+  badge:SetAllPoints(button)
+  badge:SetFrameLevel((button.GetFrameLevel and button:GetFrameLevel() or 1) + 5)
+  badge.points = badge:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  badge.points:SetPoint("BOTTOMRIGHT", badge, "BOTTOMRIGHT", -1, 1)
+  badge.level = badge:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  badge.level:SetPoint("TOPLEFT", badge, "TOPLEFT", 1, -1)
+  button.NewbieNudgeBadge = badge
+  TalentBuild.badges = TalentBuild.badges or {}
+  TalentBuild.badges[#TalentBuild.badges + 1] = badge
+  return badge
+end
+
+function TalentBuild:HideBadges()
+  for _, badge in ipairs(self.badges or {}) do badge:Hide() end
+end
+
+function TalentBuild:UpdateBadges()
+  self:HideBadges()
+  local frame = talentFrame()
+  local build = NN.db and NN.db.build
+  local data = NN.IcyTalents and NN.IcyTalents[NN.classFile]
+  if not (frame and frame.GetTalentButtonByNodeID and build and data) then return end
+  if NN.db.talentBadges == false then return end
+  local ranks = self:RanksByNode() or {}
+  for node, info in pairs(self.BuildSummary(build.picks, data)) do
+    local button = frame:GetTalentButtonByNodeID(node)
+    if button then
+      local badge = ensureBadge(button)
+      local taken = ranks[node] or 0
+      local color = (taken >= info.total) and COLOR_DONE or (taken > 0 and COLOR_PARTIAL or COLOR_NONE)
+      badge.points:SetText(taken .. "/" .. info.total)
+      badge.points:SetTextColor(color[1], color[2], color[3])
+      if taken == 0 then
+        badge.level:SetText("L" .. info.firstLevel)
+        badge.level:Show()
+      else
+        badge.level:Hide()
+      end
+      badge:Show()
+    end
+  end
+end
+
+local function talentFrameShown()
+  local frame = talentFrame()
+  return frame ~= nil and (not frame.IsShown or frame:IsShown())
+end
+
+NN:OnAnyEvent(function(event)
+  if (event == "TRAIT_NODE_CHANGED" or event == "TRAIT_CONFIG_UPDATED") and talentFrameShown() then
+    TalentBuild:UpdateBadges()
+  end
+end)
 
 NN:AfterLogin(function() TalentBuild:EnsureButton() end)
 
@@ -273,4 +357,7 @@ NN.Options.RegisterPage("build", "OPT_BUILD", function(category, layout)
     if StaticPopup_Show then StaticPopup_Show("NEWBIENUDGE_BUILD") end
   end, L.OPT_BUILD_PASTE_TT)
   Options.AddButton(layout, L.OPT_BUILD_CLEAR, L.OPT_BUTTON_DO, function() TalentBuild:Clear() end)
+  Options.AddCheckbox(category, "NN_build_badges", L.OPT_BUILD_BADGES, L.OPT_BUILD_BADGES_TT,
+    function() return NN.db.talentBadges ~= false end,
+    function(value) NN.db.talentBadges = value and true or false; TalentBuild:UpdateBadges() end)
 end)

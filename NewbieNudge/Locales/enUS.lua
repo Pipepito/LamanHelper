@@ -455,4 +455,6 @@ NN.L = setmetatable({
   MAP_BUTTON_STATE_ON = "Unexplored areas: shown, dimmed.",
   MAP_BUTTON_STATE_OFF = "Unexplored areas: hidden.",
   MAP_BUTTON_TT = "Left-click: map settings. Right-click: show or hide the unexplored areas.",
+  OPT_BUILD_BADGES = "Show the build on the talent window",
+  OPT_BUILD_BADGES_TT = "On each talent the build uses: bottom-right, the points you have of the points the build puts there (green when done, yellow in progress); top-left, the level the build first takes it at, until you start it.",
 }, { __index = function(_, key) return key end })
