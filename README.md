@@ -93,3 +93,29 @@ powershell -File tools/deploy.ps1
 
 Then `/reload` in game after each change. The in-game checklist is in
 `docs/testing-checklist.md`. Design notes live in `docs/superpowers/specs/`.
+
+## Refreshing game data
+
+Some reminders and the map reveal use tables generated from other projects.
+After a game patch that changes maps, spells or dungeons, regenerate them
+(each command rewrites files under `NewbieNudge/Data/`; commit the result):
+
+```powershell
+python tools/import_handbook.py --ref main
+```
+```powershell
+python tools/import_icy_talents.py
+```
+
+## Credits and licence
+
+NewbieNudge is released under the GNU General Public License v3.0 (see
+`LICENSE`).
+
+- Map fog tiles, spells by level, zone level ranges and dungeon data come
+  from [WoW Handbook](https://github.com/Arcaneology/WowHandbookAddon)
+  (Arcaneology / ArcaneStudio, GPL-3.0), which in turn builds its trainer
+  and profession data on [Questie](https://github.com/Questie/Questie) and
+  QuestieDB (GPL-3.0). The generated files name the upstream commit.
+- Talent build identifiers (node and spell IDs per talent) come from
+  Icy Veins' public talent data; only identifiers are kept.

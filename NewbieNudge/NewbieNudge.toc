@@ -4,6 +4,7 @@
 ## Notes: Reminders and highlights for new players: unspent talents, missing buffs, unused bags and more.
 ## Notes-esES: Recordatorios y avisos para jugadores nuevos: talentos sin gastar, buffs que faltan, bolsas sin usar y más.
 ## Version: 0.1.0
+## X-License: GPL-3.0
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
 ## SavedVariablesPerCharacter: NewbieNudgeDB
 ## AllowLoadGameType: forever
@@ -16,9 +17,21 @@ Spellbook.lua
 Highlight.lua
 Panel.lua
 Options.lua
+CVarSection.lua
 Camera.lua
+Controller.lua
+GameSettings.lua
 Data_Buffs.lua
+Data\MapFog.lua
+Data\TrainerSpells.lua
+Data\Zones.lua
+Data\Dungeons.lua
+Data\IcyTalents.lua
+MapReveal.lua
+BagFull.lua
+TalentBuild.lua
 Rules\Bags.lua
+Rules\MaterialsBag.lua
 Rules\Simple.lua
 Rules\Talents.lua
 Rules\Buffs.lua
@@ -27,5 +40,11 @@ Rules\Tracking.lua
 Rules\Ammo.lua
 Rules\Pet.lua
 Rules\Professions.lua
+Rules\ProfessionRank.lua
+Rules\TrainerSpells.lua
+Rules\Dungeons.lua
+Rules\QuestPlan.lua
+Rules\QuestSlots.lua
+Rules\QuestItem.lua
 Rules\Rested.lua
 Rules\GearUpgrade.lua
