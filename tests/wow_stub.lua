@@ -36,6 +36,7 @@ local DEFAULT_STATE = {
   explored = {}, mapLayers = {},
   questLog = nil, trivialRange = 5,
   containerFrames = {},
+  raceName = "Human", raceToken = "Human",
 }
 
 function WOW.Reset()
@@ -350,6 +351,7 @@ end
 function GetLocale() return S().locale end
 function GetBuildInfo() return "1.60.1", "70425", "Oct 7 2026", 16001 end
 function UnitClass(unit) return S().className, S().class, 8 end
+function UnitRace(unit) return S().raceName, S().raceToken end
 function UnitLevel(unit) return S().level end
 function GetMaxPlayerLevel() return S().maxLevel end
 function GetMaxLevelForPlayerExpansion() return S().maxLevel end

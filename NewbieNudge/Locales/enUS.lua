@@ -150,4 +150,8 @@ NN.L = setmetatable({
   MATERIALS_BAG_HELP = "You have a separate slot for a materials bag next to your normal bags. This reminds you to equip one you are carrying.",
   MATERIALS_BAG_ROW_EMPTY = "You have a materials bag in your inventory that isn't equipped.",
   MATERIALS_BAG_ROW_BIGGER = "A materials bag in your inventory is bigger than the one you're using.",
+  -- Trainer spells
+  TRAINER_SPELLS_TITLE = "New spells for your level",
+  TRAINER_SPELLS_HELP = "Spells and ranks your level allows that you haven't learned. Most come from your class trainer; a few class spells come from quests instead, so a row that stays after a trainer visit means a class quest is waiting.",
+  TRAINER_SPELLS_ROW = "%d spells or ranks for your level you haven't learned. Visit your class trainer.",
 }, { __index = function(_, key) return key end })

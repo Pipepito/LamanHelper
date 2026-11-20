@@ -150,6 +150,10 @@ local T = {
   MATERIALS_BAG_HELP = "Tienes un hueco aparte para una bolsa de materiales junto a tus bolsas normales. Esto te recuerda equipar la que llevas encima.",
   MATERIALS_BAG_ROW_EMPTY = "Tienes una bolsa de materiales en el inventario que no está equipada.",
   MATERIALS_BAG_ROW_BIGGER = "Una bolsa de materiales de tu inventario es más grande que la que usas.",
+  -- Trainer spells
+  TRAINER_SPELLS_TITLE = "Hechizos nuevos para tu nivel",
+  TRAINER_SPELLS_HELP = "Hechizos y rangos que tu nivel permite y que aún no has aprendido. La mayoría los enseña tu instructor de clase; unos pocos vienen de misiones, así que si la fila sigue tras visitarlo, te espera una misión de clase.",
+  TRAINER_SPELLS_ROW = "%d hechizos o rangos para tu nivel que no has aprendido. Visita a tu instructor de clase.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
