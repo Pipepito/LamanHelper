@@ -76,6 +76,15 @@ local T = {
   TRACKING_HELP = "El rastreo muestra hierbas o vetas en tu minimapa. Haz clic en la lupa junto al minimapa, o en esta línea.",
   TRACKING_ROW_HERBS = "Activa %s en el minimapa para ver las hierbas.",
   TRACKING_ROW_MINERALS = "Activa %s en el minimapa para ver las vetas.",
+  AMMO_TITLE = "Munición",
+  AMMO_HELP = "Los arcos, armas de fuego y ballestas necesitan flechas o balas en tu hueco de munición. Los vendedores cerca de los maestros de armas las venden.",
+  AMMO_ROW_NONE = "Te has quedado sin munición.",
+  AMMO_ROW_LOW = "Queda poca munición (%d).",
+  PET_TITLE = "Mascota de cazador",
+  PET_HELP = "Tu mascota hace gran parte de tu daño y mantiene a los enemigos lejos de ti. Mantenla invocada, alimentada y entrenada.",
+  PET_ROW_MISSING = "Tu mascota no está invocada.",
+  PET_ROW_UNHAPPY = "Tu mascota está descontenta; dale de comer.",
+  PET_ROW_TRAINING = "Tu mascota tiene %d puntos de entrenamiento sin gastar.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
