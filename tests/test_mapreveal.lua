@@ -40,13 +40,18 @@ return {
     local pin = WOW.NewMapPin(1412); NewbieNudge.MapReveal:HookPins(); pin:RefreshOverlays()
     assert_eq(#activeTextures(pin), 0)
   end,
-  secret_or_missing_explored_data_draws_nothing = function()
+  secret_explored_data_draws_nothing = function()
     load_addon(); fog(1412, { { 100, 100, 0, 0, 7 } })
     WOW.state.explored[1412] = { { textureWidth = WOW.secret(100), textureHeight = 100, offsetX = 0, offsetY = 0 } }
     local pin = WOW.NewMapPin(1412); NewbieNudge.MapReveal:HookPins(); pin:RefreshOverlays()
     assert_eq(#activeTextures(pin), 0)
-    WOW.state.explored[1412] = nil; pin:RefreshOverlays()
-    assert_eq(#activeTextures(pin), 0)
+  end,
+  never_visited_zone_returns_nil_and_is_fully_unexplored = function()
+    -- in game, GetExploredMapTextures returns nothing for a zone never entered (the Barrens, 2026-11-20)
+    load_addon(); fog(1412, { { 100, 100, 0, 0, 7 }, { 100, 100, 100, 0, 8 } })
+    WOW.state.explored[1412] = nil
+    local pin = WOW.NewMapPin(1412); NewbieNudge.MapReveal:HookPins(); pin:RefreshOverlays()
+    assert_eq(#activeTextures(pin), 2, "every tile drawn")
   end,
   unknown_map_draws_nothing = function()
     load_addon(); WOW.state.explored[999] = {}

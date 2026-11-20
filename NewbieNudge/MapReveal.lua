@@ -73,7 +73,8 @@ function MapReveal:OnRefresh(pin)
   local data = NN.MapFog and NN.MapFog[mapID]
   if not data then return end
   if not (C_MapExplorationInfo and C_MapExplorationInfo.GetExploredMapTextures) then return end
-  local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+  -- Nothing back means nothing explored (a zone never entered), not "unknown".
+  local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID) or {}
   if type(explored) ~= "table" then return end
   local keys = {}
   for _, info in ipairs(explored) do
