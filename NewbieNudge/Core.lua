@@ -6,7 +6,19 @@ local L = NN.L
 
 NN.rules = {}
 NN.ruleByName = {}
-NN.results = {}
+NN.results = {}      -- [name] = array of result tables (always an array)
+NN.ruleState = {}    -- [name] = { disabled = bool, dirty = bool }
+NN.appliesCache = {} -- [name] = bool
+NN.rulesByEvent = {} -- [event] = { rule, ... }
+NN.UNKNOWN = setmetatable({}, { __tostring = function() return "NewbieNudge.UNKNOWN" end })
+NN.MAX_ROWS = 10
+NN.CHECK_DELAY = 0.5
+NN.TICK_SECONDS = 30
+NN.PRIORITY = {
+  "durability", "bag_unequipped", "bag_full", "talents", "spell_ranks", "buffs", "ammo", "pet",
+  "tracking", "hearthstone", "quests", "mail", "professions", "gear_upgrade", "rested",
+}
+NN.testMode = false
 
 NN.classFile = select(2, UnitClass("player"))
 NN.isForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
@@ -73,6 +85,10 @@ function NN:RegisterRule(rule)
   if rule.combat == nil then rule.combat = false end
   self.rules[#self.rules + 1] = rule
   self.ruleByName[rule.name] = rule
+  self.ruleState[rule.name] = { disabled = false, dirty = true }
+  self.results[rule.name] = {}
+  self:RegisterRuleEvents(rule)
+  if self.loggedIn then self:NoteRuleSeen(rule) end
   return rule
 end
 
@@ -81,6 +97,42 @@ end
 -------------------------------------------------------------------------------
 
 NN.events = CreateFrame("Frame")
+
+local ALWAYS = {
+  "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED",
+  "PLAYER_LEVEL_UP", "SPELLS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED",
+}
+local RECHECK_ALL = { PLAYER_ENTERING_WORLD = true, PLAYER_REGEN_ENABLED = true, PLAYER_LEVEL_UP = true }
+local RESET_APPLIES = { PLAYER_LEVEL_UP = true, SPELLS_CHANGED = true, PLAYER_SPECIALIZATION_CHANGED = true }
+
+-- Registers one event name, or "EVENT:unit" through RegisterUnitEvent.
+function NN:RegisterEvent(spec)
+  local event, unit = spec:match("^([^:]+):(.+)$")
+  if event then
+    if self.events.RegisterUnitEvent then self.events:RegisterUnitEvent(event, unit) else self.events:RegisterEvent(event) end
+    return event
+  end
+  self.events:RegisterEvent(spec)
+  return spec
+end
+
+function NN:RegisterRuleEvents(rule)
+  for _, spec in ipairs(rule.events) do
+    local event = self:RegisterEvent(spec)
+    local list = self.rulesByEvent[event]
+    if not list then list = {}; self.rulesByEvent[event] = list end
+    list[#list + 1] = rule
+  end
+end
+
+function NN:NoteRuleSeen(rule)
+  local seen = self.db.seen.rules
+  if not seen[rule.name] then
+    seen[rule.name] = true
+    if rule.default == false then self.db.disabled[rule.name] = true end
+  end
+end
+
 NN.events:SetScript("OnEvent", function(_, event, ...)
   if event == "ADDON_LOADED" then
     if ... == ADDON_NAME then
@@ -92,11 +144,215 @@ NN.events:SetScript("OnEvent", function(_, event, ...)
   NN:OnEvent(event, ...)
 end)
 NN.events:RegisterEvent("ADDON_LOADED")
-NN.events:RegisterEvent("PLAYER_LOGIN")
+for _, event in ipairs(ALWAYS) do NN.events:RegisterEvent(event) end
 
-function NN:RegisterEvent(event)
-  self.events:RegisterEvent(event)
+-------------------------------------------------------------------------------
+-- Scheduler
+-------------------------------------------------------------------------------
+
+function NN:MarkDirty(name)
+  local state = self.ruleState[name]
+  if state then state.dirty = true end
 end
 
--- Filled in by the scheduler.
-function NN:OnEvent(event, ...) end
+function NN:MarkAllDirty()
+  for _, rule in ipairs(self.rules) do self.ruleState[rule.name].dirty = true end
+end
+
+function NN:OnLogin()
+  self.loggedIn = true
+  for name, expiry in pairs(self.db.snoozed) do
+    if expiry == 0 then self.db.snoozed[name] = nil end
+  end
+  for _, rule in ipairs(self.rules) do self:NoteRuleSeen(rule) end
+  if not self.ticker then
+    self.ticker = C_Timer.NewTicker(self.TICK_SECONDS, function() NN:MarkAllDirty(); NN:Schedule() end)
+  end
+  if self.OnLoginHooks then
+    for _, fn in ipairs(self.OnLoginHooks) do fn() end
+  end
+end
+
+-- Modules register functions to run once at PLAYER_LOGIN (after saved
+-- variables and rules exist).
+function NN:AfterLogin(fn)
+  if self.loggedIn then fn(); return end
+  self.OnLoginHooks = self.OnLoginHooks or {}
+  self.OnLoginHooks[#self.OnLoginHooks + 1] = fn
+end
+
+function NN:OnEvent(event, ...)
+  if event == "PLAYER_LOGIN" then self:OnLogin() end
+  if event == "PLAYER_REGEN_DISABLED" and self.Panel then self.Panel:SetCombatMode(true) end
+  if event == "PLAYER_REGEN_ENABLED" and self.Panel then self.Panel:SetCombatMode(false) end
+  if RESET_APPLIES[event] then wipe(self.appliesCache) end
+  if event == "BAG_UPDATE_DELAYED" then self.bagsLoaded = true end
+  if self.OnEventHooks then
+    for _, fn in ipairs(self.OnEventHooks) do fn(event, ...) end
+  end
+  if RECHECK_ALL[event] then
+    self:MarkAllDirty()
+  else
+    for _, rule in ipairs(self.rulesByEvent[event] or {}) do self.ruleState[rule.name].dirty = true end
+  end
+  self:Schedule()
+end
+
+-- Modules that need raw events (cache invalidation) register here.
+function NN:OnAnyEvent(fn)
+  self.OnEventHooks = self.OnEventHooks or {}
+  self.OnEventHooks[#self.OnEventHooks + 1] = fn
+end
+
+function NN:Schedule()
+  if self.pendingCheck then return end
+  self.pendingCheck = true
+  C_Timer.After(self.CHECK_DELAY, function()
+    NN.pendingCheck = false
+    NN:RunChecks()
+  end)
+end
+
+function NN:IsRestricted()
+  if InCombatLockdown() then return true end
+  local _, instanceType = IsInInstance()
+  if instanceType == "party" or instanceType == "raid" or instanceType == "pvp" or instanceType == "arena" then
+    return true
+  end
+  local RA = C_RestrictedActions
+  if RA then
+    for _, fname in ipairs({ "IsCombatRestricted", "IsEncounterRestricted", "IsMapRestricted" }) do
+      local f = RA[fname]
+      if f and f() == true then return true end
+    end
+  end
+  return false
+end
+
+function NN:Applies(rule)
+  local cached = self.appliesCache[rule.name]
+  if cached == nil then
+    local ok, result = pcall(rule.applies)
+    cached = ok and result == true
+    self.appliesCache[rule.name] = cached
+  end
+  return cached
+end
+
+function NN:IsSnoozed(name)
+  local expiry = self.db.snoozed[name]
+  if expiry == nil then return false end
+  if expiry == 0 then return true end
+  if expiry <= GetTime() then
+    self.db.snoozed[name] = nil
+    return false
+  end
+  return true
+end
+
+function NN:IsRuleActive(rule)
+  if self.db.disabled[rule.name] then return false end
+  if self.ruleState[rule.name].disabled then return false end
+  if not self:Applies(rule) then return false end
+  if self:IsSnoozed(rule.name) then return false end
+  return true
+end
+
+function NN:Snooze(name, minutes)
+  if not self.ruleByName[name] then return end
+  self.db.snoozed[name] = (minutes == 0) and 0 or (GetTime() + minutes * 60)
+  self:MarkDirty(name)
+  self:Schedule()
+end
+
+function NN:ClearSnoozes()
+  wipe(self.db.snoozed)
+  self:MarkAllDirty()
+  self:Schedule()
+end
+
+function NN:SetRuleEnabled(name, enabled)
+  if not self.ruleByName[name] then return end
+  self.db.disabled[name] = (not enabled) and true or nil
+  self:MarkDirty(name)
+  self:Schedule()
+end
+
+-- True when any string or number inside the result is a secret value.
+function NN.HasSecret(result)
+  if issecretvalue and issecretvalue(result) then return true end
+  if type(result) ~= "table" then return false end
+  for _, v in pairs(result) do
+    if issecretvalue and issecretvalue(v) then return true end
+    if type(v) == "table" and v ~= NN.UNKNOWN and NN.HasSecret(v) then return true end
+  end
+  return false
+end
+
+local function normalise(res)
+  if res == nil then return {} end
+  if res.text ~= nil then return { res } end
+  return res
+end
+
+function NN:DisableRuleForSession(rule, message)
+  self.ruleState[rule.name].disabled = true
+  self.results[rule.name] = {}
+  self.db.errors[rule.name] = tostring(message)
+  self:Say(L.RULE_ERROR:format(rule.name, tostring(message)))
+end
+
+function NN:RunChecks()
+  local restricted = self:IsRestricted()
+  for _, rule in ipairs(self.rules) do
+    local state = self.ruleState[rule.name]
+    if state.dirty and not state.disabled then
+      if not self:IsRuleActive(rule) then
+        self.results[rule.name] = {}
+        state.dirty = false
+      elseif self.testMode then
+        self.results[rule.name] = rule.sample and rule.sample() or { { text = rule.title, icon = 134400 } }
+        state.dirty = false
+      elseif restricted and not rule.combat then
+        -- frozen: keep previous results, stay dirty for the next unrestricted pass
+      else
+        local ok, res = pcall(rule.check)
+        if not ok then
+          self:DisableRuleForSession(rule, res)
+        elseif res == self.UNKNOWN or self.HasSecret(res) then
+          -- unreadable right now: keep previous results
+        else
+          self.results[rule.name] = normalise(res)
+        end
+        state.dirty = false
+      end
+    end
+  end
+  local rows = self:ActiveRows()
+  if self.Panel then self.Panel:Refresh(rows) end
+  if self.Highlight then self.Highlight:Apply(rows) end
+end
+
+local priorityIndex
+function NN:ActiveRows()
+  if not priorityIndex then
+    priorityIndex = {}
+    for i, name in ipairs(self.PRIORITY) do priorityIndex[name] = i end
+  end
+  local restricted = self:IsRestricted()
+  local ordered = {}
+  for i, rule in ipairs(self.rules) do
+    ordered[#ordered + 1] = { rule = rule, order = priorityIndex[rule.name] or (1000 + i) }
+  end
+  table.sort(ordered, function(a, b) return a.order < b.order end)
+  local rows = {}
+  for _, entry in ipairs(ordered) do
+    local rule = entry.rule
+    if self:IsRuleActive(rule) then
+      for _, result in ipairs(self.results[rule.name] or {}) do
+        rows[#rows + 1] = { rule = rule, result = result, stale = restricted and not rule.combat }
+      end
+    end
+  end
+  return rows
+end
