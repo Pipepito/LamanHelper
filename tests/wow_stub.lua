@@ -582,7 +582,7 @@ end
 StaticPopupDialogs = {}
 function StaticPopup_Show(which, ...)
   record("StaticPopup_Show", which)
-  local dialog = { editBox = CreateFrame("EditBox") }
+  local dialog = { EditBox = CreateFrame("EditBox") } -- live client: capital E
   return dialog
 end
 

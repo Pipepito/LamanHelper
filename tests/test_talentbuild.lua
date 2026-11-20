@@ -88,9 +88,17 @@ return {
     assert_eq(buttons, 1)
     local dialog = StaticPopupDialogs.NEWBIENUDGE_BUILD
     assert_true(dialog and dialog.hasEditBox)
-    local fake = { editBox = CreateFrame("EditBox") }; fake.editBox:SetText("#tc-1B~3-c")
+    local fake = { EditBox = CreateFrame("EditBox") } -- the live client's field name
+    fake.EditBox:SetText("stale")
+    dialog.OnShow(fake)
+    assert_eq(fake.EditBox:GetText(), "", "OnShow clears the box")
+    fake.EditBox:SetText("#tc-1B~3-c")
     dialog.OnAccept(fake)
     assert_eq(#NewbieNudge.db.build.picks, 2)
+    local old = { editBox = CreateFrame("EditBox") } -- older clients' field name still works
+    old.editBox:SetText("#tc-1~3-c")
+    dialog.OnAccept(old)
+    assert_eq(#NewbieNudge.db.build.picks, 1)
   end,
   status_counts_spent_points = function()
     setup(); WOW.state.level = 12

@@ -184,18 +184,34 @@ NN:RegisterRule({
 -- Options page and paste popup
 -------------------------------------------------------------------------------
 
+-- The popup's edit box is `EditBox` on the current client and `editBox` on
+-- older ones.
+local function popupEditBox(dialog)
+  return dialog and (dialog.EditBox or dialog.editBox)
+end
+
 if StaticPopupDialogs then
   StaticPopupDialogs["NEWBIENUDGE_BUILD"] = {
     text = L.BUILD_POPUP_TEXT, button1 = OKAY or "Okay", button2 = CANCEL or "Cancel",
     hasEditBox = true, editBoxWidth = 350, maxLetters = 0, timeout = 0, whileDead = true, hideOnEscape = true,
-    OnAccept = function(self) TalentBuild:Set(self.editBox:GetText()) end,
+    OnAccept = function(self)
+      local box = popupEditBox(self)
+      if box then TalentBuild:Set(box:GetText()) end
+    end,
     EditBoxOnEnterPressed = function(self)
       local parent = self:GetParent()
-      TalentBuild:Set(parent.editBox:GetText())
+      local box = popupEditBox(parent) or self
+      TalentBuild:Set(box:GetText())
       parent:Hide()
     end,
     EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
-    OnShow = function(self) self.editBox:SetText(""); if self.editBox.SetFocus then self.editBox:SetFocus() end end,
+    OnShow = function(self)
+      local box = popupEditBox(self)
+      if box then
+        box:SetText("")
+        if box.SetFocus then box:SetFocus() end
+      end
+    end,
   }
 end
 
