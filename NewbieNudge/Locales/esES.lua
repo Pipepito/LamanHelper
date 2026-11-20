@@ -59,6 +59,10 @@ local T = {
   QUESTS_TITLE = "Registro de misiones",
   QUESTS_HELP = "Solo puedes llevar un número limitado de misiones. Termina o abandona algunas antes de aceptar más.",
   QUESTS_ROW = "Tu registro de misiones está casi lleno (%d de %d).",
+  TALENTS_TITLE = "Talentos sin gastar",
+  TALENTS_HELP = "Los puntos de talento hacen más fuerte a tu personaje. Abre la ventana de talentos y gástalos.",
+  TALENTS_ROW_ONE = "Tienes 1 punto de talento sin gastar.",
+  TALENTS_ROW_MANY = "Tienes %d puntos de talento sin gastar.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
