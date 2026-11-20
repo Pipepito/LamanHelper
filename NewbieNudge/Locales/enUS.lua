@@ -156,7 +156,7 @@ NN.L = setmetatable({
   TRAINER_SPELLS_ROW = "%d spells or ranks for your level you haven't learned. Visit your class trainer.",
   -- Profession rank
   PROFESSION_RANK_TITLE = "Next profession rank available",
-  PROFESSION_RANK_HELP = "Your profession skill is close to its cap and you are high enough level to learn the next rank. A trainer in any capital teaches it.",
+  PROFESSION_RANK_HELP = "Your profession skill is close to its cap and you are high enough level for the next rank. Trainers teach primary ranks; Cooking, First Aid and Fishing need a vendor book for Expert and a quest for Artisan.",
   PROFESSION_RANK_ROW = "You can learn the next rank of %s (%d/%d). Visit a %s trainer.",
   -- Dungeons and zones
   DUNGEON_TITLE = "A dungeon for your level",
@@ -466,4 +466,6 @@ NN.L = setmetatable({
   QUEST_GROUP_TITLE = "Quests that need a group",
   QUEST_GROUP_HELP = "Elite, dungeon and raid quests are meant for several players. Plan them for when you have company instead of dying to them alone.",
   QUEST_GROUP_ROW = "%d quest(s) in your log need a group.",
+  PROFESSION_RANK_ROW_BOOK = "Read the Expert %s book to go past %d. Vendors sell it.",
+  PROFESSION_RANK_ROW_QUEST = "Complete the Artisan %s quest (level 35) to go past %d.",
 }, { __index = function(_, key) return key end })

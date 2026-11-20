@@ -156,7 +156,7 @@ local T = {
   TRAINER_SPELLS_ROW = "%d hechizos o rangos para tu nivel que no has aprendido. Visita a tu instructor de clase.",
   -- Profession rank
   PROFESSION_RANK_TITLE = "Siguiente rango de profesión disponible",
-  PROFESSION_RANK_HELP = "Tu habilidad de profesión está cerca de su tope y ya tienes nivel para aprender el siguiente rango. Lo enseña un instructor en cualquier capital.",
+  PROFESSION_RANK_HELP = "Tu habilidad de profesión está cerca de su tope y ya tienes nivel para el siguiente rango. Los instructores enseñan los rangos principales; Cocina, Primeros Auxilios y Pesca necesitan un libro de vendedor para Experto y una misión para Artesano.",
   PROFESSION_RANK_ROW = "Puedes aprender el siguiente rango de %s (%d/%d). Visita a un instructor de %s.",
   -- Dungeons and zones
   DUNGEON_TITLE = "Una mazmorra para tu nivel",
@@ -466,6 +466,8 @@ local T = {
   QUEST_GROUP_TITLE = "Misiones que necesitan grupo",
   QUEST_GROUP_HELP = "Las misiones de élite, de mazmorra y de banda están pensadas para varios jugadores. Déjalas para cuando tengas compañía en vez de morir solo en ellas.",
   QUEST_GROUP_ROW = "%d misión(es) de tu registro necesitan grupo.",
+  PROFESSION_RANK_ROW_BOOK = "Lee el libro de Experto en %s para pasar de %d. Lo venden los mercaderes.",
+  PROFESSION_RANK_ROW_QUEST = "Completa la misión de Artesano de %s (nivel 35) para pasar de %d.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
