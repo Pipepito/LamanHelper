@@ -154,6 +154,10 @@ local T = {
   TRAINER_SPELLS_TITLE = "Hechizos nuevos para tu nivel",
   TRAINER_SPELLS_HELP = "Hechizos y rangos que tu nivel permite y que aún no has aprendido. La mayoría los enseña tu instructor de clase; unos pocos vienen de misiones, así que si la fila sigue tras visitarlo, te espera una misión de clase.",
   TRAINER_SPELLS_ROW = "%d hechizos o rangos para tu nivel que no has aprendido. Visita a tu instructor de clase.",
+  -- Profession rank
+  PROFESSION_RANK_TITLE = "Siguiente rango de profesión disponible",
+  PROFESSION_RANK_HELP = "Tu habilidad de profesión está cerca de su tope y ya tienes nivel para aprender el siguiente rango. Lo enseña un instructor en cualquier capital.",
+  PROFESSION_RANK_ROW = "Puedes aprender el siguiente rango de %s (%d/%d). Visita a un instructor de %s.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

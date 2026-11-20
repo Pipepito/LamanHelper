@@ -37,6 +37,7 @@ local DEFAULT_STATE = {
   questLog = nil, trivialRange = 5,
   containerFrames = {},
   raceName = "Human", raceToken = "Human",
+  professionInfo = {},
 }
 
 function WOW.Reset()
@@ -368,6 +369,10 @@ function HasNewMail() return S().newMail end
 function UnitUsesAmmo(unit) return S().usesAmmo end
 function HasPetUI() return S().pet.hasUI, S().pet.isHunterPet end
 function GetProfessions() local p = S().professions; return p.prof1, p.prof2, nil, nil, nil end
+function GetProfessionInfo(index)
+  local p = S().professionInfo[index]
+  if p then return p.name, p.icon or 136240, p.skill, p.maxSkill, 0, 0, p.skillLine or 0 end
+end
 function GetSpellInfo(id) local i = S().spellInfo[id]; if i then return i.name, i.subtext, i.icon end end
 
 -------------------------------------------------------------------------------

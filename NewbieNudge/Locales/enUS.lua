@@ -154,4 +154,8 @@ NN.L = setmetatable({
   TRAINER_SPELLS_TITLE = "New spells for your level",
   TRAINER_SPELLS_HELP = "Spells and ranks your level allows that you haven't learned. Most come from your class trainer; a few class spells come from quests instead, so a row that stays after a trainer visit means a class quest is waiting.",
   TRAINER_SPELLS_ROW = "%d spells or ranks for your level you haven't learned. Visit your class trainer.",
+  -- Profession rank
+  PROFESSION_RANK_TITLE = "Next profession rank available",
+  PROFESSION_RANK_HELP = "Your profession skill is close to its cap and you are high enough level to learn the next rank. A trainer in any capital teaches it.",
+  PROFESSION_RANK_ROW = "You can learn the next rank of %s (%d/%d). Visit a %s trainer.",
 }, { __index = function(_, key) return key end })
