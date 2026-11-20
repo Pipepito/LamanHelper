@@ -34,6 +34,7 @@ Rules\Bags.lua
 Rules\MaterialsBag.lua
 Rules\Simple.lua
 Rules\Supplies.lua
+Rules\HearthBind.lua
 Rules\Talents.lua
 Rules\Buffs.lua
 Rules\SpellRanks.lua

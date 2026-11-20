@@ -41,6 +41,7 @@ local DEFAULT_STATE = {
   instance = { name = "", type = "none", instanceID = 0 }, zoneNames = {}, completedQuests = {},
   faction = "Alliance", mapID = nil, mapInfo = {},
   gamepad = { enabled = false, deviceID = 0 },
+  gossipOptions = {}, bindLocation = "Goldshire", subZone = "Goldshire", zone = "Elwynn Forest",
 }
 
 function WOW.Reset()
@@ -379,6 +380,11 @@ function GetInstanceInfo() local i = S().instance; return i.name, i.type, 0, "",
 function GetRealZoneText(id) return S().zoneNames[id] end
 function UnitFactionGroup(unit) return S().faction, S().faction end
 function OpenWorldMap(mapID) record("OpenWorldMap", mapID) end
+function GetBindLocation() return S().bindLocation end
+function GetSubZoneText() return S().subZone end
+function GetZoneText() return S().zone end
+C_GossipInfo = {}
+function C_GossipInfo.GetOptions() return S().gossipOptions end
 function ToggleWorldMap() record("ToggleWorldMap") end
 function GetNumGroupMembers() return 0 end
 function HasNewMail() return S().newMail end

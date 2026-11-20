@@ -468,6 +468,10 @@ local T = {
   QUEST_GROUP_ROW = "%d misión(es) de tu registro necesitan grupo.",
   PROFESSION_RANK_ROW_BOOK = "Lee el libro de Experto en %s para pasar de %d. Lo venden los mercaderes.",
   PROFESSION_RANK_ROW_QUEST = "Completa la misión de Artesano de %s (nivel 35) para pasar de %d.",
+  -- Hearthstone binding
+  HEARTH_BIND_TITLE = "Vincula tu Piedra de hogar cerca",
+  HEARTH_BIND_HELP = "Cuando hablas con un posadero lejos de donde está vinculada tu Piedra de hogar, te recuerda que esta posada puede ser tu hogar.",
+  HEARTH_BIND_ROW = "Tu Piedra de hogar está vinculada a %s. Este posadero puede vincularla aquí.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

@@ -468,4 +468,8 @@ NN.L = setmetatable({
   QUEST_GROUP_ROW = "%d quest(s) in your log need a group.",
   PROFESSION_RANK_ROW_BOOK = "Read the Expert %s book to go past %d. Vendors sell it.",
   PROFESSION_RANK_ROW_QUEST = "Complete the Artisan %s quest (level 35) to go past %d.",
+  -- Hearthstone binding
+  HEARTH_BIND_TITLE = "Set your Hearthstone nearby",
+  HEARTH_BIND_HELP = "When you talk to an innkeeper far from where your Hearthstone is set, reminds you that this inn can become your home instead.",
+  HEARTH_BIND_ROW = "Your Hearthstone is set to %s. This innkeeper can set it here.",
 }, { __index = function(_, key) return key end })
