@@ -61,6 +61,24 @@ function Highlight:InvalidateButtons()
   self.buttonCache = nil
 end
 
+-- Collects the tables an iterator yields, whether it yields them directly
+-- ("for frame in f()") or ipairs-style ("for i, frame in f()"), as the live
+-- client's bag enumerators do.
+local function collect(iterFn, ...)
+  local out = {}
+  if type(iterFn) ~= "function" then return out end
+  local f, state, control = iterFn(...)
+  if type(f) ~= "function" then return out end
+  while true do
+    local a, b = f(state, control)
+    if a == nil then break end
+    control = a
+    local item = (type(a) == "table") and a or b
+    if type(item) == "table" then out[#out + 1] = item end
+  end
+  return out
+end
+
 -- The default bag frames fire no addon-visible event when the player opens
 -- them, so each is hooked once: showing it rescans its buttons and re-applies.
 function Highlight:HookBagFrame(frame)
@@ -74,9 +92,7 @@ function Highlight:HookBagFrame(frame)
 end
 
 function Highlight:HookBagFrames()
-  if ContainerFrameUtil_EnumerateContainerFrames then
-    for frame in ContainerFrameUtil_EnumerateContainerFrames() do self:HookBagFrame(frame) end
-  end
+  for _, frame in ipairs(collect(ContainerFrameUtil_EnumerateContainerFrames)) do self:HookBagFrame(frame) end
   if ContainerFrameCombinedBags then self:HookBagFrame(ContainerFrameCombinedBags) end
 end
 
@@ -84,15 +100,13 @@ end
 function Highlight:ButtonForBagSlot(bag, slot)
   if not self.bagButtonCache then
     self.bagButtonCache = {}
-    if ContainerFrameUtil_EnumerateContainerFrames then
-      for frame in ContainerFrameUtil_EnumerateContainerFrames() do
-        self:HookBagFrame(frame)
-        if frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
-          for button in frame:EnumerateValidItems() do
-            local b = button.GetBagID and button:GetBagID()
-            local id = button.GetID and button:GetID()
-            if type(b) == "number" and type(id) == "number" then self.bagButtonCache[b .. "/" .. id] = button end
-          end
+    for _, frame in ipairs(collect(ContainerFrameUtil_EnumerateContainerFrames)) do
+      self:HookBagFrame(frame)
+      if frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
+        for _, button in ipairs(collect(frame.EnumerateValidItems, frame)) do
+          local b = button.GetBagID and button:GetBagID()
+          local id = button.GetID and button:GetID()
+          if type(b) == "number" and type(id) == "number" then self.bagButtonCache[b .. "/" .. id] = button end
         end
       end
     end

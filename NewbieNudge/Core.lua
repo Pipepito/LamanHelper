@@ -181,8 +181,16 @@ function NN:OnLogin()
   if not self.ticker then
     self.ticker = C_Timer.NewTicker(self.TICK_SECONDS, function() NN:MarkAllDirty(); NN:Schedule() end)
   end
+  -- Each module's login hook runs on its own: one failing module must not
+  -- stop the others (the options window is built by one of these).
   if self.OnLoginHooks then
-    for _, fn in ipairs(self.OnLoginHooks) do fn() end
+    for i, fn in ipairs(self.OnLoginHooks) do
+      local ok, err = pcall(fn)
+      if not ok then
+        self.db.errors["login:" .. i] = tostring(err)
+        self:Say(L.LOGIN_HOOK_ERROR:format(tostring(err)))
+      end
+    end
   end
 end
 

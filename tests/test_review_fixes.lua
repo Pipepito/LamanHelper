@@ -8,6 +8,10 @@ local function fakeRule(name, opts)
   return rule
 end
 
+local function callsNamed_RegisterAddOnCategory()
+  for _, c in ipairs(WOW.calls) do if c[1] == "RegisterAddOnCategory" then return c[2] end end
+end
+
 return {
   -- Finding 1: snoozes must use wall-clock time, not seconds since boot
   snooze_uses_epoch_time_not_uptime = function()
@@ -61,5 +65,15 @@ return {
     local shows = 0
     for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == MainMenuBarBackpackButton then shows = shows + 1 end end
     assert_eq(shows, 2)
+  end,
+  -- In-game finding: a login hook that errors must not stop the later ones
+  -- (the options window is built by one of them).
+  failing_login_hook_does_not_block_the_others = function()
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/failing_login_hook.lua" }
+    load_addon()
+    assert_eq(NewbieNudge_LaterHookRan, true)
+    assert_eq(callsNamed_RegisterAddOnCategory(), "NewbieNudge")
+    assert_true(tostring(NewbieNudge.db.errors["login:1"]):find("hook boom", 1, true))
+    assert_true(WOW.printed[#WOW.printed]:find("hook boom", 1, true) or WOW.printed[#WOW.printed - 1]:find("hook boom", 1, true))
   end,
 }

@@ -448,17 +448,11 @@ function WOW.NewContainerFrame(bagID, numSlots)
     b:SetID(i)
     f.Items[i] = b
   end
-  function f:EnumerateValidItems()
-    local i = 0
-    return function() i = i + 1; return self.Items[i] end
-  end
+  function f:EnumerateValidItems() return ipairs(self.Items) end
   S().containerFrames[#S().containerFrames + 1] = f
   return f
 end
-function ContainerFrameUtil_EnumerateContainerFrames()
-  local list, i = S().containerFrames, 0
-  return function() i = i + 1; return list[i] end
-end
+function ContainerFrameUtil_EnumerateContainerFrames() return ipairs(S().containerFrames) end
 
 C_Item = {}
 local function itemByLink(link)
