@@ -17,7 +17,7 @@ NN.TICK_SECONDS = 30
 NN.PRIORITY = {
   "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "buffs", "ammo", "pet",
   "tracking", "hearthstone", "hearth_bind", "supplies", "quests", "quest_item", "quest_turnin", "quest_slots", "quest_soon", "quest_grey", "quest_group", "mail",
-  "professions", "profession_rank", "trainer_spells", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
+  "professions", "profession_rank", "trainer_spells", "mount", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
 NN.testMode = false
 

@@ -489,4 +489,9 @@ NN.L = setmetatable({
   TOOLTIP_SELL_EACH = "%s each",
   GS_combinedBags = "One-bag view (all bags in one window)",
   GS_combinedBags_TT = "Opens all your bags as a single window. Forever's Classic preset turns this off; try both.",
+  -- Mount
+  MOUNT_TITLE = "Riding at level 40",
+  MOUNT_HELP = "Riding training and your first mount cost about 100 gold together at level 40. Reminds you to save from level 30, and to learn to ride once you can.",
+  MOUNT_ROW_SAVE = "Save up: riding and a mount cost about 100 gold at level 40 (you have %s).",
+  MOUNT_ROW_RIDE = "You can learn to ride now. Visit a riding trainer.",
 }, { __index = function(_, key) return key end })

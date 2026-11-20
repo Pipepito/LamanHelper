@@ -489,6 +489,11 @@ local T = {
   TOOLTIP_SELL_EACH = "%s cada uno",
   GS_combinedBags = "Vista de una sola bolsa (todas las bolsas en una ventana)",
   GS_combinedBags_TT = "Abre todas tus bolsas como una sola ventana. El preajuste Clásico de Forever lo desactiva; prueba ambos.",
+  -- Mount
+  MOUNT_TITLE = "Montar al nivel 40",
+  MOUNT_HELP = "Aprender a montar y tu primera montura cuestan unas 100 monedas de oro en total al nivel 40. Te recuerda ahorrar desde el nivel 30 y aprender a montar en cuanto puedas.",
+  MOUNT_ROW_SAVE = "Ahorra: montar y una montura cuestan unas 100 de oro al nivel 40 (tienes %s).",
+  MOUNT_ROW_RIDE = "Ya puedes aprender a montar. Visita a un instructor de equitación.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
