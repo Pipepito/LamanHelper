@@ -107,7 +107,7 @@ local ALWAYS = {
   "PLAYER_LEVEL_UP", "SPELLS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED",
 }
 local RECHECK_ALL = { PLAYER_ENTERING_WORLD = true, PLAYER_REGEN_ENABLED = true, PLAYER_LEVEL_UP = true }
-local RESET_APPLIES = { PLAYER_LEVEL_UP = true, SPELLS_CHANGED = true, PLAYER_SPECIALIZATION_CHANGED = true }
+local RESET_APPLIES = { PLAYER_LEVEL_UP = true, SPELLS_CHANGED = true, PLAYER_SPECIALIZATION_CHANGED = true, PLAYER_EQUIPMENT_CHANGED = true }
 
 -- Registers one event name, or "EVENT:unit" through RegisterUnitEvent.
 -- Unknown event names raise in the client; a bad name must not take the

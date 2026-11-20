@@ -3,6 +3,8 @@ local L = function() return NewbieNudge.L end
 local function hunter(level)
   WOW.state.class = "HUNTER"
   WOW.state.level = level or 20
+  WOW.state.itemInfo[2567] = { name = "Bow", classID = 2, subclassID = 2 }
+  WOW.state.inventory[18] = { itemID = 2567 } -- ammo rules need a bow, gun or crossbow equipped
 end
 
 local function petOut()
@@ -122,5 +124,19 @@ return {
     load_addon()
     assert_eq(NewbieNudge.ruleByName.ammo.combat, true)
     assert_eq(NewbieNudge.ruleByName.pet.combat, true)
+  end,
+  -- Forever reports UnitUsesAmmo for characters with no ammo weapon; the
+  -- rule must also see a bow, gun or crossbow in the ranged slot.
+  ammo_requires_a_ranged_weapon_that_uses_ammo = function()
+    WOW.state.class = "WARRIOR"; WOW.state.usesAmmo = true; WOW.state.ammoCount = 20
+    WOW.state.itemInfo[2001] = { name = "Sword", classID = 2, subclassID = 7 }
+    WOW.state.itemInfo[2002] = { name = "Bow", classID = 2, subclassID = 2 }
+    WOW.state.inventory[18] = { itemID = 2001 }
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("ammo"), 0, "a sword in the ranged slot needs no ammo")
+    WOW.state.inventory[18] = { itemID = 2002 }; WOW.FireEvent("PLAYER_EQUIPMENT_CHANGED", 18, true); run_checks()
+    assert_eq(results_of("ammo")[1].text, NewbieNudge.L.AMMO_ROW_LOW:format(20))
+    WOW.state.inventory[18] = nil; WOW.FireEvent("PLAYER_EQUIPMENT_CHANGED", 18, false); run_checks()
+    assert_eq(#results_of("ammo"), 0, "nothing in the ranged slot")
   end,
 }

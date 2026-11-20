@@ -32,19 +32,11 @@ Where it differs, fix the rule and `tests/wow_stub.lua` together and add a test.
 
 ### Materials bag (v2, rule `materials_bag`)
 
-With a materials bag in a bag slot or equipped, in the game chat:
-
-```
-/run NNi=C_Item.GetItemInfoInstant NNf=function(id) print(id,(C_Item.GetItemInfo(id)),"fam",C_Item.GetItemFamily(id),"cls",select(6,NNi(id)),"sub",select(7,NNi(id))) end
-```
-```
-/run for b=0,5 do for s=1,C_Container.GetContainerNumSlots(b) do local id=C_Container.GetContainerItemID(b,s) if id and select(6,NNi(id))==1 then print("bag",b,s) NNf(id) end end end
-```
-
-Write the `fam` value into `NN.REAGENT_BAG_FAMILY` and the `sub` value into
-`NN.REAGENT_BAG_SUBCLASS` at the top of `Rules/MaterialsBag.lua`. Until one
-of them is set the rule never shows. Confirmed 2026-11-20: bag inventory
-slots are 31–34 and the materials slot is 35 (`ContainerIDToInventoryID`).
+Confirmed 2026-11-20: the materials slot is inventory slot 35
+(`Enum.BagIndex.ReagentBag`, bag 5) and held an Apprentice's Mining Pack
+(item family 1024, container subclass 6). The rule treats any container with
+a non-zero item family other than arrows (1) and bullets (2) as a materials
+bag. Bag inventory slots are 31–34.
 
 ### v2 shapes (confirmed 2026-11-20 on a warrior, enUS)
 

@@ -112,4 +112,14 @@ return {
     assert_eq(WOW.settings["NN_test_dd"].type, "string")
     WOW.settings["NN_test_dd"].setter("0"); assert_eq(value, "0")
   end,
+  failing_page_does_not_block_the_category = function()
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/two_rules.lua" }
+    NewbieNudge_TestPage = function() error("page boom") end
+    WOW.extraFiles[#WOW.extraFiles + 1] = TESTS_DIR .. "/fixtures/failing_page.lua"
+    load_addon()
+    assert_eq(callsNamed("RegisterAddOnCategory")[1][2], "NewbieNudge", "category still registered")
+    local printed = WOW.printed[#WOW.printed]
+    assert_true(printed:find("page boom", 1, true), printed)
+    assert_true(tostring(NewbieNudge.db.errors["options:Boom page"]):find("page boom", 1, true))
+  end,
 }

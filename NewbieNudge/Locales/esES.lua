@@ -447,6 +447,7 @@ local T = {
   BUILD_NEXT_ROW = "Siguiente talento: %s (%d/%d).",
   BUILD_DIFFERS_ROW = "Tus talentos difieren de la build; la sugerencia sigue el orden de la build.",
   CVAR_IN_COMBAT = "No se pueden cambiar ajustes del juego en combate. Inténtalo tras la pelea.",
+  OPT_PAGE_ERROR = "La página de opciones \"%s\" dio un error y se omitió: %s",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

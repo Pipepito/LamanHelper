@@ -108,8 +108,14 @@ function Options:Build()
   end
   if Settings.RegisterVerticalLayoutSubcategory then
     for _, page in ipairs(Options.pages) do
-      local pageCategory, pageLayout = Options.AddSubcategory(L[page.titleKey])
-      page.build(pageCategory, pageLayout)
+      local title = L[page.titleKey]
+      local pageCategory, pageLayout = Options.AddSubcategory(title)
+      -- One broken page must not take the whole options window down.
+      local ok, err = pcall(page.build, pageCategory, pageLayout)
+      if not ok then
+        db.errors["options:" .. title] = tostring(err)
+        NN:Say(L.OPT_PAGE_ERROR:format(title, tostring(err)))
+      end
     end
   end
 
