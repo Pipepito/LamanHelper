@@ -536,6 +536,19 @@ end
 function Settings.RegisterVerticalLayoutCategory(name) record("RegisterVerticalLayoutCategory", name); return newCategory(name) end
 function Settings.RegisterCanvasLayoutCategory(frame, name) record("RegisterCanvasLayoutCategory", name); return newCategory(name) end
 function Settings.RegisterAddOnCategory(cat) record("RegisterAddOnCategory", cat.name) end
+function Settings.RegisterVerticalLayoutSubcategory(parent, name)
+  record("RegisterVerticalLayoutSubcategory", parent.name, name)
+  local cat, layout = newCategory(name)
+  cat.parent = parent
+  return cat, layout
+end
+function Settings.CreateControlTextContainer()
+  local c = { data = {} }
+  function c:Add(value, label) self.data[#self.data + 1] = { value = value, label = label } end
+  function c:GetData() return self.data end
+  return c
+end
+function Settings.CreateDropdown(cat, setting, optionsFn, tooltip) record("dropdown", setting.variable, optionsFn(), tooltip) end
 function Settings.RegisterProxySetting(cat, variable, vtype, name, default, getter, setter)
   WOW.settings[variable] = { getter = getter, setter = setter, name = name, default = default, type = vtype }
   record("RegisterProxySetting", variable)

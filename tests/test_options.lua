@@ -90,4 +90,25 @@ return {
     assert_eq(type(NewbieNudge.Options.AddHeader), "function")
     assert_eq(type(NewbieNudge.Options.AddButton), "function")
   end,
+  camera_lives_in_its_own_subcategory = function()
+    withRules()
+    local subs = callsNamed("RegisterVerticalLayoutSubcategory")
+    assert_true(#subs >= 1)
+    assert_eq(subs[1][2], "NewbieNudge")
+    local names = {}
+    for _, c in ipairs(subs) do names[#names + 1] = c[3] end
+    assert_true(tContains(names, NewbieNudge.L.OPT_CAMERA))
+  end,
+  dropdown_helper_registers_string_setting = function()
+    withRules()
+    local value = "1"
+    NewbieNudge.Options.AddDropdown(NewbieNudge.Options.category, "NN_test_dd", "DD", "tt",
+      { { value = "0", label = "Zero" }, { value = "1", label = "One" } },
+      function() return value end, function(v) value = v end)
+    local dd = callsNamed("dropdown")[1]
+    assert_eq(dd[2], "NN_test_dd")
+    assert_eq(dd[3], { { value = "0", label = "Zero" }, { value = "1", label = "One" } })
+    assert_eq(WOW.settings["NN_test_dd"].type, "string")
+    WOW.settings["NN_test_dd"].setter("0"); assert_eq(value, "0")
+  end,
 }

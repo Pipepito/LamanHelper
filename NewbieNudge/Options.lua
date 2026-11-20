@@ -4,7 +4,7 @@
 local _, NN = ...
 local L = NN.L
 
-local Options = {}
+local Options = { pages = {} }
 NN.Options = Options
 
 local function registerSetting(category, variable, vtype, name, default, getter, setter)
@@ -43,6 +43,31 @@ function Options.AddSlider(category, variable, name, tooltip, min, max, step, ge
   return setting
 end
 
+function Options.AddDropdown(category, variable, name, tooltip, options, getter, setter)
+  local setting = registerSetting(category, variable, Settings.VarType.String, name, getter(), getter, setter)
+  local function optionsFn()
+    local container = Settings.CreateControlTextContainer()
+    for _, option in ipairs(options) do container:Add(option.value, option.label) end
+    return container:GetData()
+  end
+  Settings.CreateDropdown(category, setting, optionsFn, tooltip)
+  return setting
+end
+
+-- A subcategory under the addon's page (Map, Bags, Camera, ...).
+function Options.AddSubcategory(name)
+  local category, layout = Settings.RegisterVerticalLayoutSubcategory(Options.category, name)
+  Options.subcategories = Options.subcategories or {}
+  Options.subcategories[name] = category
+  return category, layout
+end
+
+-- Modules register their page before login; pages are built in order after
+-- the Reminders section and the Camera page.
+function Options.RegisterPage(key, titleKey, build)
+  Options.pages[#Options.pages + 1] = { key = key, titleKey = titleKey, build = build }
+end
+
 function Options:Build()
   if self.category or not Settings or not Settings.RegisterVerticalLayoutCategory then return end
   local category, layout = Settings.RegisterVerticalLayoutCategory(L.ADDON_TITLE)
@@ -77,7 +102,16 @@ function Options:Build()
       function(value) NN:SetRuleEnabled(name, value and true or false) end)
   end
 
-  if NN.Camera and NN.Camera.AddToOptions then NN.Camera:AddToOptions(category, layout) end
+  if NN.Camera and NN.Camera.AddToOptions and Settings.RegisterVerticalLayoutSubcategory then
+    local cameraCategory, cameraLayout = Options.AddSubcategory(L.OPT_CAMERA)
+    NN.Camera:AddToOptions(cameraCategory, cameraLayout)
+  end
+  if Settings.RegisterVerticalLayoutSubcategory then
+    for _, page in ipairs(Options.pages) do
+      local pageCategory, pageLayout = Options.AddSubcategory(L[page.titleKey])
+      page.build(pageCategory, pageLayout)
+    end
+  end
 
   Settings.RegisterAddOnCategory(category)
   NN.optionsCategoryID = category:GetID()
