@@ -64,4 +64,33 @@ return {
     NewbieNudge.Highlight:ClearAll()
     assert_eq(calls("glow_hide"), 3)
   end,
+  bagslot_highlight_glows_item_button_and_backpack = function()
+    load_addon()
+    local cf = WOW.NewContainerFrame(0, 16)
+    local rows = { { rule = { name = "r" }, result = { text = "t", highlight = { key = "bags", bagslots = { { 0, 3 } } } }, stale = false } }
+    NewbieNudge.Highlight:Apply(rows)
+    local shown = {}
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" then shown[c[2]] = true end end
+    assert_true(shown[MainMenuBarBackpackButton]); assert_true(shown[cf.Items[3]])
+    NewbieNudge.Highlight:Apply({})
+    assert_eq(WOW.calls[#WOW.calls][1], "glow_hide")
+  end,
+  bagslot_without_open_bags_only_glows_backpack = function()
+    load_addon()
+    NewbieNudge.Highlight:Apply({ { rule = { name = "r" }, result = { text = "t", highlight = { key = "bags", bagslots = { { 0, 3 } } } }, stale = false } })
+    local n = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" then n = n + 1 end end
+    assert_eq(n, 1)
+  end,
+  bagslot_buttons_rescanned_after_bag_open = function()
+    load_addon()
+    local rows = { { rule = { name = "r" }, result = { text = "t", highlight = { bagslots = { { 0, 3 } } } }, stale = false } }
+    NewbieNudge.Highlight:Apply(rows)
+    local cf = WOW.NewContainerFrame(0, 16)
+    WOW.FireEvent("BAG_OPEN", 0)
+    NewbieNudge.Highlight:Apply(rows)
+    local shown = false
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == cf.Items[3] then shown = true end end
+    assert_true(shown, "item button found after the bag opened")
+  end,
 }

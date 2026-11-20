@@ -140,4 +140,9 @@ NN.L = setmetatable({
   QUEST_SLOTS_TITLE = "Bag space for quests",
   QUEST_SLOTS_HELP = "Estimates how many bag slots the items your current quests collect, and the rewards of complete quests, will take. It is an estimate.",
   QUEST_SLOTS_ROW = "Keep %d bag slots free for your quests (you have %d).",
+  -- Quest-starting items
+  QUEST_ITEM_TITLE = "Items that start a quest",
+  QUEST_ITEM_HELP = "Some items you pick up start a quest when you right-click them. This shows the ones waiting in your bags.",
+  QUEST_ITEM_ROW = "%s starts a quest. Right-click it in your bags.",
+  QUEST_ITEM_UNKNOWN = "An item",
 }, { __index = function(_, key) return key end })

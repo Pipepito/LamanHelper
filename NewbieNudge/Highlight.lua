@@ -61,6 +61,55 @@ function Highlight:InvalidateButtons()
   self.buttonCache = nil
 end
 
+-- Item button of the default bag UI for (bag, slot), while the bags are open.
+function Highlight:ButtonForBagSlot(bag, slot)
+  if not self.bagButtonCache then
+    self.bagButtonCache = {}
+    if ContainerFrameUtil_EnumerateContainerFrames then
+      for frame in ContainerFrameUtil_EnumerateContainerFrames() do
+        if frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
+          for button in frame:EnumerateValidItems() do
+            local b = button.GetBagID and button:GetBagID()
+            local id = button.GetID and button:GetID()
+            if type(b) == "number" and type(id) == "number" then self.bagButtonCache[b .. "/" .. id] = button end
+          end
+        end
+      end
+    end
+  end
+  return self.bagButtonCache[bag .. "/" .. slot]
+end
+
+function Highlight:InvalidateBagButtons()
+  self.bagButtonCache = nil
+end
+
+-- Frames a result's highlight asks for: a key string, or a table with any of
+-- key (frame key), action (slots), bagslots ({bag, slot} pairs).
+function Highlight:TargetsFor(h, wanted)
+  if type(h) == "string" then
+    local frame = self:FrameForKey(h)
+    if frame then wanted[frame] = true end
+  elseif type(h) == "table" then
+    if type(h.key) == "string" then
+      local frame = self:FrameForKey(h.key)
+      if frame then wanted[frame] = true end
+    end
+    if type(h.action) == "table" then
+      for _, slot in ipairs(h.action) do
+        local button = self:ButtonForSlot(slot)
+        if button then wanted[button] = true end
+      end
+    end
+    if type(h.bagslots) == "table" then
+      for _, pair in ipairs(h.bagslots) do
+        local button = self:ButtonForBagSlot(pair[1], pair[2])
+        if button then wanted[button] = true end
+      end
+    end
+  end
+end
+
 -------------------------------------------------------------------------------
 -- Glow primitives
 -------------------------------------------------------------------------------
@@ -123,15 +172,7 @@ function Highlight:Apply(rows)
   local wanted = {}
   for _, row in ipairs(rows) do
     local h = row.result and row.result.highlight
-    if type(h) == "string" then
-      local frame = self:FrameForKey(h)
-      if frame then wanted[frame] = true end
-    elseif type(h) == "table" and type(h.action) == "table" then
-      for _, slot in ipairs(h.action) do
-        local button = self:ButtonForSlot(slot)
-        if button then wanted[button] = true end
-      end
-    end
+    if h then self:TargetsFor(h, wanted) end
   end
   for frame in pairs(self.active) do
     if not wanted[frame] then
@@ -163,12 +204,17 @@ function Highlight:ForgetActive()
   wipe(self.active)
 end
 
+local BAG_EVENTS = { BAG_OPEN = true, BAG_CLOSED = true, BAG_UPDATE_DELAYED = true }
+
 NN:OnAnyEvent(function(event)
   if event == "ACTIONBAR_SLOT_CHANGED" or event == "ACTIONBAR_PAGE_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" then
     Highlight:InvalidateButtons()
   end
-  if RESHOW_EVENTS[event] then Highlight:ForgetActive() end
+  if BAG_EVENTS[event] then Highlight:InvalidateBagButtons() end
+  if RESHOW_EVENTS[event] or BAG_EVENTS[event] then Highlight:ForgetActive() end
 end)
+NN:RegisterEvent("BAG_OPEN")
+NN:RegisterEvent("BAG_CLOSED")
 NN:RegisterEvent("ACTIONBAR_PAGE_CHANGED")
 NN:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
 NN:RegisterEvent("UPDATE_SHAPESHIFT_FORM")

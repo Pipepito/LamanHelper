@@ -140,6 +140,11 @@ local T = {
   QUEST_SLOTS_TITLE = "Espacio en las bolsas para misiones",
   QUEST_SLOTS_HELP = "Calcula cuántos huecos ocuparán los objetos que recogen tus misiones actuales y las recompensas de las completas. Es una estimación.",
   QUEST_SLOTS_ROW = "Deja %d huecos libres en las bolsas para tus misiones (tienes %d).",
+  -- Quest-starting items
+  QUEST_ITEM_TITLE = "Objetos que inician una misión",
+  QUEST_ITEM_HELP = "Algunos objetos que recoges inician una misión al hacer clic derecho. Esto muestra los que esperan en tus bolsas.",
+  QUEST_ITEM_ROW = "%s inicia una misión. Haz clic derecho en él en tus bolsas.",
+  QUEST_ITEM_UNKNOWN = "Un objeto",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

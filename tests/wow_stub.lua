@@ -35,6 +35,7 @@ local DEFAULT_STATE = {
   gameMenuShown = false,
   explored = {}, mapLayers = {},
   questLog = nil, trivialRange = 5,
+  containerFrames = {},
 }
 
 function WOW.Reset()
@@ -391,6 +392,35 @@ function C_Container.GetContainerItemLink(id, slot) local i = C_Container.GetCon
 function C_Container.ContainerIDToInventoryID(id) return (S().bagSlotBase or 19) + id end
 function ContainerIDToInventoryID(id) return C_Container.ContainerIDToInventoryID(id) end
 function C_Container.PickupContainerItem() end
+function C_Container.GetContainerItemQuestInfo(id, slot)
+  local b = bag(id); local it = b and b.items[slot]
+  if not it then return { isQuestItem = false } end
+  return { isQuestItem = it.isQuestItem or false, questID = it.questID, isActive = it.isActive or false }
+end
+
+-- Default bag UI: WOW.NewContainerFrame(bagID, numSlots) creates a shown
+-- frame with one item button per slot, as ContainerFrameUtil_EnumerateContainerFrames yields.
+function WOW.NewContainerFrame(bagID, numSlots)
+  local f = CreateFrame("Frame")
+  f.Items = {}
+  for i = 1, numSlots do
+    local b = CreateFrame("Button", nil, f)
+    b.bagID = bagID
+    function b:GetBagID() return self.bagID end
+    b:SetID(i)
+    f.Items[i] = b
+  end
+  function f:EnumerateValidItems()
+    local i = 0
+    return function() i = i + 1; return self.Items[i] end
+  end
+  S().containerFrames[#S().containerFrames + 1] = f
+  return f
+end
+function ContainerFrameUtil_EnumerateContainerFrames()
+  local list, i = S().containerFrames, 0
+  return function() i = i + 1; return list[i] end
+end
 
 C_Item = {}
 local function itemByLink(link)
