@@ -157,6 +157,7 @@ function Controller:SetSession(on)
     NN.Panel:ApplyScale()
     NN.Panel:Refresh(NN:ActiveRows())
   end
+  if NN.BagFull and NN.BagFull.ApplyScale then NN.BagFull:ApplyScale() end
 end
 
 function Controller:Boost()
@@ -202,10 +203,15 @@ function Controller:AddPanelOptions(category, layout)
     function(value)
       NN.db.controller.boost = value and true or false
       if NN.Panel then NN.Panel:ApplyScale(); NN.Panel:Refresh(NN:ActiveRows()) end
+      if NN.BagFull and NN.BagFull.ApplyScale then NN.BagFull:ApplyScale() end
     end)
   Options.AddSlider(category, "NN_controller_scale", L.OPT_CONTROLLER_SCALE, nil, 1.0, 1.6, 0.05,
     function() return NN.db.controller.scale end,
-    function(value) NN.db.controller.scale = value; if NN.Panel then NN.Panel:ApplyScale() end end)
+    function(value)
+      NN.db.controller.scale = value
+      if NN.Panel then NN.Panel:ApplyScale() end
+      if NN.BagFull and NN.BagFull.ApplyScale then NN.BagFull:ApplyScale() end
+    end)
   Options.AddCheckbox(category, "NN_controller_hints", L.OPT_CONTROLLER_HINTS, nil,
     function() return NN.db.controller.hints end,
     function(value) NN.db.controller.hints = value and true or false end)

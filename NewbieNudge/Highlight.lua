@@ -3,7 +3,7 @@
 -- client has it, else a simple alpha-pulsing border texture.
 local _, NN = ...
 
-local Highlight = { active = {}, buttonCache = nil }
+local Highlight = { active = {}, buttonCache = nil, bagTargets = {}, hookedBagFrames = {} }
 NN.Highlight = Highlight
 
 -- Key -> candidate frame paths, first that exists wins. Looked up lazily on
@@ -61,12 +61,32 @@ function Highlight:InvalidateButtons()
   self.buttonCache = nil
 end
 
+-- The default bag frames fire no addon-visible event when the player opens
+-- them, so each is hooked once: showing it rescans its buttons and re-applies.
+function Highlight:HookBagFrame(frame)
+  if not frame or self.hookedBagFrames[frame] or not frame.HookScript then return end
+  self.hookedBagFrames[frame] = true
+  frame:HookScript("OnShow", function()
+    Highlight:InvalidateBagButtons()
+    Highlight:ForgetBagTargets()
+    Highlight:Reapply()
+  end)
+end
+
+function Highlight:HookBagFrames()
+  if ContainerFrameUtil_EnumerateContainerFrames then
+    for frame in ContainerFrameUtil_EnumerateContainerFrames() do self:HookBagFrame(frame) end
+  end
+  if ContainerFrameCombinedBags then self:HookBagFrame(ContainerFrameCombinedBags) end
+end
+
 -- Item button of the default bag UI for (bag, slot), while the bags are open.
 function Highlight:ButtonForBagSlot(bag, slot)
   if not self.bagButtonCache then
     self.bagButtonCache = {}
     if ContainerFrameUtil_EnumerateContainerFrames then
       for frame in ContainerFrameUtil_EnumerateContainerFrames() do
+        self:HookBagFrame(frame)
         if frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
           for button in frame:EnumerateValidItems() do
             local b = button.GetBagID and button:GetBagID()
@@ -82,6 +102,19 @@ end
 
 function Highlight:InvalidateBagButtons()
   self.bagButtonCache = nil
+end
+
+-- Forget only the bag item buttons, so other glows are not replayed.
+function Highlight:ForgetBagTargets()
+  for frame in pairs(self.active) do
+    if self.bagTargets[frame] then self.active[frame] = nil end
+  end
+  wipe(self.bagTargets)
+end
+
+-- Re-applies the rows from the last Apply (frames that just appeared).
+function Highlight:Reapply()
+  self:Apply(self.lastRows or NN:ActiveRows())
 end
 
 -- Blizzard's talent window, hooked once so glows come back when it opens.
@@ -122,7 +155,7 @@ function Highlight:TargetsFor(h, wanted)
     if type(h.bagslots) == "table" then
       for _, pair in ipairs(h.bagslots) do
         local button = self:ButtonForBagSlot(pair[1], pair[2])
-        if button then wanted[button] = true end
+        if button then wanted[button] = true; self.bagTargets[button] = true end
       end
     end
     if h.node ~= nil then
@@ -191,6 +224,7 @@ end
 
 -- rows: array of { rule, result, stale } from NN:ActiveRows().
 function Highlight:Apply(rows)
+  self.lastRows = rows
   local wanted = {}
   for _, row in ipairs(rows) do
     local h = row.result and row.result.highlight
@@ -232,9 +266,10 @@ NN:OnAnyEvent(function(event)
   if event == "ACTIONBAR_SLOT_CHANGED" or event == "ACTIONBAR_PAGE_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" then
     Highlight:InvalidateButtons()
   end
-  if BAG_EVENTS[event] then Highlight:InvalidateBagButtons() end
-  if RESHOW_EVENTS[event] or BAG_EVENTS[event] then Highlight:ForgetActive() end
+  if BAG_EVENTS[event] then Highlight:InvalidateBagButtons(); Highlight:ForgetBagTargets() end
+  if RESHOW_EVENTS[event] then Highlight:ForgetActive() end
 end)
+NN:AfterLogin(function() Highlight:HookBagFrames() end)
 NN:RegisterEvent("BAG_OPEN")
 NN:RegisterEvent("BAG_CLOSED")
 NN:RegisterEvent("ACTIONBAR_PAGE_CHANGED")

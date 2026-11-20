@@ -65,9 +65,16 @@ function CVarSection:Get(cvar)
   return tonumber(raw)
 end
 
+-- Secure CVars cannot be written in combat; refuse every write then.
+local function inCombat()
+  return InCombatLockdown and InCombatLockdown() == true
+end
+
 function CVarSection:Set(cvar, value)
+  if inCombat() then NN:Say(L.CVAR_IN_COMBAT); return false end
   local text = toText(value)
   if C_CVar and C_CVar.SetCVar then C_CVar.SetCVar(cvar, text) elseif SetCVar then SetCVar(cvar, text) end
+  return true
 end
 
 function CVarSection:ResetCurated()
@@ -82,6 +89,7 @@ end
 -- Writes every value of tbl whose CVar the client knows; returns how many
 -- actually changed.
 function CVarSection:Apply(tbl)
+  if inCombat() then NN:Say(L.CVAR_IN_COMBAT); return 0 end
   local changed = 0
   local names = {}
   for cvar in pairs(tbl) do names[#names + 1] = cvar end

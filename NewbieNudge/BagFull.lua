@@ -205,6 +205,13 @@ function BagFull:Refresh()
   frame:SetHeight(TITLE_H + PAD + math.max(shown, 1) * ROW_H + PAD + FOOT_H)
 end
 
+-- Same boost as the panel while a controller is in use.
+function BagFull:ApplyScale()
+  local scale = 1
+  if NN.Controller and NN.Controller:Boost() then scale = (NN.db.controller and NN.db.controller.scale) or 1.25 end
+  frame:SetScale(scale)
+end
+
 function BagFull:Anchor()
   frame:ClearAllPoints()
   if LootFrame and LootFrame:IsShown() then
@@ -229,8 +236,10 @@ function BagFull:Show(reason)
   if not (NN.db and NN.db.bagfull and NN.db.bagfull.enabled) then return end
   self.reason = reason or "manual"
   self:Refresh()
+  self:ApplyScale()
   self:Anchor()
   frame:Show()
+  self.events:RegisterEvent("GET_ITEM_INFO_RECEIVED")
   cancelTimer()
   if self.reason ~= "manual" then
     self.timer = C_Timer.NewTimer(AUTO_HIDE_SECONDS, function()
@@ -243,6 +252,7 @@ end
 function BagFull:Hide()
   frame:Hide()
   self.reason = nil
+  self.events:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
   cancelTimer()
 end
 
@@ -290,7 +300,13 @@ end
 NN:RegisterEvent("UI_ERROR_MESSAGE")
 NN:RegisterEvent("LOOT_OPENED")
 NN:RegisterEvent("LOOT_CLOSED")
-NN:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+
+-- Item info arrives in bursts; only listen while the frame is shown, on a
+-- private frame so the core scheduler is not woken by it.
+BagFull.events = CreateFrame("Frame")
+BagFull.events:SetScript("OnEvent", function(_, event)
+  if event == "GET_ITEM_INFO_RECEIVED" and frame:IsShown() then BagFull:Refresh() end
+end)
 
 NN:OnAnyEvent(function(event, arg1, arg2)
   if event == "UI_ERROR_MESSAGE" then
@@ -301,8 +317,6 @@ NN:OnAnyEvent(function(event, arg1, arg2)
     BagFull:MaybeAutoHide()
   elseif event == "BAG_UPDATE_DELAYED" then
     if frame:IsShown() then BagFull:Refresh(); BagFull:MaybeAutoHide() end
-  elseif event == "GET_ITEM_INFO_RECEIVED" then
-    if frame:IsShown() then BagFull:Refresh() end
   end
 end)
 

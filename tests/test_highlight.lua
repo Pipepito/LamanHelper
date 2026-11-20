@@ -108,4 +108,29 @@ return {
     for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == cf.Items[3] then shown = true end end
     assert_true(shown, "item button found after the bag opened")
   end,
+  -- review fix 1: opening the bags (no bag event) must glow the quest item
+  bagslot_glow_appears_when_bags_open_without_bag_event = function()
+    local cf = WOW.NewContainerFrame(0, 16); cf:Hide()
+    load_addon()
+    local rows = { { rule = { name = "r" }, result = { text = "t", highlight = { key = "bags", bagslots = { { 0, 3 } } } }, stale = false } }
+    NewbieNudge.Highlight:Apply(rows)
+    local before = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == cf.Items[3] then before = before + 1 end end
+    assert_eq(before, 0, "hidden bag: no item glow yet")
+    cf:Show()
+    local after = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == cf.Items[3] then after = after + 1 end end
+    assert_eq(after, 1, "item glows once the bag frame shows")
+  end,
+  -- review fix 6: a bag update must not replay every other glow
+  bag_update_does_not_replay_other_glows = function()
+    load_addon()
+    local rows = { { rule = { name = "r" }, result = { text = "t", highlight = "talents" }, stale = false } }
+    NewbieNudge.Highlight:Apply(rows)
+    WOW.FireEvent("BAG_UPDATE_DELAYED")
+    NewbieNudge.Highlight:Apply(rows)
+    local n = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" and c[2] == PlayerSpellsMicroButton then n = n + 1 end end
+    assert_eq(n, 1, "talent glow shown once, not replayed by a bag event")
+  end,
 }

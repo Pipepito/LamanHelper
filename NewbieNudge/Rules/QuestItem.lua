@@ -24,7 +24,9 @@ NN:RegisterRule({
         if info then
           local q = C_Container.GetContainerItemQuestInfo(bag, slot)
           local questID = q and NN.Plain(q.questID)
-          if questID and q.isActive ~= true then
+          local done = questID and C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted
+            and C_QuestLog.IsQuestFlaggedCompleted(questID) == true
+          if questID and q.isActive ~= true and not done then
             if #results < MAX_ITEMS then
               local link = NN.Plain(info.hyperlink, "string")
               local name = link and NN.Plain((C_Item.GetItemInfo(link)), "string") or L.QUEST_ITEM_UNKNOWN

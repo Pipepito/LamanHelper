@@ -446,6 +446,7 @@ local T = {
   BUILD_HELP = "Sigue la build de Icy Veins que pegaste y nombra el talento que toca coger. El talento brilla en la ventana de talentos.",
   BUILD_NEXT_ROW = "Siguiente talento: %s (%d/%d).",
   BUILD_DIFFERS_ROW = "Tus talentos difieren de la build; la sugerencia sigue el orden de la build.",
+  CVAR_IN_COMBAT = "No se pueden cambiar ajustes del juego en combate. Inténtalo tras la pelea.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

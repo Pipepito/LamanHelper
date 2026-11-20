@@ -131,4 +131,25 @@ return {
     assert_true(WOW.settings["NN_bagfull_enabled"] and WOW.settings["NN_bagfull_quality"] and WOW.settings["NN_bagfull_onLoot"])
     WOW.settings["NN_bagfull_quality"].setter("0"); assert_eq(NewbieNudge.db.bagfull.maxQuality, 0)
   end,
+  -- review fix 2: the frame follows the controller scale boost
+  frame_uses_controller_scale_boost = function()
+    item(1, { name = "Junk" }); put(1, 1)
+    load_addon(); load_bags(); NewbieNudge.BagFull:Show("manual")
+    assert_eq(NewbieNudgeBagFull:GetScale(), 1)
+    WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true)
+    assert_eq(NewbieNudgeBagFull:GetScale(), 1.25)
+    WOW.settings["NN_controller_boost"].setter(false)
+    assert_eq(NewbieNudgeBagFull:GetScale(), 1)
+  end,
+  -- review fix 3: item-info events only reach the addon while the frame is shown
+  item_info_event_only_while_shown = function()
+    item(1, { name = "Junk" }); put(1, 1)
+    load_addon(); load_bags()
+    assert_true(not NewbieNudge.events:IsEventRegistered("GET_ITEM_INFO_RECEIVED"), "core frame must not drive the scheduler on item info")
+    assert_true(not NewbieNudge.BagFull.events:IsEventRegistered("GET_ITEM_INFO_RECEIVED"))
+    NewbieNudge.BagFull:Show("manual")
+    assert_true(NewbieNudge.BagFull.events:IsEventRegistered("GET_ITEM_INFO_RECEIVED"))
+    NewbieNudge.BagFull:Hide()
+    assert_true(not NewbieNudge.BagFull.events:IsEventRegistered("GET_ITEM_INFO_RECEIVED"))
+  end,
 }

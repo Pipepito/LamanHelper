@@ -446,4 +446,5 @@ NN.L = setmetatable({
   BUILD_HELP = "Follows the Icy Veins build you pasted and names the talent to pick next. The talent glows in the talent window.",
   BUILD_NEXT_ROW = "Next talent: %s (%d/%d).",
   BUILD_DIFFERS_ROW = "Your talents differ from the build; the suggestion follows the build's order.",
+  CVAR_IN_COMBAT = "Can't change game settings in combat. Try again after the fight.",
 }, { __index = function(_, key) return key end })

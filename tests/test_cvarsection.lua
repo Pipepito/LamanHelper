@@ -62,4 +62,14 @@ return {
     assert_eq(C_CVar.GetCVar("fooB"), "2")
     assert_eq(WOW.settings["NN_cvar_fooB"].getter(), "2")
   end,
+  -- review fix 4: no CVar writes in combat, from any page
+  set_refused_in_combat_with_message = function()
+    cvars({ fooA = { default = "0" } })
+    load_addon(); WOW.state.inCombat = true
+    local printed = #WOW.printed
+    section():Set("fooA", 1)
+    assert_eq(C_CVar.GetCVar("fooA"), "0")
+    assert_eq(#WOW.printed, printed + 1)
+    assert_true(WOW.printed[#WOW.printed]:find(NewbieNudge.L.CVAR_IN_COMBAT, 1, true))
+  end,
 }

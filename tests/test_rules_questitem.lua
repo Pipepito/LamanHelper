@@ -34,4 +34,12 @@ return {
     assert_eq(#results_of("quest_item"), 4)
     assert_eq(results_of("quest_item")[4].text, L().MORE_ROWS:format(2))
   end,
+  -- review fix 5: an item that starts a quest already done is not a reminder
+  completed_quest_starter_not_listed = function()
+    WOW.state.itemInfo[9] = { name = "Note" }
+    WOW.state.bags[0].items[3] = { itemID = 9, questID = 500, isActive = false, isQuestItem = true }
+    WOW.state.completedQuests[500] = true
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("quest_item"), 0)
+  end,
 }
