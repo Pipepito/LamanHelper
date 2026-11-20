@@ -117,7 +117,9 @@ bag. Bag inventory slots are 31–34.
 | quest_group | Hold an elite or dungeon quest. | Finish or abandon it. |
 | profession_rank (secondary) | First Aid 50/75 at level 10 (trainer); 125/150 (book); 225/225 at 35 (quest). | Learn the rank. |
 | hearth_bind | Talk to an innkeeper in a zone other than your bind point. | Close the talk window (row) ; the chat line comes once per inn per session. |
-| mount | Level 30–39 with under 100 gold; level 40 without Riding (needs the skill API, Task 8). | Reach 100 gold; learn to ride. |
+| mount | Level 30–39 with under 100 gold; level 40 without Riding (skill ID 762). | Reach 100 gold; learn to ride. |
+| weapon_skill | Equip a weapon type whose skill is 20+ below its cap (skills under C_SkillInfo, category 6). | Train it on weak enemies. |
+| legacy | Reach level 25 (one nudge until you press Y); have unviewed Legacy challenges. | Open the Legacy window; view the challenges. |
 | vendor (not a rule) | Open a merchant with grey items and damaged gear. | Chat says what was sold and what the repair cost; "Repairing would cost X" when too poor. |
 | tooltips (not a rule) | Hover an item away from a vendor. | "Sell price: X each" line; none at a vendor or for 0-value items. |
 

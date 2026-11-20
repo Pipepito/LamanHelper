@@ -494,4 +494,12 @@ NN.L = setmetatable({
   MOUNT_HELP = "Riding training and your first mount cost about 100 gold together at level 40. Reminds you to save from level 30, and to learn to ride once you can.",
   MOUNT_ROW_SAVE = "Save up: riding and a mount cost about 100 gold at level 40 (you have %s).",
   MOUNT_ROW_RIDE = "You can learn to ride now. Visit a riding trainer.",
+  -- Weapon skill and Legacy
+  WEAPON_SKILL_TITLE = "Weapon skill behind",
+  WEAPON_SKILL_HELP = "Each weapon type has its own skill that rises as you fight with it. A weapon you rarely used misses a lot until the skill catches up.",
+  WEAPON_SKILL_ROW = "Your %s skill is %d/%d. Fight weaker enemies to train it.",
+  LEGACY_TITLE = "Legacy system",
+  LEGACY_HELP = "Forever's account-wide challenges and perks open around level 25 (press Y). Reminds you once, and whenever new challenges wait to be looked at.",
+  LEGACY_ROW_UNLOCK = "The Legacy system is open. Press Y to spend your first point.",
+  LEGACY_ROW_CHALLENGES = "You have new Legacy challenges to look at (press Y).",
 }, { __index = function(_, key) return key end })

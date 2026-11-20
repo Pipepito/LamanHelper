@@ -494,6 +494,14 @@ local T = {
   MOUNT_HELP = "Aprender a montar y tu primera montura cuestan unas 100 monedas de oro en total al nivel 40. Te recuerda ahorrar desde el nivel 30 y aprender a montar en cuanto puedas.",
   MOUNT_ROW_SAVE = "Ahorra: montar y una montura cuestan unas 100 de oro al nivel 40 (tienes %s).",
   MOUNT_ROW_RIDE = "Ya puedes aprender a montar. Visita a un instructor de equitación.",
+  -- Weapon skill and Legacy
+  WEAPON_SKILL_TITLE = "Habilidad con el arma atrasada",
+  WEAPON_SKILL_HELP = "Cada tipo de arma tiene su propia habilidad, que sube al luchar con ella. Un arma que apenas has usado falla mucho hasta que la habilidad se pone al día.",
+  WEAPON_SKILL_ROW = "Tu habilidad con %s es %d/%d. Lucha contra enemigos débiles para entrenarla.",
+  LEGACY_TITLE = "Sistema de Legado",
+  LEGACY_HELP = "Los desafíos y ventajas de cuenta de Forever se abren hacia el nivel 25 (pulsa Y). Te avisa una vez, y siempre que haya desafíos nuevos por ver.",
+  LEGACY_ROW_UNLOCK = "El sistema de Legado está abierto. Pulsa Y para gastar tu primer punto.",
+  LEGACY_ROW_CHALLENGES = "Tienes desafíos de Legado nuevos por ver (pulsa Y).",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

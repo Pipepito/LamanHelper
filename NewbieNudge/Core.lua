@@ -15,9 +15,9 @@ NN.MAX_ROWS = 10
 NN.CHECK_DELAY = 0.5
 NN.TICK_SECONDS = 30
 NN.PRIORITY = {
-  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "buffs", "ammo", "pet",
+  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "weapon_skill", "buffs", "ammo", "pet",
   "tracking", "hearthstone", "hearth_bind", "supplies", "quests", "quest_item", "quest_turnin", "quest_slots", "quest_soon", "quest_grey", "quest_group", "mail",
-  "professions", "profession_rank", "trainer_spells", "mount", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
+  "professions", "profession_rank", "trainer_spells", "mount", "legacy", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
 NN.testMode = false
 
@@ -31,7 +31,7 @@ NN.defaults = {
   combatStrip = true,
   snoozeMinutes = 60,
   errors = {},
-  seen = { rules = {}, dungeons = {} },
+  seen = { rules = {}, dungeons = {}, legacy = false },
   map = { reveal = true, brightness = 0.6, desaturate = true },
   bagfull = { enabled = true, maxQuality = 2, onLoot = true, point = "LEFT", x = 40, y = 0 },
   controller = { boost = true, scale = 1.25, hints = true },

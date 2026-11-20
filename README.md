@@ -60,7 +60,9 @@ your level · the zone you are in is below or above your level · the next
 talent of your Icy Veins build · no food, drink or bandages in your bags ·
 quests that need a group · the next rank of Cooking, First Aid or Fishing
 (trainer, book or quest) · an innkeeper who could set your Hearthstone nearby
-· saving up for your mount from level 30, and learning to ride at 40.
+· saving up for your mount from level 30, and learning to ride at 40 · a
+weapon skill far behind its cap · the Legacy system opening at 25, and new
+Legacy challenges to look at.
 
 Every reminder has its own checkbox in the options.
 

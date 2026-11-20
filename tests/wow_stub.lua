@@ -52,6 +52,7 @@ function WOW.Reset()
   if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
   if LootFrame then LootFrame.shown = false end
   if MerchantFrame then MerchantFrame.shown = false end
+  LegacyChallengesUnviewed = {}
   PlayerSpellsFrame = nil
 end
 WOW.Reset()
@@ -637,8 +638,18 @@ function C_PetInfo.GetPetHappiness() local p = S().pet; if p.exists then return 
 function C_PetInfo.GetPetTrainingPoints() local p = S().pet; if p.exists then return p.trainingTotal, p.trainingSpent end end
 
 C_SkillInfo = {}
+-- Live shape (2026-11-20): { name, rank, maxRank, skillID, skillLineCategoryID, isHeader, ... }
 function C_SkillInfo.GetNumSkillLines() return #S().skillLines end
-function C_SkillInfo.GetSkillLineInfo(i) local l = S().skillLines[i]; if l then return { skillName = l.name, isHeader = l.isHeader or false, skillRank = l.rank or 1 } end end
+function C_SkillInfo.GetSkillLineInfo(i)
+  local l = S().skillLines[i]
+  if l then
+    return { name = l.name, skillName = l.name, isHeader = l.isHeader or false, rank = l.rank or 1, skillRank = l.rank or 1,
+             maxRank = l.maxRank or 1, skillID = l.skillID or 0, skillLineCategoryID = l.category or 0 }
+  end
+end
+-- Legacy system: a window toggle and a set of unviewed challenge IDs; no scripting API.
+function ToggleLegacySystemUI() record("ToggleLegacySystemUI") end
+LegacyChallengesUnviewed = {}
 
 C_QuestLog = {}
 -- WOW.Quest({ questID=, title=, level=, isHeader=, isComplete=, trivial=, objectives=, rewards=, choices= })
