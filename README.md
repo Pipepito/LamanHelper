@@ -62,7 +62,8 @@ quests that need a group · the next rank of Cooking, First Aid or Fishing
 (trainer, book or quest) · an innkeeper who could set your Hearthstone nearby
 · saving up for your mount from level 30, and learning to ride at 40 · a
 weapon skill far behind its cap · the Legacy system opening at 25, and new
-Legacy challenges to look at.
+Legacy challenges to look at · a flight path in your zone you have not
+unlocked yet.
 
 Every reminder has its own checkbox in the options.
 
