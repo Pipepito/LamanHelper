@@ -449,6 +449,8 @@ local T = {
   CVAR_IN_COMBAT = "No se pueden cambiar ajustes del juego en combate. Inténtalo tras la pelea.",
   OPT_PAGE_ERROR = "La página de opciones \"%s\" dio un error y se omitió: %s",
   LOGIN_HOOK_ERROR = "Una parte del addon no pudo iniciarse y se omitió: %s",
+  BUILD_BUTTON = "Build de Icy Veins",
+  BUILD_BUTTON_TT = "Clic izquierdo: pegar un enlace de la calculadora de talentos de Icy Veins. Clic derecho: quitar la build.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

@@ -449,4 +449,6 @@ NN.L = setmetatable({
   CVAR_IN_COMBAT = "Can't change game settings in combat. Try again after the fight.",
   OPT_PAGE_ERROR = "The options page \"%s\" hit an error and was skipped: %s",
   LOGIN_HOOK_ERROR = "Part of the addon failed to start and was skipped: %s",
+  BUILD_BUTTON = "Icy Veins build",
+  BUILD_BUTTON_TT = "Left-click: paste an Icy Veins talent calculator link. Right-click: clear the build.",
 }, { __index = function(_, key) return key end })

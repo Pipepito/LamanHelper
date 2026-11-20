@@ -558,6 +558,7 @@ function C_Traits.GetConfigInfo(id) if id then return { ID = id, treeIDs = { S()
 function C_Traits.GetTreeCurrencyInfo(configID, treeID) return { { quantity = S().talents.unspent, maxQuantity = 51, spent = 0 } } end
 -- S().talents.nodes = { [nodeID] = { ranks =, maxRanks =, spellID = } }
 function C_Traits.GetTreeNodes(treeID)
+  if type(treeID) ~= "number" then error("bad argument #1 to '?' (Usage: local nodeIDs = C_Traits.GetTreeNodes(treeID))") end
   local ids = {}
   for id in pairs(S().talents.nodes or {}) do ids[#ids + 1] = id end
   table.sort(ids)

@@ -101,8 +101,9 @@ end
 
 -- { [nodeID] = purchased ranks } from the client, or nil on a secret value.
 function TalentBuild:RanksByNode()
-  local configID, treeID = NN.TalentTree and NN.TalentTree()
-  if not configID or not (C_Traits.GetTreeNodes and C_Traits.GetNodeInfo) then return {} end
+  local configID, treeID
+  if NN.TalentTree then configID, treeID = NN.TalentTree() end
+  if not configID or not treeID or not (C_Traits.GetTreeNodes and C_Traits.GetNodeInfo) then return {} end
   local ranks = {}
   for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID) or {}) do
     local info = C_Traits.GetNodeInfo(configID, nodeID)
@@ -123,7 +124,8 @@ function TalentBuild:SpentPoints()
 end
 
 local function talentName(entry)
-  local configID = NN.TalentTree and NN.TalentTree()
+  local configID
+  if NN.TalentTree then configID = NN.TalentTree() end
   if configID and C_Traits.GetNodeInfo and C_Traits.GetEntryInfo and C_Traits.GetDefinitionInfo then
     local info = C_Traits.GetNodeInfo(configID, entry.node)
     local entryID = info and info.entryIDs and info.entryIDs[1]
@@ -214,6 +216,55 @@ if StaticPopupDialogs then
     end,
   }
 end
+
+-------------------------------------------------------------------------------
+-- Button on the talent window
+-------------------------------------------------------------------------------
+
+local function talentFrame()
+  return (PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame) or (ClassTalentFrame and ClassTalentFrame.TalentsTab)
+end
+
+-- Creates the "Icy Veins build" button once the talent window exists.
+-- Left-click opens the paste popup, right-click clears the build.
+function TalentBuild:EnsureButton()
+  if self.button then return self.button end
+  local parent = talentFrame()
+  if not parent then return nil end
+  local button = CreateFrame("Button", "NewbieNudgeBuildButton", parent, "UIPanelButtonTemplate")
+  button:SetSize(130, 22)
+  button:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 8, 8)
+  button:SetText(L.BUILD_BUTTON)
+  button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  button:SetScript("OnClick", function(_, mouseButton)
+    if mouseButton == "RightButton" then
+      if NN.db.build then TalentBuild:Clear() end
+    elseif StaticPopup_Show then
+      StaticPopup_Show("NEWBIENUDGE_BUILD")
+    end
+  end)
+  button:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText(L.BUILD_BUTTON)
+    GameTooltip:AddLine(TalentBuild:Status(), 1, 0.82, 0, true)
+    GameTooltip:AddLine(L.BUILD_BUTTON_TT, 1, 1, 1, true)
+    GameTooltip:Show()
+  end)
+  button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  self.button = button
+  return button
+end
+
+NN:AfterLogin(function() TalentBuild:EnsureButton() end)
+
+-- The talent window can load on demand; try again when its addon arrives.
+local loader = CreateFrame("Frame")
+loader:RegisterEvent("ADDON_LOADED")
+loader:SetScript("OnEvent", function(_, _, name)
+  if name == "Blizzard_PlayerSpells" or name == "Blizzard_ClassTalentUI" or name == "Blizzard_TalentUI" then
+    TalentBuild:EnsureButton()
+  end
+end)
 
 NN.Options.RegisterPage("build", "OPT_BUILD", function(category, layout)
   local Options = NN.Options

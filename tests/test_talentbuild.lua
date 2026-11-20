@@ -112,4 +112,24 @@ return {
     NewbieNudge.TalentBuild:Set("#tc-11B~3-c")
     assert_true(NewbieNudge.TalentBuild:Status():find("3", 1, true))
   end,
+  talent_window_button_opens_popup_and_right_click_clears = function()
+    setup(); WOW.state.talents.nodes = { [11] = { ranks = 0, maxRanks = 2, spellID = 1001 } }
+    load_addon()
+    local f = WOW.NewTalentFrame()
+    WOW.FireEvent("ADDON_LOADED", "Blizzard_PlayerSpells")
+    local b = NewbieNudgeBuildButton
+    assert_true(b, "button created on the talent frame"); assert_eq(b:GetParent(), f)
+    assert_eq(b:GetText(), NewbieNudge.L.BUILD_BUTTON)
+    WOW.Click(b)
+    assert_eq(WOW.calls[#WOW.calls], { "StaticPopup_Show", "NEWBIENUDGE_BUILD" })
+    NewbieNudge.TalentBuild:Set("#tc-1~3-c"); assert_true(NewbieNudge.db.build)
+    WOW.Click(b, "RightButton")
+    assert_nil(NewbieNudge.db.build)
+  end,
+  talent_window_button_created_when_frame_exists_at_login = function()
+    setup(); WOW.state.talents.nodes = { [11] = { ranks = 0, maxRanks = 2, spellID = 1001 } }
+    WOW.NewTalentFrame()
+    load_addon()
+    assert_true(NewbieNudgeBuildButton)
+  end,
 }
