@@ -118,7 +118,7 @@ return {
     local f = WOW.NewTalentFrame()
     WOW.FireEvent("ADDON_LOADED", "Blizzard_PlayerSpells")
     local b = NewbieNudgeBuildButton
-    assert_true(b, "button created on the talent frame"); assert_eq(b:GetParent(), f)
+    assert_true(b, "button created on the talent frame"); assert_true(b:GetParent() == f, "parented to the talent frame")
     assert_eq(b:GetText(), NewbieNudge.L.BUILD_BUTTON)
     WOW.Click(b)
     assert_eq(WOW.calls[#WOW.calls], { "StaticPopup_Show", "NEWBIENUDGE_BUILD" })
