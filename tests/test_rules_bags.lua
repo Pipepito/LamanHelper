@@ -31,6 +31,18 @@ return {
     run_checks()
     assert_eq(#results_of("bag_unequipped"), 0)
   end,
+  bag_slots_resolved_through_container_api = function()
+    -- The client decides which inventory slots hold the bags; 20-23 is not a given.
+    setup()
+    WOW.state.bagSlotBase = 29
+    for b = 1, 4 do
+      WOW.state.bags[b] = { numSlots = 6, family = 0, items = {} }
+      WOW.state.inventory[29 + b] = { itemID = BAG6 }
+    end
+    putInBackpack(1, BAG6)
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("bag_unequipped"), 0, "equal bags and no empty slot: no row")
+  end,
   bag_in_inventory_with_empty_slot = function()
     setup(); putInBackpack(1, BAG6)
     load_addon(); load_bags(); run_checks()

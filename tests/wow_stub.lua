@@ -385,8 +385,8 @@ function C_Container.GetContainerItemInfo(id, slot)
 end
 function C_Container.GetContainerItemID(id, slot) local b = bag(id); local it = b and b.items[slot]; return it and it.itemID end
 function C_Container.GetContainerItemLink(id, slot) local i = C_Container.GetContainerItemInfo(id, slot); return i and i.hyperlink end
-function C_Container.ContainerIDToInventoryID(id) return 19 + id end
-function ContainerIDToInventoryID(id) return 19 + id end
+function C_Container.ContainerIDToInventoryID(id) return (S().bagSlotBase or 19) + id end
+function ContainerIDToInventoryID(id) return C_Container.ContainerIDToInventoryID(id) end
 function C_Container.PickupContainerItem() end
 
 C_Item = {}

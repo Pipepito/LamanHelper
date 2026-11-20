@@ -4,7 +4,7 @@ local _, NN = ...
 local L = NN.L
 
 local BAG_ICON = 133634
-local FIRST_BAG_SLOT, LAST_BAG_SLOT = 20, 23
+local FIRST_BAG, LAST_BAG = 1, 4
 local CONTAINER_CLASS = (Enum and Enum.ItemClass and Enum.ItemClass.Container) or 1
 local REGULAR_FAMILY = 0
 
@@ -47,9 +47,16 @@ local function isEligibleContainer(itemID)
   return usesAmmo()
 end
 
+-- Inventory slot that holds the given bag; the client decides the numbering.
+local function bagInventorySlot(bag)
+  local f = (C_Container and C_Container.ContainerIDToInventoryID) or ContainerIDToInventoryID
+  local slot = f and NN.Plain(f(bag))
+  return slot or (19 + bag)
+end
+
 local function hasEmptyBagSlot()
-  for slot = FIRST_BAG_SLOT, LAST_BAG_SLOT do
-    if GetInventoryItemID("player", slot) == nil then return true end
+  for bag = FIRST_BAG, LAST_BAG do
+    if GetInventoryItemID("player", bagInventorySlot(bag)) == nil then return true end
   end
   return false
 end
