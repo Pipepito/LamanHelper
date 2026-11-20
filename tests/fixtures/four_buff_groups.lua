@@ -1,0 +1,3 @@
+-- Test fixture: replaces the Mage buff data with four single-spell groups.
+local _, NN = ...
+NN.BuffData.MAGE = { { ids = { 1 } }, { ids = { 2 } }, { ids = { 3 } }, { ids = { 4 } } }

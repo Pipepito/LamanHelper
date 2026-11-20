@@ -63,6 +63,11 @@ local T = {
   TALENTS_HELP = "Los puntos de talento hacen más fuerte a tu personaje. Abre la ventana de talentos y gástalos.",
   TALENTS_ROW_ONE = "Tienes 1 punto de talento sin gastar.",
   TALENTS_ROW_MANY = "Tienes %d puntos de talento sin gastar.",
+  BUFFS_TITLE = "Buffs que faltan",
+  BUFFS_HELP = "Estos buffs duran mucho y marcan la diferencia. Vuelve a lanzarlos cuando se acaben; el botón que brilla en tu barra es el que debes pulsar.",
+  BUFFS_ROW = "Falta el buff: %s",
+  BUFFS_ROW_NOT_ON_BAR = "Falta el buff: %s (no está en tu barra de acción)",
+  BUFFS_ROW_WEAPON = "Falta la mejora de arma: %s",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
