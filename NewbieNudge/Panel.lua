@@ -6,7 +6,13 @@ local Panel = { rows = {}, stripIcons = {}, combat = false, currentRows = {}, st
 NN.Panel = Panel
 
 local WIDTH, PAD, ROW_H, ROW_H2, ICON, TITLE_H = 260, 6, 24, 36, 20, 18
-local STRIP_ICON, STRIP_GAP = 24, 4
+local STRIP_GAP = 4
+
+-- Strip icon size: bigger while a controller is in use and the boost is on.
+function Panel.STRIP_ICON()
+  if NN.Controller and NN.Controller:Boost() then return 32 end
+  return 24
+end
 local TEXT_WIDTH = WIDTH - PAD * 2 - ICON - 6
 
 -------------------------------------------------------------------------------
@@ -61,8 +67,16 @@ local function showTooltip(owner, data)
   GameTooltip:SetText(data.rule.title)
   GameTooltip:AddLine(data.result.text, 1, 0.82, 0, true)
   GameTooltip:AddLine(data.rule.help, 1, 1, 1, true)
-  if data.result.onClick then GameTooltip:AddLine(L.ROW_HINT_CLICK, 0.8, 0.8, 0.8) end
-  GameTooltip:AddLine(L.ROW_HINT_SNOOZE:format(NN.db and NN.db.snoozeMinutes or 60), 0.8, 0.8, 0.8, true)
+  local left, right, shift
+  if NN.Controller and NN.Controller.HintButtons then left, right, shift = NN.Controller:HintButtons() end
+  if data.result.onClick then
+    GameTooltip:AddLine(left and L.ROW_HINT_CLICK_PAD:format(left) or L.ROW_HINT_CLICK, 0.8, 0.8, 0.8)
+  end
+  if left then
+    GameTooltip:AddLine(L.ROW_HINT_SNOOZE_PAD:format(right, shift, right), 0.8, 0.8, 0.8, true)
+  else
+    GameTooltip:AddLine(L.ROW_HINT_SNOOZE:format(NN.db and NN.db.snoozeMinutes or 60), 0.8, 0.8, 0.8, true)
+  end
   if data.stale then GameTooltip:AddLine(L.ROW_STALE, 0.6, 0.6, 0.6) end
   GameTooltip:Show()
 end
@@ -159,7 +173,7 @@ end
 
 local function newStripIcon(index)
   local button = CreateFrame("Button", nil, strip)
-  button:SetSize(STRIP_ICON, STRIP_ICON)
+  button:SetSize(Panel.STRIP_ICON(), Panel.STRIP_ICON())
   button.icon = button:CreateTexture(nil, "ARTWORK")
   button.icon:SetAllPoints()
   bindClickable(button)
@@ -178,9 +192,11 @@ end
 
 function Panel:RefreshStrip(rows)
   local seen = {}
+  local STRIP_ICON = Panel.STRIP_ICON()
   for i, data in ipairs(rows) do
     local button = self.stripIcons[i]
     if not button then button = newStripIcon(i); self.stripIcons[i] = button end
+    button:SetSize(STRIP_ICON, STRIP_ICON)
     button:ClearAllPoints()
     button:SetPoint("LEFT", strip, "LEFT", (i - 1) * (STRIP_ICON + STRIP_GAP), 0)
     button.icon:SetTexture(data.result.icon or 134400)
@@ -213,6 +229,7 @@ end
 
 function Panel:Refresh(rows)
   self.currentRows = rows
+  if NN.db and NN.db.panel.hidden then frame:Hide(); return end
   if self.combat then
     if NN.db and NN.db.combatStrip == false then frame:Hide(); return end
     list:Hide(); strip:Show()
@@ -237,7 +254,27 @@ function Panel:SetLocked(locked)
 end
 
 function Panel:ApplyScale()
-  frame:SetScale((NN.db and NN.db.panel.scale) or 1)
+  local scale = (NN.db and NN.db.panel.scale) or 1
+  if NN.Controller and NN.Controller:Boost() then
+    scale = scale * ((NN.db.controller and NN.db.controller.scale) or 1.25)
+  end
+  frame:SetScale(scale)
+end
+
+-- Bindable actions (see Controller.lua / Bindings.xml).
+function Panel:ToggleHidden()
+  NN.db.panel.hidden = not NN.db.panel.hidden
+  if NN.db.panel.hidden then frame:Hide() else self:Refresh(NN:ActiveRows()) end
+end
+
+function Panel:OpenTop()
+  local row = self.currentRows and self.currentRows[1]
+  if row and row.result and row.result.onClick then pcall(row.result.onClick) end
+end
+
+function Panel:SnoozeTop()
+  local row = self.currentRows and self.currentRows[1]
+  if row and row.rule then NN:Snooze(row.rule.name, NN.db.snoozeMinutes) end
 end
 
 function Panel:ApplyPosition()

@@ -27,13 +27,14 @@ NN.isForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 NN.defaults = {
   disabled = {},
   snoozed = {},
-  panel = { point = "RIGHT", x = -40, y = 60, locked = true, scale = 1 },
+  panel = { point = "RIGHT", x = -40, y = 60, locked = true, scale = 1, hidden = false },
   combatStrip = true,
   snoozeMinutes = 60,
   errors = {},
   seen = { rules = {}, dungeons = {} },
   map = { reveal = true, brightness = 0.6, desaturate = true },
   bagfull = { enabled = true, maxQuality = 2, onLoot = true, point = "LEFT", x = 40, y = 0 },
+  controller = { boost = true, scale = 1.25, hints = true },
 }
 
 -------------------------------------------------------------------------------
@@ -389,7 +390,10 @@ function NN:HandleSlash(msg)
   arg = arg and strtrim(arg):lower() or ""
 
   if command == "" then
+    if self.db.panel.hidden then self:Say(L.SLASH_PANEL_HIDDEN) end
     if self.OpenOptions then self:OpenOptions() else self:Say(L.SLASH_HELP) end
+  elseif command == "show" then
+    if self.db.panel.hidden and self.Panel then self.Panel:ToggleHidden() end
   elseif command == "lock" then
     self.db.panel.locked = not self.db.panel.locked
     if self.Panel then self.Panel:SetLocked(self.db.panel.locked) end

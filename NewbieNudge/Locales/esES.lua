@@ -279,6 +279,20 @@ local T = {
   CTRL_SoftTargetNameplateEnemy_TT = "Muestra siempre la barra de vida del enemigo que sería tu objetivo.",
   CTRL_SoftTargetNameplateSize = "Tamaño de esa barra de vida",
   CTRL_SoftTargetNameplateSize_TT = "Tamaño de esa barra de vida.",
+  -- Controller-aware panel and bindings
+  OPT_CONTROLLER_PANEL = "Panel de recordatorios con mando",
+  OPT_CONTROLLER_BOOST = "Agrandar el panel cuando se usa un mando",
+  OPT_CONTROLLER_BOOST_TT = "En una pantalla pequeña como la de la Steam Deck, el panel y la tira de combate crecen según el factor de abajo.",
+  OPT_CONTROLLER_SCALE = "Factor de escala con mando",
+  OPT_CONTROLLER_HINTS = "Mostrar los botones del mando en las descripciones",
+  ROW_HINT_CLICK_PAD = "%s: abrir.",
+  ROW_HINT_SNOOZE_PAD = "%s: posponer. %s+%s: posponer hasta la próxima conexión.",
+  BINDING_HEADER = "NewbieNudge",
+  BINDING_TOGGLE = "Mostrar u ocultar el panel de recordatorios",
+  BINDING_OPEN_TOP = "Abrir el primer recordatorio",
+  BINDING_SNOOZE_TOP = "Posponer el primer recordatorio",
+  BINDING_OPTIONS = "Abrir las opciones de NewbieNudge",
+  SLASH_PANEL_HIDDEN = "El panel de recordatorios está oculto. Usa el atajo o /nudge show para recuperarlo.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

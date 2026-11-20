@@ -145,6 +145,73 @@ function Controller:ApplyPreset(name)
 end
 
 -------------------------------------------------------------------------------
+-- The addon when a controller is in use
+-------------------------------------------------------------------------------
+
+-- Sticky for the session: on the Deck the trackpad flips the active input to
+-- the mouse constantly, and the panel must not resize every few seconds.
+function Controller:SetSession(on)
+  if not on or self.session then return end
+  self.session = true
+  if NN.Panel then
+    NN.Panel:ApplyScale()
+    NN.Panel:Refresh(NN:ActiveRows())
+  end
+end
+
+function Controller:Boost()
+  return self.session == true and NN.db ~= nil and NN.db.controller.boost == true
+end
+
+-- Labels for the pad buttons that click, right-click and act as Shift, or nil
+-- when no controller is in use or hints are off.
+function Controller:HintButtons()
+  if not self.session or not (NN.db and NN.db.controller.hints) then return nil end
+  local left = self:GetString("GamePadCursorLeftClick")
+  local right = self:GetString("GamePadCursorRightClick")
+  local shift = self:GetString("GamePadEmulateShift")
+  return padLabel(left or "PADRTRIGGER"), padLabel(right or "PADRSHOULDER"), padLabel(shift or "PADLTRIGGER")
+end
+
+NN:RegisterEvent("GAME_PAD_ACTIVE_CHANGED")
+NN:RegisterEvent("GAME_PAD_CONNECTED")
+NN:OnAnyEvent(function(event, arg1)
+  if event == "GAME_PAD_ACTIVE_CHANGED" and arg1 == true then Controller:SetSession(true) end
+end)
+
+NN:AfterLogin(function()
+  if C_GamePad and C_GamePad.IsEnabled and C_GamePad.IsEnabled() == true and Controller:GetString("GamePadEnable") == "1" then
+    local id = C_GamePad.GetActiveDeviceID and NN.Plain(C_GamePad.GetActiveDeviceID())
+    if id and id ~= 0 then Controller:SetSession(true) end
+  end
+end)
+
+-- Bindable actions (Bindings.xml); the game's own key-binding window lets
+-- players put them on pad combinations.
+BINDING_HEADER_NEWBIENUDGE = L.BINDING_HEADER
+BINDING_NAME_NEWBIENUDGE_TOGGLE = L.BINDING_TOGGLE
+BINDING_NAME_NEWBIENUDGE_OPEN_TOP = L.BINDING_OPEN_TOP
+BINDING_NAME_NEWBIENUDGE_SNOOZE_TOP = L.BINDING_SNOOZE_TOP
+BINDING_NAME_NEWBIENUDGE_OPTIONS = L.BINDING_OPTIONS
+
+function Controller:AddPanelOptions(category, layout)
+  local Options = NN.Options
+  Options.AddHeader(layout, L.OPT_CONTROLLER_PANEL)
+  Options.AddCheckbox(category, "NN_controller_boost", L.OPT_CONTROLLER_BOOST, L.OPT_CONTROLLER_BOOST_TT,
+    function() return NN.db.controller.boost end,
+    function(value)
+      NN.db.controller.boost = value and true or false
+      if NN.Panel then NN.Panel:ApplyScale(); NN.Panel:Refresh(NN:ActiveRows()) end
+    end)
+  Options.AddSlider(category, "NN_controller_scale", L.OPT_CONTROLLER_SCALE, nil, 1.0, 1.6, 0.05,
+    function() return NN.db.controller.scale end,
+    function(value) NN.db.controller.scale = value; if NN.Panel then NN.Panel:ApplyScale() end end)
+  Options.AddCheckbox(category, "NN_controller_hints", L.OPT_CONTROLLER_HINTS, nil,
+    function() return NN.db.controller.hints end,
+    function(value) NN.db.controller.hints = value and true or false end)
+end
+
+-------------------------------------------------------------------------------
 -- Options page (only when the client has gamepad support)
 -------------------------------------------------------------------------------
 

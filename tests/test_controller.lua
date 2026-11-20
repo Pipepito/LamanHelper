@@ -73,4 +73,64 @@ return {
     assert_true(has(callsNamed("RegisterVerticalLayoutSubcategory"), function(c) return c[3] == L().OPT_CONTROLLER end))
     assert_true(has(callsNamed("initializer"), function(c) return c[2] == "button" and c[3] == L().OPT_CONTROLLER_PRESET_DECK end))
   end,
+  -- Task 13: the addon when a controller is in use
+  session_set_by_active_event_and_sticky = function()
+    load_addon(); assert_eq(NewbieNudge.Controller.session, false)
+    WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true); assert_eq(NewbieNudge.Controller.session, true)
+    WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", false); assert_eq(NewbieNudge.Controller.session, true)
+  end,
+  session_detected_at_login = function()
+    WOW.state.gamepad = { enabled = true, deviceID = 3 }; WOW.state.cvars = { GamePadEnable = { value = "1", default = "0" } }
+    load_addon(); assert_eq(NewbieNudge.Controller.session, true)
+  end,
+  panel_scale_boosted_in_session = function()
+    load_addon(); NewbieNudge.db.panel.scale = 1.2
+    NewbieNudge.Panel:ApplyScale(); assert_eq(NewbieNudgePanel:GetScale(), 1.2)
+    WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true)
+    assert_eq(NewbieNudgePanel:GetScale(), 1.5)
+    NewbieNudge.db.controller.boost = false; NewbieNudge.Panel:ApplyScale(); assert_eq(NewbieNudgePanel:GetScale(), 1.2)
+    assert_eq(NewbieNudge.Panel.STRIP_ICON(), 24)
+    NewbieNudge.db.controller.boost = true; assert_eq(NewbieNudge.Panel.STRIP_ICON(), 32)
+  end,
+  tooltip_hints_use_pad_buttons = function()
+    WOW.state.cvars = {
+      GamePadCursorLeftClick = { value = "PADRTRIGGER", default = "PADRTRIGGER" },
+      GamePadCursorRightClick = { value = "PADRSHOULDER", default = "PADRSHOULDER" },
+      GamePadEmulateShift = { value = "PADLTRIGGER", default = "PADLTRIGGER" },
+    }
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/two_rules.lua" }
+    load_addon(); WOW.FireEvent("TEST_EVENT"); run_checks(); WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true)
+    WOW.Hover(NewbieNudge.Panel.rows[1])
+    local text = table.concat(GameTooltip.lines, "\n")
+    assert_true(text:find(L().ROW_HINT_CLICK_PAD:format("RT"), 1, true), text)
+    assert_true(text:find(L().ROW_HINT_SNOOZE_PAD:format("RB", "LT", "RB"), 1, true), text)
+  end,
+  hint_falls_back_to_raw_token = function()
+    WOW.state.cvars = { GamePadCursorLeftClick = { value = "PADPADDLE9", default = "PADRTRIGGER" } }
+    load_addon(); WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true)
+    local left = NewbieNudge.Controller:HintButtons()
+    assert_eq(left, "PADPADDLE9")
+  end,
+  hints_absent_without_session_or_when_disabled = function()
+    load_addon()
+    assert_nil(NewbieNudge.Controller:HintButtons())
+    WOW.FireEvent("GAME_PAD_ACTIVE_CHANGED", true); NewbieNudge.db.controller.hints = false
+    assert_nil(NewbieNudge.Controller:HintButtons())
+  end,
+  bindings_act_on_top_row_and_toggle_hidden = function()
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/two_rules.lua" }
+    load_addon(); WOW.FireEvent("TEST_EVENT"); run_checks()
+    assert_true(NewbieNudgePanel:IsShown())
+    NewbieNudge.Panel:ToggleHidden(); assert_true(not NewbieNudgePanel:IsShown()); assert_eq(NewbieNudge.db.panel.hidden, true)
+    NewbieNudge.Panel:Refresh(NewbieNudge:ActiveRows()); assert_true(not NewbieNudgePanel:IsShown(), "stays hidden through refresh")
+    NewbieNudge.Panel:ToggleHidden(); assert_true(NewbieNudgePanel:IsShown())
+    NewbieNudge.Panel:OpenTop()
+    NewbieNudge.Panel:SnoozeTop(); assert_true(NewbieNudge.db.snoozed.first_rule ~= nil)
+    assert_eq(type(BINDING_NAME_NEWBIENUDGE_TOGGLE), "string"); assert_eq(type(BINDING_HEADER_NEWBIENUDGE), "string")
+  end,
+  controller_panel_options_registered = function()
+    load_addon()
+    assert_true(WOW.settings["NN_controller_boost"] and WOW.settings["NN_controller_scale"] and WOW.settings["NN_controller_hints"])
+    WOW.settings["NN_controller_scale"].setter(1.4); assert_eq(NewbieNudge.db.controller.scale, 1.4)
+  end,
 }

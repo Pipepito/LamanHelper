@@ -1,0 +1,6 @@
+<Bindings>
+  <Binding name="NEWBIENUDGE_TOGGLE" header="NEWBIENUDGE" category="ADDONS">NewbieNudge.Panel:ToggleHidden()</Binding>
+  <Binding name="NEWBIENUDGE_OPEN_TOP" category="ADDONS">NewbieNudge.Panel:OpenTop()</Binding>
+  <Binding name="NEWBIENUDGE_SNOOZE_TOP" category="ADDONS">NewbieNudge.Panel:SnoozeTop()</Binding>
+  <Binding name="NEWBIENUDGE_OPTIONS" category="ADDONS">NewbieNudge:OpenOptions()</Binding>
+</Bindings>
