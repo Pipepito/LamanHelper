@@ -94,4 +94,18 @@ return {
     pin:RefreshOverlays()
     assert_eq(#activeTextures(pin), 1)
   end,
+  map_button_opens_map_settings_and_toggles_reveal = function()
+    load_addon()
+    local b = NewbieNudgeMapButton
+    assert_true(b, "button created on the world map"); assert_true(b:GetParent() == WorldMapFrame)
+    WOW.Click(b)
+    local opened
+    for _, c in ipairs(WOW.calls) do if c[1] == "OpenToCategory" then opened = c[2] end end
+    assert_eq(opened, NewbieNudge.L.OPT_MAP, "opens the Map subcategory, not the main page")
+    WOW.Click(b, "RightButton")
+    assert_eq(NewbieNudge.db.map.reveal, false)
+    assert_true(WOW.printed[#WOW.printed]:find(NewbieNudge.L.SLASH_MAP_OFF, 1, true))
+    WOW.Hover(b)
+    assert_eq(GameTooltip.lines[1], NewbieNudge.L.MAP_BUTTON_TITLE)
+  end,
 }

@@ -441,9 +441,12 @@ function NN:HandleSlash(msg)
   elseif command == "trash" then
     if self.BagFull then self.BagFull:Show("manual") end
   elseif command == "map" then
-    self.db.map.reveal = not self.db.map.reveal
-    if self.MapReveal then self.MapReveal:Refresh() end
-    self:Say(self.db.map.reveal and L.SLASH_MAP_ON or L.SLASH_MAP_OFF)
+    if self.MapReveal then
+      self.MapReveal:Toggle()
+    else
+      self.db.map.reveal = not self.db.map.reveal
+      self:Say(self.db.map.reveal and L.SLASH_MAP_ON or L.SLASH_MAP_OFF)
+    end
   else
     self:Say(L.SLASH_HELP)
   end

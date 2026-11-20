@@ -451,6 +451,10 @@ local T = {
   LOGIN_HOOK_ERROR = "Una parte del addon no pudo iniciarse y se omitió: %s",
   BUILD_BUTTON = "Build de Icy Veins",
   BUILD_BUTTON_TT = "Clic izquierdo: pegar un enlace de la calculadora de talentos de Icy Veins. Clic derecho: quitar la build.",
+  MAP_BUTTON_TITLE = "Mapa de NewbieNudge",
+  MAP_BUTTON_STATE_ON = "Zonas sin explorar: visibles, atenuadas.",
+  MAP_BUTTON_STATE_OFF = "Zonas sin explorar: ocultas.",
+  MAP_BUTTON_TT = "Clic izquierdo: ajustes del mapa. Clic derecho: mostrar u ocultar las zonas sin explorar.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

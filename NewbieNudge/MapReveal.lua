@@ -131,15 +131,66 @@ function MapReveal:Refresh()
   if self.pin and WorldMapFrame and WorldMapFrame:IsShown() then self:OnRefresh(self.pin) end
 end
 
+function MapReveal:Toggle()
+  NN.db.map.reveal = not NN.db.map.reveal
+  self:Refresh()
+  NN:Say(NN.db.map.reveal and L.SLASH_MAP_ON or L.SLASH_MAP_OFF)
+end
+
+-- Opens the addon's Map settings page (falls back to the main page).
+function MapReveal:OpenSettings()
+  local subs = NN.Options and NN.Options.subcategories
+  local category = subs and subs[L.OPT_MAP]
+  if category and Settings and Settings.OpenToCategory then
+    Settings.OpenToCategory(category:GetID())
+  elseif NN.OpenOptions then
+    NN:OpenOptions()
+  end
+end
+
+-- A small icon on the world map: left-click opens the Map settings,
+-- right-click toggles the dimmed unexplored areas.
+function MapReveal:EnsureButton()
+  if self.button or not WorldMapFrame then return self.button end
+  local anchor = WorldMapFrame.ScrollContainer or WorldMapFrame
+  local button = CreateFrame("Button", "NewbieNudgeMapButton", WorldMapFrame)
+  button:SetSize(24, 24)
+  button:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -8, 8)
+  button:SetFrameStrata("HIGH")
+  button:SetFrameLevel((anchor.GetFrameLevel and anchor:GetFrameLevel() or 1) + 50)
+  button.icon = button:CreateTexture(nil, "ARTWORK")
+  button.icon:SetAllPoints()
+  button.icon:SetTexture("Interface\\Icons\\INV_Misc_Map_01")
+  button.border = button:CreateTexture(nil, "OVERLAY")
+  button.border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+  button.border:SetPoint("CENTER", button, "CENTER", 0, 0)
+  button.border:SetSize(40, 40)
+  button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+  button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  button:SetScript("OnClick", function(_, mouseButton)
+    if mouseButton == "RightButton" then MapReveal:Toggle() else MapReveal:OpenSettings() end
+  end)
+  button:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetText(L.MAP_BUTTON_TITLE)
+    GameTooltip:AddLine(NN.db.map.reveal and L.MAP_BUTTON_STATE_ON or L.MAP_BUTTON_STATE_OFF, 1, 0.82, 0, true)
+    GameTooltip:AddLine(L.MAP_BUTTON_TT, 1, 1, 1, true)
+    GameTooltip:Show()
+  end)
+  button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  self.button = button
+  return button
+end
+
 NN:AfterLogin(function()
-  if WorldMapFrame then MapReveal:HookPins() end
+  if WorldMapFrame then MapReveal:HookPins(); MapReveal:EnsureButton() end
 end)
 
 -- The world map UI can load on demand; hook it when it arrives.
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("ADDON_LOADED")
 loader:SetScript("OnEvent", function(_, _, name)
-  if name == "Blizzard_WorldMap" and WorldMapFrame then MapReveal:HookPins() end
+  if name == "Blizzard_WorldMap" and WorldMapFrame then MapReveal:HookPins(); MapReveal:EnsureButton() end
 end)
 
 -------------------------------------------------------------------------------
