@@ -356,3 +356,56 @@ function NN:ActiveRows()
   end
   return rows
 end
+
+-------------------------------------------------------------------------------
+-- Slash command
+-------------------------------------------------------------------------------
+
+function NN:RuleStateText(rule)
+  if self.db.disabled[rule.name] or self.ruleState[rule.name].disabled then return L.STATE_OFF end
+  if not self:Applies(rule) then return L.STATE_NA end
+  if self:IsSnoozed(rule.name) then return L.STATE_SNOOZED end
+  return L.STATE_ON
+end
+
+function NN:HandleSlash(msg)
+  msg = strtrim(msg or "")
+  local command, arg = msg:match("^(%S+)%s*(.-)$")
+  command = command and command:lower() or ""
+  arg = arg and strtrim(arg):lower() or ""
+
+  if command == "" then
+    if self.OpenOptions then self:OpenOptions() else self:Say(L.SLASH_HELP) end
+  elseif command == "lock" then
+    self.db.panel.locked = not self.db.panel.locked
+    if self.Panel then self.Panel:SetLocked(self.db.panel.locked) end
+    self:Say(self.db.panel.locked and L.SLASH_LOCKED or L.SLASH_UNLOCKED)
+  elseif command == "list" then
+    self:Say(L.SLASH_LIST_HEADER)
+    for _, rule in ipairs(self.rules) do
+      print(L.SLASH_LIST_LINE:format(rule.title, rule.name, self:RuleStateText(rule)))
+    end
+  elseif command == "on" or command == "off" then
+    local rule = self.ruleByName[arg]
+    if not rule then
+      self:Say(L.SLASH_UNKNOWN_RULE:format(arg))
+    else
+      self:SetRuleEnabled(arg, command == "on")
+      self:Say(L.SLASH_RULE_SET:format(rule.title, command == "on" and L.STATE_ON or L.STATE_OFF))
+    end
+  elseif command == "reset" then
+    self.testMode = false
+    self:ClearSnoozes()
+    self:Say(L.SLASH_RESET_DONE)
+  elseif command == "test" then
+    self.testMode = true
+    self:MarkAllDirty()
+    self:Schedule()
+    self:Say(L.SLASH_TEST_ON)
+  else
+    self:Say(L.SLASH_HELP)
+  end
+end
+
+SLASH_NEWBIENUDGE1 = "/nudge"
+SlashCmdList.NEWBIENUDGE = function(msg) NN:HandleSlash(msg) end
