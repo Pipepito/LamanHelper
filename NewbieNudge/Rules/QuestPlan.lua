@@ -16,6 +16,23 @@ local function trivialRange()
   return range or DEFAULT_RANGE
 end
 
+local QT = (Enum and Enum.QuestTag) or {}
+local GROUP_TAGS = { [QT.Group or 1] = true, [QT.Raid or 62] = true, [QT.Dungeon or 81] = true }
+
+-- True when the quest is tagged for a group (Group, Dungeon, Raid) or the
+-- client suggests more than one player for it.
+local function needsGroup(questID)
+  if C_QuestLog.GetQuestTagInfo then
+    local tag = C_QuestLog.GetQuestTagInfo(questID)
+    if tag and GROUP_TAGS[NN.Plain(tag.tagID) or -1] then return true end
+  end
+  if C_QuestLog.GetSuggestedGroupSize then
+    local n = NN.Plain(C_QuestLog.GetSuggestedGroupSize(questID))
+    if n and n > 1 then return true end
+  end
+  return false
+end
+
 local scanCache, scanGeneration
 
 -- Returns a list of { questID, title, level, isComplete, isTrivial, turnsGreyIn }
@@ -52,7 +69,7 @@ function NN.QuestScan()
         end
         result[#result + 1] = {
           questID = questID, title = NN.Plain(info.title, "string") or "", level = level,
-          isComplete = isComplete, isTrivial = isTrivial,
+          isComplete = isComplete, isTrivial = isTrivial, needsGroup = needsGroup(questID),
           turnsGreyIn = (level + range) - playerLevel + 1,
         }
       end
@@ -122,4 +139,21 @@ NN:RegisterRule({
     return nil
   end,
   sample = function() return { { text = L.QUEST_GREY_ROW:format(2), icon = QUEST_ICON } } end,
+})
+
+NN:RegisterRule({
+  name = "quest_group",
+  title = L.QUEST_GROUP_TITLE,
+  help = L.QUEST_GROUP_HELP,
+  events = EVENTS,
+  applies = function() return true end,
+  check = function()
+    local n = countWhere(function(q) return q.needsGroup and not q.isComplete end)
+    if n == NN.UNKNOWN then return NN.UNKNOWN end
+    if n > 0 then
+      return { text = L.QUEST_GROUP_ROW:format(n), icon = 136221, onClick = ToggleQuestLog }
+    end
+    return nil
+  end,
+  sample = function() return { { text = L.QUEST_GROUP_ROW:format(1), icon = 136221 } } end,
 })

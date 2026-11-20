@@ -462,6 +462,10 @@ local T = {
   SUPPLIES_HELP = "La comida, la bebida y las vendas cubren los huecos entre peleas. Te avisa cuando no llevas nada; las vendas solo cuentan si sabes Primeros Auxilios.",
   SUPPLIES_ROW_FOOD = "No llevas comida ni bebida en las bolsas.",
   SUPPLIES_ROW_BANDAGE = "No llevas vendas. Primeros Auxilios las hace con tela.",
+  -- Group quests
+  QUEST_GROUP_TITLE = "Misiones que necesitan grupo",
+  QUEST_GROUP_HELP = "Las misiones de élite, de mazmorra y de banda están pensadas para varios jugadores. Déjalas para cuando tengas compañía en vez de morir solo en ellas.",
+  QUEST_GROUP_ROW = "%d misión(es) de tu registro necesitan grupo.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

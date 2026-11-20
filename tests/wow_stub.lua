@@ -622,6 +622,8 @@ function C_QuestLog.GetNumQuestLogEntries()
 end
 function C_QuestLog.GetMaxNumQuestsCanAccept() return S().quests.max end
 function C_QuestLog.IsQuestFlaggedCompleted(id) return S().completedQuests[id] == true end
+function C_QuestLog.GetQuestTagInfo(id) local q = questByID(id); if q and q.tag then return { tagID = q.tag, tagName = "Tag" .. q.tag } end end
+Enum.QuestTag = { Group = 1, Raid = 62, Dungeon = 81 }
 function C_QuestLog.GetInfo(i)
   local q = S().questLog and S().questLog[i]
   if not q then return nil end

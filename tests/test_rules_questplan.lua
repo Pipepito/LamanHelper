@@ -68,4 +68,22 @@ return {
     for i, n in ipairs(NewbieNudge.PRIORITY) do idx[n] = i end
     assert_true(idx.quests < idx.quest_turnin and idx.quest_turnin < idx.quest_soon and idx.quest_soon < idx.quest_grey)
   end,
+  group_counts_tagged_quests = function()
+    WOW.Quest({ questID = 1, title = "A", level = 20, tag = 1 }); WOW.Quest({ questID = 2, title = "B", level = 20, tag = 81 })
+    WOW.Quest({ questID = 3, title = "C", level = 20 })
+    load_addon(); run()
+    local r = results_of("quest_group")
+    assert_eq(r[1].text, L().QUEST_GROUP_ROW:format(2))
+    r[1].onClick(); assert_eq(WOW.calls[#WOW.calls][1], "ToggleQuestLog")
+  end,
+  complete_group_quest_not_counted = function()
+    WOW.Quest({ questID = 1, title = "A", level = 20, tag = 1, isComplete = true })
+    load_addon(); run(); assert_eq(#results_of("quest_group"), 0)
+  end,
+  group_priority_after_grey = function()
+    load_addon()
+    local idx = {}
+    for i, n in ipairs(NewbieNudge.PRIORITY) do idx[n] = i end
+    assert_true(idx.quest_grey < idx.quest_group)
+  end,
 }

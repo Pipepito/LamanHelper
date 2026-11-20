@@ -462,4 +462,8 @@ NN.L = setmetatable({
   SUPPLIES_HELP = "Food, drink and bandages cover the gaps between fights. Reminds you when your bags hold none at all; bandages only count if you know First Aid.",
   SUPPLIES_ROW_FOOD = "You have no food or drink in your bags.",
   SUPPLIES_ROW_BANDAGE = "You have no bandages. First Aid makes them from cloth.",
+  -- Group quests
+  QUEST_GROUP_TITLE = "Quests that need a group",
+  QUEST_GROUP_HELP = "Elite, dungeon and raid quests are meant for several players. Plan them for when you have company instead of dying to them alone.",
+  QUEST_GROUP_ROW = "%d quest(s) in your log need a group.",
 }, { __index = function(_, key) return key end })
