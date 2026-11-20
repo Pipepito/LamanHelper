@@ -11,7 +11,7 @@ local T = {
   ROW_HINT_SNOOZE = "Clic derecho: posponer %d minutos. Mayús+clic derecho: posponer hasta la próxima conexión.",
   ROW_STALE = "No se actualiza durante el combate.",
   MORE_ROWS = "…y %d más",
-  SLASH_HELP = "Comandos: /nudge (opciones), /nudge lock, /nudge list, /nudge on <nombre>, /nudge off <nombre>, /nudge reset, /nudge test, /nudge map",
+  SLASH_HELP = "Comandos: /nudge (opciones), /nudge lock, /nudge list, /nudge on <nombre>, /nudge off <nombre>, /nudge reset, /nudge test, /nudge map, /nudge trash",
   SLASH_LIST_HEADER = "Recordatorios de este personaje:",
   SLASH_LIST_LINE = "  %s (%s): %s",
   STATE_ON = "activado",
@@ -166,6 +166,18 @@ local T = {
   ZONE_HELP = "Compara la zona en la que estás con tu nivel, para que sepas cuándo las misiones dan menos experiencia o cuándo la zona es peligrosa.",
   ZONE_BELOW_ROW = "%s (%d–%d) está por debajo de tu nivel. Las misiones aquí dan menos XP.",
   ZONE_ABOVE_ROW = "%s (%d–%d) está por encima de tu nivel. Ten cuidado aquí.",
+  -- Bag-full helper
+  OPT_BAGS = "Bolsas",
+  OPT_BAGFULL_ENABLED = "Con las bolsas llenas, listar los objetos más baratos para destruir",
+  OPT_BAGFULL_ENABLED_TT = "Abre una ventanita junto al botín cuando tus bolsas están llenas, con un botón Destruir por objeto. Nunca lista objetos de misión, bolsas, munición, reactivos ni equipo útil.",
+  OPT_BAGFULL_QUALITY = "Calidad máxima de objeto a listar",
+  OPT_BAGFULL_QUALITY_TT = "Los objetos grises van primero y se destruyen con un clic. Los blancos y verdes piden confirmación.",
+  OPT_BAGFULL_ONLOOT = "Abrir también al recoger botín con las bolsas llenas",
+  BAGFULL_TITLE = "Bolsas llenas: lo más barato para destruir",
+  BAGFULL_FOOT = "Nunca se listan objetos de misión ni bolsas.",
+  BAGFULL_EMPTY = "No se encontró nada seguro que destruir.",
+  BAGFULL_DESTROY = "Destruir",
+  BAGFULL_SURE = "¿Seguro?",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

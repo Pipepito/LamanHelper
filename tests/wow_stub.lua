@@ -46,6 +46,7 @@ function WOW.Reset()
   WOW.state = deepcopy(DEFAULT_STATE)
   WOW.calls, WOW.printed, WOW.timers, WOW.eventFrames, WOW.settings = {}, {}, {}, {}, {}
   if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
+  if LootFrame then LootFrame.shown = false end
 end
 WOW.Reset()
 local S = function() return WOW.state end
@@ -102,10 +103,13 @@ WOW_PROJECT_CAMELOT = 18
 WOW_PROJECT_ID = 18
 INVSLOT_AMMO, INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED = 0, 1, 17
 CONTAINER_SLOTS = "%d|4Slot:Slots; %s"
+ERR_INV_FULL = "Inventory is full."
+ITEM_QUALITY0_DESC, ITEM_QUALITY1_DESC, ITEM_QUALITY2_DESC = "Poor", "Common", "Uncommon"
+OKAY, CANCEL = "Okay", "Cancel"
 TRADE_SKILLS = "Professions"
 Enum = {
   BagIndex = { Backpack = 0, Bag_1 = 1, Bag_2 = 2, Bag_3 = 3, Bag_4 = 4, ReagentBag = 5 },
-  ItemClass = { Container = 1, Weapon = 2, Armor = 4 },
+  ItemClass = { Consumable = 0, Container = 1, Weapon = 2, Armor = 4, Reagent = 5, Projectile = 6, Tradegoods = 7, Quiver = 11, Questitem = 12, Key = 13 },
   ItemArmorSubclass = { Generic = 0, Cloth = 1, Leather = 2, Mail = 3, Plate = 4 },
   SpellBookSpellBank = { Player = 0, Pet = 1 },
   SpellBookItemType = { None = 0, Spell = 1, FutureSpell = 2, PetAction = 3, Flyout = 4 },
@@ -272,6 +276,8 @@ function GameTooltip:AddLine(text) self.lines[#self.lines + 1] = text end
 function GameTooltip:AddDoubleLine(l, r) self.lines[#self.lines + 1] = l .. " | " .. tostring(r) end
 function GameTooltip:SetText(text) self.lines = { text } end
 GameMenuFrame = CreateFrame("Frame", "GameMenuFrame", UIParent)
+LootFrame = CreateFrame("Frame", "LootFrame", UIParent)
+LootFrame.shown = false
 GameMenuFrame.shown = false
 function WOW.ShowGameMenu(b) if b then GameMenuFrame:Show() else GameMenuFrame:Hide() end; S().gameMenuShown = b and true or false end
 
@@ -399,13 +405,29 @@ function C_Container.GetContainerItemInfo(id, slot)
   if not it then return nil end
   local info = S().itemInfo[it.itemID] or {}
   return { itemID = it.itemID, hyperlink = it.link or info.link or ("item:" .. it.itemID), stackCount = it.count or 1,
-           iconFileID = info.icon or 134400, quality = info.quality or 1 }
+           iconFileID = info.icon or 134400, quality = info.quality or 1, isLocked = it.locked or false,
+           hasNoValue = (info.sellPrice or 0) == 0, isBound = it.bound or false }
 end
 function C_Container.GetContainerItemID(id, slot) local b = bag(id); local it = b and b.items[slot]; return it and it.itemID end
 function C_Container.GetContainerItemLink(id, slot) local i = C_Container.GetContainerItemInfo(id, slot); return i and i.hyperlink end
 function C_Container.ContainerIDToInventoryID(id) return (S().bagSlotBase or 19) + id end
 function ContainerIDToInventoryID(id) return C_Container.ContainerIDToInventoryID(id) end
-function C_Container.PickupContainerItem() end
+function C_Container.PickupContainerItem(id, slot)
+  local b = bag(id)
+  if b and b.items[slot] then S().cursor = { type = "item", bag = id, slot = slot } end
+  record("PickupContainerItem", id, slot)
+end
+function CursorHasItem() local c = S().cursor; return c ~= nil and c.type == "item" end
+function DeleteCursorItem()
+  local c = S().cursor
+  if c and c.type == "item" then
+    S().bags[c.bag].items[c.slot] = nil
+    record("DeleteCursorItem", c.bag, c.slot)
+  end
+  S().cursor = nil
+end
+C_CurrencyInfo = { GetCoinTextureString = function(n) return tostring(n) .. "c" end }
+function GetMoneyString(n) return tostring(n) .. "c" end
 function C_Container.GetContainerItemQuestInfo(id, slot)
   local b = bag(id); local it = b and b.items[slot]
   if not it then return { isQuestItem = false } end

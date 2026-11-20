@@ -46,8 +46,8 @@ return {
     load_addon()
     local cat, layout = NewbieNudge.Options.AddSubcategory("X")
     section():AddControls(cat, layout)
-    local dd = callsNamed("dropdown")[1]
-    assert_eq(dd[2], "NN_cvar_fooB")
+    local dd = has(callsNamed("dropdown"), function(c) return c[2] == "NN_cvar_fooB" end)
+    assert_true(dd, "dropdown registered for fooB")
     assert_eq(dd[3][#dd[3]], { value = "7", label = "7" })
     local inits = callsNamed("initializer")
     assert_true(has(inits, function(c) return c[2] == "header" and c[3] == NewbieNudge.L.OPT_GENERAL end))

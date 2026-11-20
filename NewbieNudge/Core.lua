@@ -33,6 +33,7 @@ NN.defaults = {
   errors = {},
   seen = { rules = {}, dungeons = {} },
   map = { reveal = true, brightness = 0.6, desaturate = true },
+  bagfull = { enabled = true, maxQuality = 2, onLoot = true, point = "LEFT", x = 40, y = 0 },
 }
 
 -------------------------------------------------------------------------------
@@ -415,6 +416,8 @@ function NN:HandleSlash(msg)
     self:MarkAllDirty()
     self:Schedule()
     self:Say(L.SLASH_TEST_ON)
+  elseif command == "trash" then
+    if self.BagFull then self.BagFull:Show("manual") end
   elseif command == "map" then
     self.db.map.reveal = not self.db.map.reveal
     if self.MapReveal then self.MapReveal:Refresh() end

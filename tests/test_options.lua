@@ -105,8 +105,9 @@ return {
     NewbieNudge.Options.AddDropdown(NewbieNudge.Options.category, "NN_test_dd", "DD", "tt",
       { { value = "0", label = "Zero" }, { value = "1", label = "One" } },
       function() return value end, function(v) value = v end)
-    local dd = callsNamed("dropdown")[1]
-    assert_eq(dd[2], "NN_test_dd")
+    local dd
+    for _, c in ipairs(callsNamed("dropdown")) do if c[2] == "NN_test_dd" then dd = c end end
+    assert_true(dd, "dropdown registered")
     assert_eq(dd[3], { { value = "0", label = "Zero" }, { value = "1", label = "One" } })
     assert_eq(WOW.settings["NN_test_dd"].type, "string")
     WOW.settings["NN_test_dd"].setter("0"); assert_eq(value, "0")
