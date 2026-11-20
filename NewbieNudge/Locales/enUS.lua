@@ -1,0 +1,40 @@
+-- English strings. This file always loads: it serves enUS and enGB clients
+-- and is the fallback for every other language. A key with no translation
+-- shows its own name instead of erroring.
+local _, NN = ...
+
+NN.L = setmetatable({
+  ADDON_TITLE = "NewbieNudge",
+  CHAT_PREFIX = "|cff7fd5ffNewbieNudge|r: ",
+  PANEL_TITLE = "Reminders",
+  ROW_HINT_CLICK = "Left-click to go there.",
+  ROW_HINT_SNOOZE = "Right-click: snooze %d minutes. Shift+right-click: snooze until next login.",
+  ROW_STALE = "Not updated during combat.",
+  MORE_ROWS = "…and %d more",
+  SLASH_HELP = "Commands: /nudge (options), /nudge lock, /nudge list, /nudge on <name>, /nudge off <name>, /nudge reset, /nudge test",
+  SLASH_LIST_HEADER = "Reminders for this character:",
+  SLASH_LIST_LINE = "  %s (%s): %s",
+  STATE_ON = "on",
+  STATE_OFF = "off",
+  STATE_SNOOZED = "snoozed",
+  STATE_NA = "not relevant for this character",
+  SLASH_UNKNOWN_RULE = "No reminder called '%s'. Use /nudge list.",
+  SLASH_RULE_SET = "%s is now %s.",
+  SLASH_RESET_DONE = "Snoozes cleared.",
+  SLASH_LOCKED = "Panel locked.",
+  SLASH_UNLOCKED = "Panel unlocked: drag the title bar to move it. /nudge lock when done.",
+  SLASH_TEST_ON = "Test mode: showing every reminder with sample text. /nudge reset to leave.",
+  RULE_ERROR = "The reminder '%s' hit an error and is off until next login. Please report: %s",
+  OPT_GENERAL = "General",
+  OPT_REMINDERS = "Reminders",
+  OPT_LOCK = "Lock panel position",
+  OPT_LOCK_TT = "When unlocked, drag the title bar to move the panel.",
+  OPT_SCALE = "Panel scale",
+  OPT_SNOOZE = "Snooze length (minutes)",
+  OPT_COMBAT_STRIP = "Show compact strip in combat",
+  OPT_COMBAT_STRIP_TT = "In combat the panel shrinks to a row of icons. Turn this off to hide it in combat.",
+  OPT_RESET_SNOOZE = "Reset snoozes",
+  OPT_RESET_POS = "Reset position",
+  OPT_BUTTON_DO = "Reset",
+  OPT_NOT_RELEVANT = "Not relevant for this character",
+}, { __index = function(_, key) return key end })
