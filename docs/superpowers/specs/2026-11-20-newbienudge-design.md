@@ -176,6 +176,35 @@ All controls read and write `NewbieNudgeDB` directly through
 settings copy to keep in sync. Changing any reminder checkbox triggers a
 re-check.
 
+3. **Camera** (added 2026-11-20 at the user's request): console variables
+   (CVars) the game exposes but Blizzard's own settings do not show. These
+   are read and written with `C_CVar.GetCVar` / `C_CVar.SetCVar`, so they
+   live in the game's own config, not in the addon's saved variables, and
+   survive the addon being removed. Two parts:
+   - A curated list with proper controls and plain-language labels:
+     `cameraDistanceMaxZoomFactor` (slider 1.0–2.6, "Max camera distance",
+     first in the list), `cameraDistanceMoveSpeed` (slider 1–50, "Zoom
+     speed"), `cameraKeepCharacterCentered` (checkbox),
+     `cameraReduceUnexpectedMovement` (checkbox), `test_cameraDynamicPitch`
+     (checkbox), `test_cameraOverShoulder` (slider -2.0–2.0),
+     `test_cameraTargetFocusEnemyEnable` (checkbox),
+     `test_cameraTargetFocusInteractEnable` (checkbox),
+     `test_cameraHeadMovementStrength` (slider 0–2). A "Reset camera to
+     defaults" button writes each one's `C_CVar.GetCVarDefault`.
+   - An auto-discovered list: every CVar from `C_Console.GetAllCommands()`
+     whose name contains "camera" (case-insensitive), that is not in the
+     curated list and not in a short exclude list of variables Blizzard's
+     settings already show (`cameraSmoothStyle`, `cameraSmoothTrackingStyle`,
+     `cameraBobbing`, `cameraWaterCollision`, `cameraYawMoveSpeed`,
+     `cameraPitchMoveSpeed`, `cameraSmoothYaw`, `cameraSmoothPitch`,
+     `cameraTerrainTilt`). A variable whose default is `0` or `1` gets a
+     checkbox; a numeric one gets a slider from 0 to the larger of 1, twice
+     its default and its current value, with step 0.1 when the default has
+     decimals, else 1; anything else is skipped. The label is the CVar name
+     and the tooltip is the help text the API returns. When
+     `C_Console.GetAllCommands` does not exist, only the curated list shows.
+   The curated labels and help are localized; discovered names are not.
+
 ### 3.5 Localization
 
 - `Locales/enUS.lua` creates `NewbieNudge.L` as a table with every string,
