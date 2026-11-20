@@ -91,4 +91,7 @@ NN.L = setmetatable({
   RESTED_TITLE = "Rested XP",
   RESTED_HELP = "Logging out in an inn or a city builds rested XP, which doubles the experience you get from kills for a while.",
   RESTED_ROW = "You're not in an inn or city. Log out there to earn rested XP.",
+  GEAR_UPGRADE_TITLE = "Gear upgrade in bags",
+  GEAR_UPGRADE_HELP = "This compares item levels only, so treat it as a hint. Open your bags and read the item's tooltip.",
+  GEAR_UPGRADE_ROW = "An item in your bags looks like an upgrade: %s",
 }, { __index = function(_, key) return key end })

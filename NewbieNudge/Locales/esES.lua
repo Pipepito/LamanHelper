@@ -91,6 +91,9 @@ local T = {
   RESTED_TITLE = "Experiencia de descanso",
   RESTED_HELP = "Desconectar en una posada o ciudad acumula experiencia de descanso, que duplica la experiencia por matar enemigos durante un tiempo.",
   RESTED_ROW = "No estás en una posada ni en una ciudad. Desconecta allí para ganar experiencia de descanso.",
+  GEAR_UPGRADE_TITLE = "Mejora de equipo en las bolsas",
+  GEAR_UPGRADE_HELP = "Esto compara solo el nivel de objeto, así que tómalo como una pista. Abre tus bolsas y lee la descripción del objeto.",
+  GEAR_UPGRADE_ROW = "Un objeto de tus bolsas parece una mejora: %s",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
