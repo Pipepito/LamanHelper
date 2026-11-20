@@ -40,4 +40,23 @@ return {
     WOW.FireEvent("GOSSIP_CLOSED"); run_checks()
     assert_eq(#results_of("hearth_bind"), 0)
   end,
+  disabled_rule_says_nothing = function()
+    WOW.state.bindLocation = "Goldshire"; WOW.state.subZone = "Sentinel Hill"; WOW.state.zone = "Westfall"
+    load_addon(); innkeeper(); NewbieNudge:SetRuleEnabled("hearth_bind", false)
+    local printed = #WOW.printed
+    talk()
+    assert_eq(#WOW.printed, printed, "no chat line when the rule is off")
+    assert_eq(#results_of("hearth_bind"), 0)
+  end,
+  own_inn_recognised_by_recorded_bind_spot = function()
+    -- inside an inn the sub-zone is the inn's name, not the bind location's name
+    WOW.state.bindLocation = "Goldshire"; WOW.state.subZone = "Lion's Pride Inn"; WOW.state.zone = "Elwynn Forest"
+    load_addon(); innkeeper()
+    WOW.FireEvent("HEARTHSTONE_BOUND") -- the player binds here
+    talk()
+    assert_eq(#results_of("hearth_bind"), 0, "the inn we bound at is home")
+    assert_eq(NewbieNudge.db.hearthSpot.sub, "Lion's Pride Inn")
+    WOW.state.subZone = "Sentinel Hill"; WOW.state.zone = "Westfall"; WOW.FireEvent("GOSSIP_CLOSED"); talk()
+    assert_eq(#results_of("hearth_bind"), 1, "another inn still reminds")
+  end,
 }

@@ -33,4 +33,12 @@ return {
     assert_true(found)
     assert_nil(NewbieNudge.GameSettings.PRESET.combinedBags, "the preset leaves it alone")
   end,
+  uses_data_id_when_the_tooltip_has_no_getitem = function()
+    WOW.state.itemInfo[1] = { name = "Linen Cloth", sellPrice = 150, link = "item:1" }
+    load_addon()
+    local getItem = GameTooltip.GetItem; GameTooltip.GetItem = nil
+    WOW.ShowItemTooltip("item:1")
+    GameTooltip.GetItem = getItem
+    assert_true(lines():find("150c", 1, true), lines())
+  end,
 }

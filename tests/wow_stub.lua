@@ -289,7 +289,8 @@ function GameTooltip:GetItem() local link = S().tooltipItem; if link then return
 function WOW.ShowItemTooltip(link)
   S().tooltipItem = link
   GameTooltip:SetOwner(UIParent, "ANCHOR_NONE"); GameTooltip:SetText("Item")
-  for _, fn in ipairs(S().tooltipCalls) do fn(GameTooltip, { type = 0 }) end
+  local id = tonumber(tostring(link):match("item:(%d+)"))
+  for _, fn in ipairs(S().tooltipCalls) do fn(GameTooltip, { type = 0, id = id }) end
 end
 TooltipDataProcessor = {}
 function TooltipDataProcessor.AddTooltipPostCall(kind, fn) S().tooltipCalls[#S().tooltipCalls + 1] = fn end

@@ -49,7 +49,7 @@ Bag not equipped or smaller than one in your inventory · bags nearly full ·
 unspent talent points · long-duration self-buffs missing (the bar button glows)
 · old spell ranks on your bars (click to swap) · gathering tracking not turned
 on · damaged or broken gear · out of ammo · hunter pet not summoned, unhappy or
-with unspent training points · no profession by level 10 · no Hearthstone ·
+with unspent training points · warlock demon not summoned · no profession by level 10 · no Hearthstone ·
 quest log nearly full · new mail · logging out outside an inn or city · gear
 upgrade sitting in your bags (off by default: `/nudge on gear_upgrade`) ·
 materials bag not equipped · an item in your bags that starts a quest (the

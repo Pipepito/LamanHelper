@@ -116,7 +116,8 @@ bag. Bag inventory slots are 31–34.
 | supplies | Level 5+, no food or drink in the bags; with First Aid, no bandages. | Buy food; make a bandage. |
 | quest_group | Hold an elite or dungeon quest. | Finish or abandon it. |
 | profession_rank (secondary) | First Aid 50/75 at level 10 (trainer); 125/150 (book); 225/225 at 35 (quest). | Learn the rank. |
-| hearth_bind | Talk to an innkeeper in a zone other than your bind point. | Close the talk window (row) ; the chat line comes once per inn per session. |
+| hearth_bind | Talk to an innkeeper in a zone other than your bind point. | Close the talk window (row); the chat line comes once per inn per session. Also: talk to the innkeeper where you are bound → no row, no line (bind there once first so the spot is recorded); turn the rule off → no chat line. |
+| demon | Warlock with a summon spell known and no demon out (not resting, mounted or dead). The summon button glows. | Summon it. |
 | mount | Level 30–39 with under 100 gold; level 40 without Riding (skill ID 762). | Reach 100 gold; learn to ride. |
 | weapon_skill | Equip a weapon type whose skill is 20+ below its cap (skills under C_SkillInfo, category 6). | Train it on weak enemies. |
 | legacy | Reach level 25 (one nudge until you press Y); have unviewed Legacy challenges. | Open the Legacy window; view the challenges. |

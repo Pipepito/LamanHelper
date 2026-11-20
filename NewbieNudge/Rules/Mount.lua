@@ -8,11 +8,7 @@ local MOUNT_ICON = 132261
 local SAVE_FROM_LEVEL, RIDE_LEVEL = 30, 40
 local MOUNT_COST = 1000000 -- copper
 
-local function moneyText(value)
-  if C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then return C_CurrencyInfo.GetCoinTextureString(value) end
-  if GetMoneyString then return GetMoneyString(value) end
-  return tostring(value)
-end
+local moneyText = NN.MoneyText
 
 -- true / false when a skill API can answer, nil when none can (Task 8 wires
 -- the real skill-line lookup; until then the riding row stays silent).

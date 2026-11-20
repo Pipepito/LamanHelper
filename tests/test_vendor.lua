@@ -34,7 +34,7 @@ return {
     for i = 1, 25 do put(i, 1) end
     load_addon(); load_bags(); WOW.OpenMerchant()
     WOW.CloseMerchant(); WOW.AdvanceTime(2)
-    assert_true(sold() <= 10, "at most one tick's worth")
+    assert_eq(sold(), 10, "exactly the first tick's worth")
   end,
   repairs_when_affordable = function()
     WOW.state.canRepair = true; WOW.state.repairCost = 500
@@ -54,5 +54,22 @@ return {
     WOW.OpenMerchant(); WOW.AdvanceTime(1)
     assert_eq(sold(), 0); assert_true(not repaired())
     assert_true(WOW.settings["NN_vendor_sellJunk"] and WOW.settings["NN_vendor_repair"])
+  end,
+  repair_waits_for_sale_proceeds = function()
+    WOW.state.money = 400; WOW.state.canRepair = true; WOW.state.repairCost = 500
+    item(1, { quality = 0, price = 100 }); put(1, 1, { count = 2 })
+    load_addon(); load_bags(); WOW.OpenMerchant(); WOW.AdvanceTime(1)
+    assert_true(repaired(), "200c of junk sold first makes the 500c repair affordable")
+    assert_eq(WOW.state.money, 100)
+  end,
+  repair_runs_at_once_when_nothing_to_sell = function()
+    WOW.state.canRepair = true; WOW.state.repairCost = 500
+    load_addon(); load_bags(); WOW.OpenMerchant()
+    assert_true(repaired(), "no ticker needed")
+  end,
+  unsellable_grey_not_counted = function()
+    item(1, { quality = 0, price = 0 }); put(1, 1); item(2, { quality = 0, price = 5 }); put(2, 2)
+    load_addon(); load_bags(); WOW.OpenMerchant(); WOW.AdvanceTime(1)
+    assert_true(WOW.printed[#WOW.printed]:find(L().VENDOR_SOLD:format(1, "5c"), 1, true), WOW.printed[#WOW.printed])
   end,
 }

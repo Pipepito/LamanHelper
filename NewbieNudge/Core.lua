@@ -15,7 +15,7 @@ NN.MAX_ROWS = 10
 NN.CHECK_DELAY = 0.5
 NN.TICK_SECONDS = 30
 NN.PRIORITY = {
-  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "weapon_skill", "buffs", "ammo", "pet",
+  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "weapon_skill", "buffs", "ammo", "pet", "demon",
   "tracking", "hearthstone", "hearth_bind", "supplies", "quests", "quest_item", "quest_turnin", "quest_slots", "quest_soon", "quest_grey", "quest_group", "mail",
   "professions", "profession_rank", "trainer_spells", "mount", "legacy", "flight_path", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
@@ -54,6 +54,13 @@ end
 
 function NN:Say(text)
   print(L.CHAT_PREFIX .. tostring(text))
+end
+
+-- Copper amount as the client's coin string.
+function NN.MoneyText(value)
+  if C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then return C_CurrencyInfo.GetCoinTextureString(value) end
+  if GetMoneyString then return GetMoneyString(value) end
+  return tostring(value)
 end
 
 -- Fills missing keys of tbl from defaults, recursively, without touching

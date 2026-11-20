@@ -507,4 +507,8 @@ NN.L = setmetatable({
   FLIGHT_PATH_HELP = "Each zone has flight masters; talking to one once unlocks that flight path for good. Shows the ones in your current zone you have not visited yet.",
   FLIGHT_PATH_ROW = "Flight path to unlock in %s: %s.",
   FLIGHT_PATH_ROW_MANY = "Flight paths to unlock in %s: %s and %d more.",
+  -- Warlock demon
+  DEMON_TITLE = "Demon not summoned",
+  DEMON_HELP = "A warlock should always have a demon out. Reminds you when none is summoned, and glows the summon spell on your bar.",
+  DEMON_ROW_MISSING = "Your demon isn't summoned.",
 }, { __index = function(_, key) return key end })

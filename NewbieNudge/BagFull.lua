@@ -149,11 +149,7 @@ local function qualityColor(quality)
   return 1, 1, 1
 end
 
-local function moneyText(value)
-  if C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then return C_CurrencyInfo.GetCoinTextureString(value) end
-  if GetMoneyString then return GetMoneyString(value) end
-  return tostring(value)
-end
+local moneyText = NN.MoneyText
 
 local function newRow(index)
   local row = CreateFrame("Frame", nil, frame)

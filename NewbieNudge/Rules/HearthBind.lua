@@ -19,13 +19,32 @@ local function hasBindOption()
   return false
 end
 
+-- Where the player stood when they last bound: inside an inn the sub-zone is
+-- the inn's name while the bind location is the area's, so names alone
+-- cannot tell "this is my inn".
+local function recordBindSpot()
+  if not NN.db then return end
+  NN.db.hearthSpot = {
+    zone = GetZoneText and NN.Plain(GetZoneText(), "string") or "",
+    sub = GetSubZoneText and NN.Plain(GetSubZoneText(), "string") or "",
+  }
+end
+
+local function atOwnInn(bind, zone, sub)
+  if bind == sub or bind == zone then return true end
+  local spot = NN.db and NN.db.hearthSpot
+  return spot ~= nil and spot.zone == zone and spot.sub == sub
+end
+
 local function onGossipShow()
   current = nil
+  local rule = NN.ruleByName.hearth_bind
+  if not rule or not NN:IsRuleActive(rule) then return end
   if not hasBindOption() or not GetBindLocation then return end
   local bind = NN.Plain(GetBindLocation(), "string")
   local sub = GetSubZoneText and NN.Plain(GetSubZoneText(), "string") or ""
   local zone = GetZoneText and NN.Plain(GetZoneText(), "string") or ""
-  if not bind or bind == "" or bind == sub or bind == zone then return end
+  if not bind or bind == "" or atOwnInn(bind, zone, sub) then return end
   current = { bind = bind }
   local key = zone .. "/" .. sub
   if not saidHere[key] then
@@ -36,9 +55,11 @@ end
 
 NN:RegisterEvent("GOSSIP_SHOW")
 NN:RegisterEvent("GOSSIP_CLOSED")
+NN:RegisterEvent("HEARTHSTONE_BOUND")
 NN:OnAnyEvent(function(event)
   if event == "GOSSIP_SHOW" then onGossipShow()
-  elseif event == "GOSSIP_CLOSED" then current = nil end
+  elseif event == "GOSSIP_CLOSED" then current = nil
+  elseif event == "HEARTHSTONE_BOUND" then recordBindSpot(); current = nil end
 end)
 
 NN:RegisterRule({

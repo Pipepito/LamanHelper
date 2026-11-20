@@ -9,11 +9,7 @@ NN.Vendor = Vendor
 
 local PER_TICK, TICK = 10, 0.3
 
-local function moneyText(value)
-  if C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then return C_CurrencyInfo.GetCoinTextureString(value) end
-  if GetMoneyString then return GetMoneyString(value) end
-  return tostring(value)
-end
+local moneyText = NN.MoneyText
 
 local function merchantOpen()
   return MerchantFrame ~= nil and MerchantFrame:IsShown()
@@ -26,9 +22,12 @@ local function greyStacks()
     for slot = 1, NN.Plain(C_Container.GetContainerNumSlots(bag)) or 0 do
       local info = C_Container.GetContainerItemInfo(bag, slot)
       local itemID = info and NN.Plain(info.itemID)
-      if itemID and NN.Plain(info.quality) == 0 and info.isLocked ~= true then
+      if itemID and NN.Plain(info.quality) == 0 and info.isLocked ~= true and info.hasNoValue ~= true then
         local _, _, _, _, _, _, _, _, _, _, sellPrice = C_Item.GetItemInfo(NN.Plain(info.hyperlink, "string") or itemID)
-        list[#list + 1] = { bag = bag, slot = slot, itemID = itemID, count = NN.Plain(info.stackCount) or 1, price = NN.Plain(sellPrice) or 0 }
+        sellPrice = NN.Plain(sellPrice) or 0
+        if sellPrice > 0 then
+          list[#list + 1] = { bag = bag, slot = slot, itemID = itemID, count = NN.Plain(info.stackCount) or 1, price = sellPrice }
+        end
       end
     end
   end
@@ -44,6 +43,11 @@ local function finishSelling()
   local sold, copper = Vendor.sold or 0, Vendor.copper or 0
   stopSelling()
   if sold > 0 then NN:Say(L.VENDOR_SOLD:format(sold, moneyText(copper))) end
+  -- Repair once the sale proceeds are in, so junk money counts toward it.
+  if merchantOpen() and Vendor.repairPending then
+    Vendor.repairPending = nil
+    Vendor:Repair()
+  end
 end
 
 local function sellTick()
@@ -63,15 +67,18 @@ local function sellTick()
   if #Vendor.queue == 0 then finishSelling() end
 end
 
+-- Returns true when selling is still running on the ticker.
 function Vendor:SellJunk()
   stopSelling()
   self.sold, self.copper = 0, 0
   self.queue = greyStacks()
-  if #self.queue == 0 then self.queue = nil; return end
+  if #self.queue == 0 then self.queue = nil; return false end
   sellTick()
   if self.queue and #self.queue > 0 then
     self.ticker = C_Timer.NewTicker(TICK, sellTick)
+    return true
   end
+  return false
 end
 
 function Vendor:Repair()
@@ -91,11 +98,16 @@ function Vendor:OnMerchantShow()
   if InCombatLockdown and InCombatLockdown() then return end
   local db = NN.db and NN.db.vendor
   if not db then return end
-  if db.sellJunk then self:SellJunk() end
-  if db.repair then self:Repair() end
+  self.repairPending = db.repair and true or nil
+  local selling = db.sellJunk and self:SellJunk()
+  if not selling and self.repairPending then
+    self.repairPending = nil
+    self:Repair()
+  end
 end
 
 function Vendor:OnMerchantClosed()
+  self.repairPending = nil
   if self.queue then finishSelling() end
 end
 
@@ -106,8 +118,7 @@ NN:OnAnyEvent(function(event)
   elseif event == "MERCHANT_CLOSED" then Vendor:OnMerchantClosed() end
 end)
 
--- Options: two checkboxes on the Bags page (BagFull.lua registers the page;
--- this adds to it through a second registration of the same page key).
+-- Options: two checkboxes on their own "Vendors" page.
 NN.Options.RegisterPage("vendor", "OPT_BAGS_VENDOR", function(category, layout)
   local Options = NN.Options
   Options.AddCheckbox(category, "NN_vendor_sellJunk", L.OPT_VENDOR_SELL, L.OPT_VENDOR_SELL_TT,

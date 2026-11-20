@@ -22,15 +22,18 @@ local function openLegacy()
   if windowAvailable() then ToggleLegacySystemUI() end
 end
 
--- Opening the window, by us or by the player, counts as having seen it.
-NN:AfterLogin(function()
+-- Opening the window, by us or by the player, counts as having seen it. The
+-- window's code can load late, so the hook is installed whenever it is first
+-- seen to exist.
+local function ensureHook()
   if windowAvailable() and not NN.legacyHooked then
     NN.legacyHooked = true
     hooksecurefunc("ToggleLegacySystemUI", function()
       if NN.db then NN.db.seen.legacy = true; NN:MarkDirty("legacy"); NN:Schedule() end
     end)
   end
-end)
+end
+NN:AfterLogin(ensureHook)
 
 NN:RegisterRule({
   name = "legacy",
@@ -38,6 +41,7 @@ NN:RegisterRule({
   help = L.LEGACY_HELP,
   events = { "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD" },
   applies = function()
+    ensureHook()
     return windowAvailable() and (NN.Plain(UnitLevel("player")) or 0) >= UNLOCK_LEVEL
   end,
   check = function()

@@ -27,4 +27,13 @@ return {
     _G.ToggleLegacySystemUI = nil; WOW.state.level = 30; wipe(NewbieNudge.appliesCache)
     assert_true(not NewbieNudge:Applies(NewbieNudge.ruleByName.legacy))
   end,
+  pressing_y_later_clears_the_nudge_even_if_the_window_loaded_late = function()
+    WOW.state.level = 25; _G.ToggleLegacySystemUI = nil
+    load_addon()
+    _G.ToggleLegacySystemUI = function() WOW.record("ToggleLegacySystemUI") end -- the UI loads later
+    wipe(NewbieNudge.appliesCache); WOW.FireEvent("PLAYER_LEVEL_UP", 25); run_checks()
+    assert_eq(#results_of("legacy"), 1)
+    ToggleLegacySystemUI(); run_checks()
+    assert_eq(#results_of("legacy"), 0)
+  end,
 }

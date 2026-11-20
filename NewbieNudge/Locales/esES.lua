@@ -507,6 +507,10 @@ local T = {
   FLIGHT_PATH_HELP = "Cada zona tiene maestros de vuelo; hablar con uno una vez desbloquea esa ruta para siempre. Muestra los de tu zona actual que aún no has visitado.",
   FLIGHT_PATH_ROW = "Ruta de vuelo por desbloquear en %s: %s.",
   FLIGHT_PATH_ROW_MANY = "Rutas de vuelo por desbloquear en %s: %s y %d más.",
+  -- Warlock demon
+  DEMON_TITLE = "Demonio sin invocar",
+  DEMON_HELP = "Un brujo siempre debería tener un demonio fuera. Te avisa cuando no hay ninguno invocado y hace brillar el hechizo de invocación en tu barra.",
+  DEMON_ROW_MISSING = "No tienes tu demonio invocado.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
