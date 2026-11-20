@@ -145,6 +145,11 @@ local T = {
   QUEST_ITEM_HELP = "Algunos objetos que recoges inician una misión al hacer clic derecho. Esto muestra los que esperan en tus bolsas.",
   QUEST_ITEM_ROW = "%s inicia una misión. Haz clic derecho en él en tus bolsas.",
   QUEST_ITEM_UNKNOWN = "Un objeto",
+  -- Materials bag
+  MATERIALS_BAG_TITLE = "Bolsa de materiales sin usar",
+  MATERIALS_BAG_HELP = "Tienes un hueco aparte para una bolsa de materiales junto a tus bolsas normales. Esto te recuerda equipar la que llevas encima.",
+  MATERIALS_BAG_ROW_EMPTY = "Tienes una bolsa de materiales en el inventario que no está equipada.",
+  MATERIALS_BAG_ROW_BIGGER = "Una bolsa de materiales de tu inventario es más grande que la que usas.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

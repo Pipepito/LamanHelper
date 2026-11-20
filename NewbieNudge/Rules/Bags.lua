@@ -54,6 +54,9 @@ local function bagInventorySlot(bag)
   return slot or (19 + bag)
 end
 
+NN.ContainerSlots = containerSlots
+NN.BagInventorySlot = bagInventorySlot
+
 local function hasEmptyBagSlot()
   for bag = FIRST_BAG, LAST_BAG do
     if GetInventoryItemID("player", bagInventorySlot(bag)) == nil then return true end

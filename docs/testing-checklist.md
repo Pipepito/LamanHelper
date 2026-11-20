@@ -30,6 +30,22 @@ Where it differs, fix the rule and `tests/wow_stub.lua` together and add a test.
 | `/dump #C_Console.GetAllCommands()` | camera | a few hundred |
 | `/dump C_CVar.GetCVar("cameraDistanceMaxZoomFactor")` | camera | "1.9" or similar |
 
+### Materials bag (v2, rule `materials_bag`)
+
+With a materials bag in a bag slot or equipped, in the game chat:
+
+```
+/run NNi=C_Item.GetItemInfoInstant NNf=function(id) print(id,(C_Item.GetItemInfo(id)),"fam",C_Item.GetItemFamily(id),"cls",select(6,NNi(id)),"sub",select(7,NNi(id))) end
+```
+```
+/run for b=0,5 do for s=1,C_Container.GetContainerNumSlots(b) do local id=C_Container.GetContainerItemID(b,s) if id and select(6,NNi(id))==1 then print("bag",b,s) NNf(id) end end end
+```
+
+Write the `fam` value into `NN.REAGENT_BAG_FAMILY` and the `sub` value into
+`NN.REAGENT_BAG_SUBCLASS` at the top of `Rules/MaterialsBag.lua`. Until one
+of them is set the rule never shows. Confirmed 2026-11-20: bag inventory
+slots are 31–34 and the materials slot is 35 (`ContainerIDToInventoryID`).
+
 ## 1. Panel and commands
 
 - [ ] `/nudge test` shows up to 10 rows plus "…and N more"; icons and text readable; hover a row shows title, help and hints.

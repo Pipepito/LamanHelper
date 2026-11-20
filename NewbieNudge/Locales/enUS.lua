@@ -145,4 +145,9 @@ NN.L = setmetatable({
   QUEST_ITEM_HELP = "Some items you pick up start a quest when you right-click them. This shows the ones waiting in your bags.",
   QUEST_ITEM_ROW = "%s starts a quest. Right-click it in your bags.",
   QUEST_ITEM_UNKNOWN = "An item",
+  -- Materials bag
+  MATERIALS_BAG_TITLE = "Materials bag not in use",
+  MATERIALS_BAG_HELP = "You have a separate slot for a materials bag next to your normal bags. This reminds you to equip one you are carrying.",
+  MATERIALS_BAG_ROW_EMPTY = "You have a materials bag in your inventory that isn't equipped.",
+  MATERIALS_BAG_ROW_BIGGER = "A materials bag in your inventory is bigger than the one you're using.",
 }, { __index = function(_, key) return key end })
