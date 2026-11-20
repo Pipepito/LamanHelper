@@ -2,7 +2,7 @@
 -- WOW.calls; nothing here simulates game behaviour beyond returning the state
 -- a test set. Lua 5.1 only.
 
-WOW = { calls = {}, printed = {}, timers = {}, eventFrames = {}, settings = {}, extraFiles = nil }
+WOW = { calls = {}, printed = {}, timers = {}, eventFrames = {}, settings = {}, extraFiles = nil, keepData = false }
 
 local function deepcopy(t)
   if type(t) ~= "table" then return t end
@@ -38,6 +38,8 @@ local DEFAULT_STATE = {
   containerFrames = {},
   raceName = "Human", raceToken = "Human",
   professionInfo = {},
+  instance = { name = "", type = "none", instanceID = 0 }, zoneNames = {}, completedQuests = {},
+  faction = "Alliance", mapID = nil, mapInfo = {},
 }
 
 function WOW.Reset()
@@ -364,6 +366,11 @@ function InCombatLockdown() return S().inCombat end
 function IsResting() return S().resting end
 function IsMounted() return S().mounted end
 function IsInInstance() local t = S().instanceType; return t ~= "none", t end
+function GetInstanceInfo() local i = S().instance; return i.name, i.type, 0, "", 5, 0, false, i.instanceID, 5, nil end
+function GetRealZoneText(id) return S().zoneNames[id] end
+function UnitFactionGroup(unit) return S().faction, S().faction end
+function OpenWorldMap(mapID) record("OpenWorldMap", mapID) end
+function ToggleWorldMap() record("ToggleWorldMap") end
 function GetNumGroupMembers() return 0 end
 function HasNewMail() return S().newMail end
 function UnitUsesAmmo(unit) return S().usesAmmo end
@@ -565,6 +572,7 @@ function C_QuestLog.GetNumQuestLogEntries()
   return #log, quests
 end
 function C_QuestLog.GetMaxNumQuestsCanAccept() return S().quests.max end
+function C_QuestLog.IsQuestFlaggedCompleted(id) return S().completedQuests[id] == true end
 function C_QuestLog.GetInfo(i)
   local q = S().questLog and S().questLog[i]
   if not q then return nil end
@@ -585,6 +593,9 @@ C_RestrictedActions = nil
 -- World map, exploration, texture pools
 -------------------------------------------------------------------------------
 C_Map = {}
+function C_Map.GetBestMapForUnit(unit) return S().mapID end
+function C_Map.GetMapInfo(mapID) local m = S().mapInfo[mapID]; if m then return { mapID = mapID, name = m.name, mapType = m.mapType, parentMapID = m.parentMapID } end end
+Enum.UIMapType = { Cosmic = 0, World = 1, Continent = 2, Zone = 3, Dungeon = 4, Micro = 5, Orphan = 6 }
 function C_Map.GetMapArtLayers(mapID) return S().mapLayers[mapID] or { { tileWidth = 256, tileHeight = 256 } } end
 C_MapExplorationInfo = {}
 function C_MapExplorationInfo.GetExploredMapTextures(mapID) return S().explored[mapID] end

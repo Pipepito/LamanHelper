@@ -31,7 +31,7 @@ NN.defaults = {
   combatStrip = true,
   snoozeMinutes = 60,
   errors = {},
-  seen = { rules = {} },
+  seen = { rules = {}, dungeons = {} },
   map = { reveal = true, brightness = 0.6, desaturate = true },
 }
 

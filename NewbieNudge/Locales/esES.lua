@@ -158,6 +158,14 @@ local T = {
   PROFESSION_RANK_TITLE = "Siguiente rango de profesión disponible",
   PROFESSION_RANK_HELP = "Tu habilidad de profesión está cerca de su tope y ya tienes nivel para aprender el siguiente rango. Lo enseña un instructor en cualquier capital.",
   PROFESSION_RANK_ROW = "Puedes aprender el siguiente rango de %s (%d/%d). Visita a un instructor de %s.",
+  -- Dungeons and zones
+  DUNGEON_TITLE = "Una mazmorra para tu nivel",
+  DUNGEON_HELP = "Nombra una mazmorra cuyo rango de nivel te encaja. Las mazmorras tienen sus propias misiones; cógelas fuera antes. La fila desaparece cuando has entrado o has hecho sus misiones.",
+  DUNGEON_ROW = "%s (%d–%d) encaja con tu nivel. Coge sus misiones antes de entrar.",
+  ZONE_TITLE = "Nivel de la zona",
+  ZONE_HELP = "Compara la zona en la que estás con tu nivel, para que sepas cuándo las misiones dan menos experiencia o cuándo la zona es peligrosa.",
+  ZONE_BELOW_ROW = "%s (%d–%d) está por debajo de tu nivel. Las misiones aquí dan menos XP.",
+  ZONE_ABOVE_ROW = "%s (%d–%d) está por encima de tu nivel. Ten cuidado aquí.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

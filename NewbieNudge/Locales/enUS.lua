@@ -158,4 +158,12 @@ NN.L = setmetatable({
   PROFESSION_RANK_TITLE = "Next profession rank available",
   PROFESSION_RANK_HELP = "Your profession skill is close to its cap and you are high enough level to learn the next rank. A trainer in any capital teaches it.",
   PROFESSION_RANK_ROW = "You can learn the next rank of %s (%d/%d). Visit a %s trainer.",
+  -- Dungeons and zones
+  DUNGEON_TITLE = "A dungeon for your level",
+  DUNGEON_HELP = "Names a dungeon whose level range fits you. Dungeons have their own quests; grab them outside first. The row goes away once you have been inside or done its quests.",
+  DUNGEON_ROW = "%s (%d–%d) fits your level. Pick up its quests before you go.",
+  ZONE_TITLE = "Zone level",
+  ZONE_HELP = "Compares the zone you are in with your level, so you know when quests here give less experience or when the area is dangerous.",
+  ZONE_BELOW_ROW = "%s (%d–%d) is below your level. Quests here give less XP.",
+  ZONE_ABOVE_ROW = "%s (%d–%d) is above your level. Be careful here.",
 }, { __index = function(_, key) return key end })

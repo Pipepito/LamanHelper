@@ -49,6 +49,7 @@ function load_addon()
     if line:match("%S") and not line:match("^##") then files[#files + 1] = line end
   end
   toc:close()
+  if not WOW.keepData then files[#files + 1] = TESTS_DIR .. "/fixtures/quiet_data.lua" end
   for _, extra in ipairs(WOW.extraFiles or {}) do files[#files + 1] = extra end
   for _, rel in ipairs(files) do
     local path = rel:match("^/") and rel or (ADDON_DIR .. "/" .. rel:gsub("\\", "/"))
