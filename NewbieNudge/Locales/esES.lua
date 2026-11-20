@@ -68,6 +68,14 @@ local T = {
   BUFFS_ROW = "Falta el buff: %s",
   BUFFS_ROW_NOT_ON_BAR = "Falta el buff: %s (no está en tu barra de acción)",
   BUFFS_ROW_WEAPON = "Falta la mejora de arma: %s",
+  SPELL_RANKS_TITLE = "Rangos antiguos en tus barras",
+  SPELL_RANKS_HELP = "Has aprendido un rango más fuerte de este hechizo, pero tu barra aún tiene el antiguo. Haz clic en esta línea para cambiarlo.",
+  SPELL_RANKS_ROW = "%s en tu barra de acción es %s; conoces %s.",
+  SPELL_RANKS_ROW_NORANK = "%s en tu barra de acción es un rango antiguo.",
+  TRACKING_TITLE = "Rastreo de recolección",
+  TRACKING_HELP = "El rastreo muestra hierbas o vetas en tu minimapa. Haz clic en la lupa junto al minimapa, o en esta línea.",
+  TRACKING_ROW_HERBS = "Activa %s en el minimapa para ver las hierbas.",
+  TRACKING_ROW_MINERALS = "Activa %s en el minimapa para ver las vetas.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
