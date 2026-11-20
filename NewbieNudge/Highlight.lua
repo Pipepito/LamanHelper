@@ -84,6 +84,24 @@ function Highlight:InvalidateBagButtons()
   self.bagButtonCache = nil
 end
 
+-- Blizzard's talent window, hooked once so glows come back when it opens.
+function Highlight:TalentFrame()
+  local f = (PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame) or (ClassTalentFrame and ClassTalentFrame.TalentsTab)
+  if f and f ~= self.talentFrame then
+    self.talentFrame = f
+    if f.HookScript then
+      f:HookScript("OnShow", function() Highlight:ForgetActive(); Highlight:Apply(NN:ActiveRows()) end)
+    end
+  end
+  return f
+end
+
+function Highlight:ButtonForNode(nodeID)
+  local f = self:TalentFrame()
+  if f and f.GetTalentButtonByNodeID then return f:GetTalentButtonByNodeID(nodeID) end
+  return nil
+end
+
 -- Frames a result's highlight asks for: a key string, or a table with any of
 -- key (frame key), action (slots), bagslots ({bag, slot} pairs).
 function Highlight:TargetsFor(h, wanted)
@@ -106,6 +124,10 @@ function Highlight:TargetsFor(h, wanted)
         local button = self:ButtonForBagSlot(pair[1], pair[2])
         if button then wanted[button] = true end
       end
+    end
+    if h.node ~= nil then
+      local button = self:ButtonForNode(h.node)
+      if button then wanted[button] = true end
     end
   end
 end
@@ -197,7 +219,7 @@ end
 -- so forget what we showed and let the next Apply show it again.
 local RESHOW_EVENTS = {
   PLAYER_ENTERING_WORLD = true, UPDATE_SHAPESHIFT_FORM = true, ACTIONBAR_SLOT_CHANGED = true,
-  ACTIONBAR_PAGE_CHANGED = true, UPDATE_BONUS_ACTIONBAR = true,
+  ACTIONBAR_PAGE_CHANGED = true, UPDATE_BONUS_ACTIONBAR = true, TRAIT_NODE_CHANGED = true,
 }
 
 function Highlight:ForgetActive()

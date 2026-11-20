@@ -24,7 +24,7 @@ local DEFAULT_STATE = {
   spellBook = { lines = {}, items = {} },
   actions = {},
   weaponEnchant = { main = false, off = false },
-  talents = { configID = 1, treeID = 10, unspent = 0 },
+  talents = { configID = 1, treeID = 10, unspent = 0, nodes = {} },
   tracking = {},
   usesAmmo = false, ammoCount = 0,
   pet = { exists = false, hasUI = false, isHunterPet = false, happiness = 3, trainingTotal = 0, trainingSpent = 0 },
@@ -48,6 +48,7 @@ function WOW.Reset()
   WOW.calls, WOW.printed, WOW.timers, WOW.eventFrames, WOW.settings = {}, {}, {}, {}, {}
   if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
   if LootFrame then LootFrame.shown = false end
+  PlayerSpellsFrame = nil
 end
 WOW.Reset()
 local S = function() return WOW.state end
@@ -561,6 +562,35 @@ function C_ClassTalents.GetActiveConfigID() return S().talents.configID end
 C_Traits = {}
 function C_Traits.GetConfigInfo(id) if id then return { ID = id, treeIDs = { S().talents.treeID } } end end
 function C_Traits.GetTreeCurrencyInfo(configID, treeID) return { { quantity = S().talents.unspent, maxQuantity = 51, spent = 0 } } end
+-- S().talents.nodes = { [nodeID] = { ranks =, maxRanks =, spellID = } }
+function C_Traits.GetTreeNodes(treeID)
+  local ids = {}
+  for id in pairs(S().talents.nodes or {}) do ids[#ids + 1] = id end
+  table.sort(ids)
+  return ids
+end
+function C_Traits.GetNodeInfo(configID, nodeID)
+  local n = S().talents.nodes[nodeID]
+  if not n then return nil end
+  return { ID = nodeID, ranksPurchased = n.ranks or 0, activeRank = n.ranks or 0, maxRanks = n.maxRanks or 1, entryIDs = { nodeID * 10 } }
+end
+function C_Traits.GetEntryInfo(configID, entryID) return { definitionID = entryID } end
+function C_Traits.GetDefinitionInfo(defID) local n = S().talents.nodes[defID / 10]; return { spellID = n and n.spellID } end
+-- Blizzard's talent window: WOW.NewTalentFrame() creates PlayerSpellsFrame.TalentsFrame with a button per node.
+function WOW.NewTalentFrame()
+  local f = CreateFrame("Frame", "PlayerSpellsTalentsFrame", UIParent)
+  f.buttons = {}
+  for id in pairs(S().talents.nodes or {}) do f.buttons[id] = CreateFrame("Button", nil, f) end
+  function f:GetTalentButtonByNodeID(id) return self.buttons[id] end
+  PlayerSpellsFrame = { TalentsFrame = f }
+  return f
+end
+StaticPopupDialogs = {}
+function StaticPopup_Show(which, ...)
+  record("StaticPopup_Show", which)
+  local dialog = { editBox = CreateFrame("EditBox") }
+  return dialog
+end
 
 C_Minimap = {}
 function C_Minimap.GetNumTrackingTypes() return #S().tracking end

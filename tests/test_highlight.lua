@@ -82,6 +82,21 @@ return {
     for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" then n = n + 1 end end
     assert_eq(n, 1)
   end,
+  node_highlight_glows_talent_button_when_frame_exists = function()
+    WOW.state.talents.nodes = { [11] = { ranks = 0, maxRanks = 2, spellID = 1 } }
+    load_addon(); WOW.NewTalentFrame()
+    NewbieNudge.Highlight:Apply({ { rule = { name = "r" }, result = { text = "t", highlight = { key = "talents", node = 11 } }, stale = false } })
+    local shown = {}
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" then shown[c[2]] = true end end
+    assert_true(shown[PlayerSpellsMicroButton]); assert_true(shown[PlayerSpellsFrame.TalentsFrame.buttons[11]])
+  end,
+  node_highlight_without_frame_only_glows_micro_button = function()
+    load_addon()
+    NewbieNudge.Highlight:Apply({ { rule = { name = "r" }, result = { text = "t", highlight = { key = "talents", node = 11 } }, stale = false } })
+    local n = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "glow_show" then n = n + 1 end end
+    assert_eq(n, 1)
+  end,
   bagslot_buttons_rescanned_after_bag_open = function()
     load_addon()
     local rows = { { rule = { name = "r" }, result = { text = "t", highlight = { bagslots = { { 0, 3 } } } }, stale = false } }

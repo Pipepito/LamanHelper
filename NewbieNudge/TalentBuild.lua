@@ -66,9 +66,144 @@ function TalentBuild:Clear()
   recheck()
 end
 
+-------------------------------------------------------------------------------
+-- Where the player is relative to the build
+-------------------------------------------------------------------------------
+
+-- Walks the build in order with a running count per talent; the first pick
+-- whose count exceeds the purchased ranks on its node is the next one.
+-- Returns index, urlId, entry; nil when every pick is satisfied.
+function TalentBuild.NextPick(picks, ranksByNode, data)
+  local count = {}
+  for i, id in ipairs(picks) do
+    local entry = data[id]
+    if entry then
+      count[id] = (count[id] or 0) + 1
+      if count[id] > (ranksByNode[entry.node] or 0) then return i, id, entry end
+    end
+  end
+  return nil
+end
+
+-- True when the player holds ranks on a node the build has not reached
+-- before the next pick (they went off the build).
+function TalentBuild.Differs(picks, nextIndex, ranksByNode, data)
+  local reached = {}
+  for i = 1, (nextIndex or (#picks + 1)) - 1 do
+    local entry = data[picks[i]]
+    if entry then reached[entry.node] = true end
+  end
+  for node, ranks in pairs(ranksByNode) do
+    if ranks > 0 and not reached[node] then return true end
+  end
+  return false
+end
+
+-- { [nodeID] = purchased ranks } from the client, or nil on a secret value.
+function TalentBuild:RanksByNode()
+  local configID, treeID = NN.TalentTree and NN.TalentTree()
+  if not configID or not (C_Traits.GetTreeNodes and C_Traits.GetNodeInfo) then return {} end
+  local ranks = {}
+  for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID) or {}) do
+    local info = C_Traits.GetNodeInfo(configID, nodeID)
+    if info then
+      local r = info.ranksPurchased
+      if r == nil then r = info.activeRank end
+      if issecretvalue and issecretvalue(r) then return nil end
+      ranks[nodeID] = NN.Plain(r) or 0
+    end
+  end
+  return ranks
+end
+
+function TalentBuild:SpentPoints()
+  local total = 0
+  for _, r in pairs(self:RanksByNode() or {}) do total = total + r end
+  return total
+end
+
+local function talentName(entry)
+  local configID = NN.TalentTree and NN.TalentTree()
+  if configID and C_Traits.GetNodeInfo and C_Traits.GetEntryInfo and C_Traits.GetDefinitionInfo then
+    local info = C_Traits.GetNodeInfo(configID, entry.node)
+    local entryID = info and info.entryIDs and info.entryIDs[1]
+    local e = entryID and C_Traits.GetEntryInfo(configID, entryID)
+    local def = e and e.definitionID and C_Traits.GetDefinitionInfo(e.definitionID)
+    local spellID = def and NN.Plain(def.spellID)
+    local name = spellID and C_Spell and C_Spell.GetSpellName and NN.Plain(C_Spell.GetSpellName(spellID), "string")
+    if name then return name end
+  end
+  local name = C_Spell and C_Spell.GetSpellName and NN.Plain(C_Spell.GetSpellName(entry.spell), "string")
+  return name or tostring(entry.spell)
+end
+
 function TalentBuild:Status()
   local build = NN.db and NN.db.build
   if not build then return L.BUILD_STATUS_NONE end
-  local taken = self.SpentPoints and self:SpentPoints() or 0
-  return L.BUILD_STATUS:format((UnitClass("player")), #build.picks, taken)
+  return L.BUILD_STATUS:format((UnitClass("player")), #build.picks, self:SpentPoints())
 end
+
+-------------------------------------------------------------------------------
+-- Rule
+-------------------------------------------------------------------------------
+
+local TALENT_ICON = 136116
+
+NN:RegisterRule({
+  name = "talent_build",
+  title = L.BUILD_TITLE,
+  help = L.BUILD_HELP,
+  events = { "TRAIT_TREE_CURRENCY_INFO_UPDATED", "TRAIT_CONFIG_UPDATED", "TRAIT_NODE_CHANGED", "PLAYER_TALENT_UPDATE", "PLAYER_LEVEL_UP" },
+  applies = function()
+    return NN.db ~= nil and NN.db.build ~= nil and (NN.Plain(UnitLevel("player")) or 0) >= 10
+  end,
+  check = function()
+    local build = NN.db.build
+    local data = NN.IcyTalents and NN.IcyTalents[NN.classFile]
+    if not build or not data then return nil end
+    local unspent = NN.UnspentTalentPoints()
+    if unspent == NN.UNKNOWN then return NN.UNKNOWN end
+    local ranks = TalentBuild:RanksByNode()
+    if ranks == nil then return NN.UNKNOWN end
+    local idx, _, entry = TalentBuild.NextPick(build.picks, ranks, data)
+    if not idx or (unspent or 0) <= 0 then return nil end
+    local purchased = ranks[entry.node] or 0
+    local results = {
+      { text = L.BUILD_NEXT_ROW:format(talentName(entry), purchased + 1, entry.maxRank or 1), icon = TALENT_ICON,
+        onClick = NN.OpenTalents, highlight = { key = "talents", node = entry.node } },
+    }
+    if TalentBuild.Differs(build.picks, idx, ranks, data) then
+      results[#results + 1] = { text = L.BUILD_DIFFERS_ROW, icon = TALENT_ICON, onClick = NN.OpenTalents }
+    end
+    return results
+  end,
+  sample = function() return { { text = L.BUILD_NEXT_ROW:format("Spirit Tap", 1, 5), icon = TALENT_ICON } } end,
+})
+
+-------------------------------------------------------------------------------
+-- Options page and paste popup
+-------------------------------------------------------------------------------
+
+if StaticPopupDialogs then
+  StaticPopupDialogs["NEWBIENUDGE_BUILD"] = {
+    text = L.BUILD_POPUP_TEXT, button1 = OKAY or "Okay", button2 = CANCEL or "Cancel",
+    hasEditBox = true, editBoxWidth = 350, maxLetters = 0, timeout = 0, whileDead = true, hideOnEscape = true,
+    OnAccept = function(self) TalentBuild:Set(self.editBox:GetText()) end,
+    EditBoxOnEnterPressed = function(self)
+      local parent = self:GetParent()
+      TalentBuild:Set(parent.editBox:GetText())
+      parent:Hide()
+    end,
+    EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
+    OnShow = function(self) self.editBox:SetText(""); if self.editBox.SetFocus then self.editBox:SetFocus() end end,
+  }
+end
+
+NN.Options.RegisterPage("build", "OPT_BUILD", function(category, layout)
+  local Options = NN.Options
+  Options.AddHeader(layout, TalentBuild:Status())
+  Options.AddButton(layout, L.OPT_BUILD_PASTE, L.OPT_BUTTON_DO, function()
+    if StaticPopup_Show then StaticPopup_Show("NEWBIENUDGE_BUILD") end
+  end, L.OPT_BUILD_PASTE_TT)
+  Options.AddButton(layout, L.OPT_BUILD_CLEAR, L.OPT_BUTTON_DO, function() TalentBuild:Clear() end)
+end)
