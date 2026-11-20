@@ -106,14 +106,23 @@ local RECHECK_ALL = { PLAYER_ENTERING_WORLD = true, PLAYER_REGEN_ENABLED = true,
 local RESET_APPLIES = { PLAYER_LEVEL_UP = true, SPELLS_CHANGED = true, PLAYER_SPECIALIZATION_CHANGED = true }
 
 -- Registers one event name, or "EVENT:unit" through RegisterUnitEvent.
+-- Unknown event names raise in the client; a bad name must not take the
+-- whole rule file down, so registration is protected and simply skipped.
 function NN:RegisterEvent(spec)
   local event, unit = spec:match("^([^:]+):(.+)$")
+  local ok
   if event then
-    if self.events.RegisterUnitEvent then self.events:RegisterUnitEvent(event, unit) else self.events:RegisterEvent(event) end
-    return event
+    if self.events.RegisterUnitEvent then
+      ok = pcall(self.events.RegisterUnitEvent, self.events, event, unit)
+    else
+      ok = pcall(self.events.RegisterEvent, self.events, event)
+    end
+  else
+    event = spec
+    ok = pcall(self.events.RegisterEvent, self.events, event)
   end
-  self.events:RegisterEvent(spec)
-  return spec
+  if not ok and self.db then self.db.errors["event:" .. event] = "unknown event" end
+  return event
 end
 
 function NN:RegisterRuleEvents(rule)
@@ -243,7 +252,7 @@ function NN:IsSnoozed(name)
   local expiry = self.db.snoozed[name]
   if expiry == nil then return false end
   if expiry == 0 then return true end
-  if expiry <= GetTime() then
+  if expiry <= time() then
     self.db.snoozed[name] = nil
     return false
   end
@@ -260,7 +269,8 @@ end
 
 function NN:Snooze(name, minutes)
   if not self.ruleByName[name] then return end
-  self.db.snoozed[name] = (minutes == 0) and 0 or (GetTime() + minutes * 60)
+  -- wall-clock seconds (time()), never GetTime(): the latter is uptime and is saved across sessions
+  self.db.snoozed[name] = (minutes == 0) and 0 or (time() + minutes * 60)
   self:MarkDirty(name)
   self:Schedule()
 end
@@ -319,7 +329,7 @@ function NN:RunChecks()
         local ok, res = pcall(rule.check)
         if not ok then
           self:DisableRuleForSession(rule, res)
-        elseif res == self.UNKNOWN or self.HasSecret(res) then
+        elseif self.HasSecret(res) or res == self.UNKNOWN then
           -- unreadable right now: keep previous results
         else
           self.results[rule.name] = normalise(res)

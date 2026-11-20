@@ -18,6 +18,7 @@ NN:RegisterRule({
     local low, broken = false, false
     for slot = INVSLOT_FIRST_EQUIPPED or 1, INVSLOT_LAST_EQUIPPED or 17 do
       local cur, max = GetInventoryItemDurability(slot)
+      if issecretvalue and (issecretvalue(cur) or issecretvalue(max)) then return NN.UNKNOWN end
       if cur ~= nil or max ~= nil then
         cur, max = NN.Plain(cur), NN.Plain(max)
         if cur == nil or max == nil then return NN.UNKNOWN end

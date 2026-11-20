@@ -51,7 +51,7 @@ return {
     NewbieNudge.db.snoozeMinutes = 45
     show({ { text = "one" } })
     WOW.Click(NewbieNudge.Panel.rows[1], "RightButton")
-    assert_eq(NewbieNudge.db.snoozed.a, WOW.state.time + 45 * 60)
+    assert_eq(NewbieNudge.db.snoozed.a, time() + 45 * 60)
     WOW.AdvanceTime(0.5)
     assert_true(not NewbieNudgePanel:IsShown())
   end,
@@ -67,9 +67,10 @@ return {
     show({ { text = "one", onClick = function() end } })
     WOW.Hover(NewbieNudge.Panel.rows[1])
     assert_eq(GameTooltip.lines[1], "T_a")
-    assert_eq(GameTooltip.lines[2], "Help for a")
-    assert_eq(GameTooltip.lines[3], NewbieNudge.L.ROW_HINT_CLICK)
-    assert_eq(GameTooltip.lines[4], NewbieNudge.L.ROW_HINT_SNOOZE:format(60))
+    assert_eq(GameTooltip.lines[2], "one", "the reminder text itself (the strip has no text otherwise)")
+    assert_eq(GameTooltip.lines[3], "Help for a")
+    assert_eq(GameTooltip.lines[4], NewbieNudge.L.ROW_HINT_CLICK)
+    assert_eq(GameTooltip.lines[5], NewbieNudge.L.ROW_HINT_SNOOZE:format(60))
   end,
   stale_rows_are_half_alpha = function()
     load_addon()
@@ -137,6 +138,13 @@ return {
     assert_true(NewbieNudge.Panel.title:IsShown())
     NewbieNudge.Panel:SetLocked(true)
     assert_true(not NewbieNudge.Panel.title:IsShown())
+  end,
+  long_text_rows_get_two_line_height = function()
+    load_addon()
+    show({ { text = string.rep("long text ", 8) }, { text = "short" } })
+    assert_eq(NewbieNudge.Panel.rows[1]:GetHeight(), 36)
+    assert_eq(NewbieNudge.Panel.rows[2]:GetHeight(), 24)
+    assert_eq(select(5, NewbieNudge.Panel.rows[2]:GetPoint(1)), -36, "second row starts below the wrapped first row")
   end,
   scale_applied_from_db = function()
     _G.NewbieNudgeDB = { panel = { scale = 1.3 } }

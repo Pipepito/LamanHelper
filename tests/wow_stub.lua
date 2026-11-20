@@ -13,7 +13,7 @@ end
 
 local DEFAULT_STATE = {
   locale = "enUS", class = "MAGE", className = "Mage", level = 20, maxLevel = 60,
-  time = 1000, inCombat = false, resting = false, mounted = false, dead = false,
+  time = 1000, epoch = 1700000000, inCombat = false, resting = false, mounted = false, dead = false,
   instanceType = "none", projectID = 18, shiftDown = false,
   bags = { [0] = { numSlots = 16, family = 0, items = {} } },
   inventory = {},
@@ -175,7 +175,8 @@ function Region:SetJustifyV(j) self.justifyV = j end
 function Region:SetWordWrap(b) self.wordWrap = b end
 function Region:SetNonSpaceWrap() end
 function Region:SetMaxLines(n) self.maxLines = n end
-function Region:GetStringWidth() return (self.textValue and #self.textValue * 6) or 0 end
+function Region:GetUnboundedStringWidth() return (self.textValue and #self.textValue * 6) or 0 end
+function Region:GetStringWidth() local w = self:GetUnboundedStringWidth(); if self.wordWrap and self.width and w > self.width then return self.width end return w end
 function Region:GetStringHeight() return 12 end
 function Region:GetNumLines() return 1 end
 function Region:SetFont(f, s, fl) self.font = { f, s, fl } end
@@ -209,7 +210,9 @@ function Region:Fire(handler, ...)
   if self.scripts[handler] then self.scripts[handler](self, ...) end
   for _, fn in ipairs(self.hooks[handler] or {}) do fn(self, ...) end
 end
+WOW.unknownEvents = {}
 function Region:RegisterEvent(event)
+  if WOW.unknownEvents[event] then error("Attempt to register unknown event \"" .. tostring(event) .. "\"") end
   local list = WOW.eventFrames[event]
   if not list then list = {}; WOW.eventFrames[event] = list end
   for _, f in ipairs(list) do if f == self then return end end
@@ -296,7 +299,7 @@ end
 
 function GetTime() return S().time end
 function GetServerTime() return math.floor(S().time) end
-function time() return math.floor(S().time) end
+function time() return math.floor(S().epoch) end
 function date(fmt) return fmt or "" end
 
 C_Timer = {}
@@ -333,6 +336,7 @@ function WOW.AdvanceTime(seconds)
       best.fn()
     end
   end
+  S().epoch = S().epoch + seconds
   S().time = target
 end
 

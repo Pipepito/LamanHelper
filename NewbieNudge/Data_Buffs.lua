@@ -7,16 +7,16 @@ local _, NN = ...
 
 NN.BuffData = {
   MAGE = {
-    { ids = { 1459 } },                       -- Arcane Intellect
+    { ids = { 1459, 23028 } },                -- Arcane Intellect / Arcane Brilliance
     { ids = { 168, 7302, 6117 } },            -- Frost Armor / Ice Armor / Mage Armor
   },
   PRIEST = {
-    { ids = { 1243 } },                       -- Power Word: Fortitude
+    { ids = { 1243, 21562 } },                -- Power Word: Fortitude / Prayer of Fortitude
     { ids = { 588 } },                        -- Inner Fire
-    { ids = { 14752 } },                      -- Divine Spirit
+    { ids = { 14752, 27681 } },               -- Divine Spirit / Prayer of Spirit
   },
   DRUID = {
-    { ids = { 1126 } },                       -- Mark of the Wild
+    { ids = { 1126, 21849 } },                -- Mark of the Wild / Gift of the Wild
     { ids = { 467 } },                        -- Thorns
     { ids = { 16864 } },                      -- Omen of Clarity
   },
@@ -28,7 +28,8 @@ NN.BuffData = {
     { ids = { 8017, 8024, 8033, 8232 }, weapon = true }, -- Rockbiter / Flametongue / Frostbrand / Windfury
   },
   PALADIN = {
-    { ids = { 19740, 19742, 20217, 20911, 19977, 1038 } }, -- Blessings on self
+    { ids = { 19740, 19742, 20217, 20911, 19977, 1038,
+              25782, 25894, 25898, 25899, 25890, 25895 } }, -- Blessings on self, including Greater Blessings
     { ids = { 465, 7294, 19746, 19876, 19888, 19891, 20218 } }, -- Auras
   },
   HUNTER = {

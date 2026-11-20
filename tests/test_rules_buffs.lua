@@ -95,6 +95,13 @@ return {
     assert_eq(#r, 4)
     assert_eq(r[4].text, L().MORE_ROWS:format(1))
   end,
+  group_version_of_buff_satisfies = function()
+    mage()
+    WOW.state.auras[23028] = true -- Arcane Brilliance up instead of Arcane Intellect
+    WOW.state.auras[168] = true
+    load_addon(); run_checks()
+    assert_eq(#results_of("buffs"), 0)
+  end,
   reacts_to_unit_aura_player = function()
     mage()
     WOW.state.auras[1459] = true; WOW.state.auras[168] = true
@@ -110,7 +117,7 @@ return {
       assert_true(NewbieNudge.BuffData[class], class)
     end
     assert_nil(NewbieNudge.BuffData.WARRIOR)
-    assert_eq(NewbieNudge.BuffData.MAGE[1].ids, { 1459 })
+    assert_eq(NewbieNudge.BuffData.MAGE[1].ids, { 1459, 23028 })
     assert_eq(NewbieNudge.BuffData.ROGUE[1].weapon, true)
   end,
 }

@@ -59,6 +59,7 @@ local function showTooltip(owner, data)
   if not data then return end
   GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
   GameTooltip:SetText(data.rule.title)
+  GameTooltip:AddLine(data.result.text, 1, 0.82, 0, true)
   GameTooltip:AddLine(data.rule.help, 1, 1, 1, true)
   if data.result.onClick then GameTooltip:AddLine(L.ROW_HINT_CLICK, 0.8, 0.8, 0.8) end
   GameTooltip:AddLine(L.ROW_HINT_SNOOZE:format(NN.db and NN.db.snoozeMinutes or 60), 0.8, 0.8, 0.8, true)
@@ -113,7 +114,8 @@ local function fillRow(row, text, icon, alpha, data)
   row.icon:SetTexture(icon or 134400)
   row:SetAlpha(alpha)
   row.data = data
-  local height = (row.text:GetStringWidth() > TEXT_WIDTH) and ROW_H2 or ROW_H
+  local measure = row.text.GetUnboundedStringWidth or row.text.GetStringWidth
+  local height = (measure(row.text) > TEXT_WIDTH) and ROW_H2 or ROW_H
   row:SetHeight(height)
   row:Show()
   return height

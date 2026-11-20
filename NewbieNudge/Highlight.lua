@@ -152,10 +152,23 @@ function Highlight:ClearAll()
   wipe(self.active)
 end
 
+-- Blizzard's own action-button update hides overlay glows on these events,
+-- so forget what we showed and let the next Apply show it again.
+local RESHOW_EVENTS = {
+  PLAYER_ENTERING_WORLD = true, UPDATE_SHAPESHIFT_FORM = true, ACTIONBAR_SLOT_CHANGED = true,
+  ACTIONBAR_PAGE_CHANGED = true, UPDATE_BONUS_ACTIONBAR = true,
+}
+
+function Highlight:ForgetActive()
+  wipe(self.active)
+end
+
 NN:OnAnyEvent(function(event)
   if event == "ACTIONBAR_SLOT_CHANGED" or event == "ACTIONBAR_PAGE_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" then
     Highlight:InvalidateButtons()
   end
+  if RESHOW_EVENTS[event] then Highlight:ForgetActive() end
 end)
 NN:RegisterEvent("ACTIONBAR_PAGE_CHANGED")
 NN:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+NN:RegisterEvent("UPDATE_SHAPESHIFT_FORM")

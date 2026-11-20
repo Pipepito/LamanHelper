@@ -133,7 +133,7 @@ return {
     NewbieNudge:Snooze("a", 60)
     WOW.AdvanceTime(0.5)
     assert_eq(#NewbieNudge:ActiveRows(), 0)
-    WOW.state.time = WOW.state.time + 3601
+    WOW.state.epoch = WOW.state.epoch + 3601 -- wall clock, not uptime
     WOW.AdvanceTime(30)
     assert_eq(#NewbieNudge:ActiveRows(), 1)
   end,
