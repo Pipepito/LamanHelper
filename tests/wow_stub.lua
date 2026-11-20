@@ -732,6 +732,7 @@ function Settings.CreateControlTextContainer()
 end
 function Settings.CreateDropdown(cat, setting, optionsFn, tooltip) record("dropdown", setting.variable, optionsFn(), tooltip) end
 function Settings.RegisterProxySetting(cat, variable, vtype, name, default, getter, setter)
+  if WOW.settings[variable] then error("Settings variable already registered: " .. tostring(variable)) end
   WOW.settings[variable] = { getter = getter, setter = setter, name = name, default = default, type = vtype }
   record("RegisterProxySetting", variable)
   local setting = { variable = variable, name = name }

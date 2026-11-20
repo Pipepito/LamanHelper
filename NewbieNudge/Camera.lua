@@ -23,7 +23,8 @@ local Camera = NN.CVarSection.New({
     cameraYawMoveSpeed = true, cameraPitchMoveSpeed = true, cameraSmoothYaw = true, cameraSmoothPitch = true,
     cameraTerrainTilt = true,
   },
-  match = function(name) return name:lower():find("camera", 1, true) ~= nil end,
+  -- GamePad* variables belong to the Controller page, even when they mention the camera.
+  match = function(name) return name:lower():find("camera", 1, true) ~= nil and name:sub(1, 7) ~= "GamePad" end,
   note = "OPT_CAMERA_NOTE",
   otherHeader = "OPT_CAMERA_OTHER",
   resetLabel = "OPT_CAMERA_RESET",

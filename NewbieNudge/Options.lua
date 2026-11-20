@@ -7,16 +7,27 @@ local L = NN.L
 local Options = { pages = {} }
 NN.Options = Options
 
+-- The Settings API refuses a variable registered twice; the second page to
+-- ask for one gets the first page's setting back instead of an error.
+Options.registered = {}
+
 local function registerSetting(category, variable, vtype, name, default, getter, setter)
+  local existing = Options.registered[variable]
+  if existing then return existing end
+  local setting
   if Settings.RegisterProxySetting then
-    return Settings.RegisterProxySetting(category, variable, vtype, name, default, getter, setter)
+    setting = Settings.RegisterProxySetting(category, variable, vtype, name, default, getter, setter)
+    Options.registered[variable] = setting
+    return setting
   end
   -- Older clients: proxy through a one-key table whose __index/__newindex call us.
   local proxy = setmetatable({}, {
     __index = function() return getter() end,
     __newindex = function(_, _, value) setter(value) end,
   })
-  return Settings.RegisterAddOnSetting(category, variable, "value", proxy, vtype, name, default)
+  setting = Settings.RegisterAddOnSetting(category, variable, "value", proxy, vtype, name, default)
+  Options.registered[variable] = setting
+  return setting
 end
 
 function Options.AddHeader(layout, name)

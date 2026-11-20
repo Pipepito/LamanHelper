@@ -119,4 +119,16 @@ return {
     assert_eq(NewbieNudge.Camera:Get("cameraKeepCharacterCentered"), 0)
     assert_eq(s.getter(), false)
   end,
+  gamepad_camera_cvars_belong_to_the_controller_page = function()
+    -- The live client refuses a second registration of the same variable; a
+    -- GamePad* CVar that contains "camera" must not be registered by both pages.
+    cvars({ cameraDistanceMaxZoomFactor = { default = "1.9" }, GamePadCameraYawSpeed = { default = "1" }, GamePadTurnWithCamera = { default = "1" } })
+    console({ { "GamePadCameraYawSpeed", "yaw" }, { "GamePadTurnWithCamera", "turn" } })
+    load_addon()
+    local regs = 0
+    for _, c in ipairs(callsNamed("RegisterProxySetting")) do if c[2] == "NN_cvar_GamePadCameraYawSpeed" then regs = regs + 1 end end
+    assert_eq(regs, 1)
+    for _, d in ipairs(NewbieNudge.Camera:Discover()) do assert_true(d.cvar:sub(1, 7) ~= "GamePad", d.cvar) end
+    assert_eq(callsNamed("RegisterAddOnCategory")[1][2], "NewbieNudge")
+  end,
 }
