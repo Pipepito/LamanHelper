@@ -25,4 +25,15 @@ return {
     end
     assert_true(NewbieNudge.Dungeons[1].min <= NewbieNudge.Dungeons[2].min)
   end,
+  icy_talents_shape_and_confirmed_node = function()
+    WOW.keepData = true; load_addon()
+    local t = NewbieNudge.IcyTalents
+    assert_true(type(t.version) == "string" and t.compatible[t.version])
+    for _, class in ipairs({ "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }) do
+      assert_true(t[class], class)
+      for id, e in pairs(t[class]) do assert_true(#id == 1 and e.node and e.spell and e.maxRank, class .. ":" .. id) end
+    end
+    -- confirmed in game 2026-11-20: warrior node 105926 = Improved Intercept, spell 20504, 2 ranks
+    assert_eq(t.WARRIOR.u, { node = 105926, spell = 20504, maxRank = 2 })
+  end,
 }

@@ -387,7 +387,8 @@ function NN:HandleSlash(msg)
   msg = strtrim(msg or "")
   local command, arg = msg:match("^(%S+)%s*(.-)$")
   command = command and command:lower() or ""
-  arg = arg and strtrim(arg):lower() or ""
+  local rawArg = arg and strtrim(arg) or "" -- links are case-sensitive
+  arg = rawArg:lower()
 
   if command == "" then
     if self.db.panel.hidden then self:Say(L.SLASH_PANEL_HIDDEN) end
@@ -420,6 +421,15 @@ function NN:HandleSlash(msg)
     self:MarkAllDirty()
     self:Schedule()
     self:Say(L.SLASH_TEST_ON)
+  elseif command == "build" then
+    if not self.TalentBuild then return end
+    if arg == "clear" then
+      self.TalentBuild:Clear()
+    elseif arg == "" then
+      self:Say(self.TalentBuild:Status())
+    else
+      self.TalentBuild:Set(rawArg)
+    end
   elseif command == "trash" then
     if self.BagFull then self.BagFull:Show("manual") end
   elseif command == "map" then
