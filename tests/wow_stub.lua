@@ -28,7 +28,7 @@ local DEFAULT_STATE = {
   tracking = {},
   usesAmmo = false, ammoCount = 0,
   pet = { exists = false, hasUI = false, isHunterPet = false, happiness = 3, trainingTotal = 0, trainingSpent = 0 },
-  professions = {},
+  professions = { prof1 = 1 },   -- quiet default: one profession so the rule stays silent
   skillLines = {},
   quests = { num = 5, max = 25 }, newMail = false,
   cursor = nil,

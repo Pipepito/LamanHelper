@@ -149,6 +149,8 @@ return {
     NewbieNudge:HandleSlash("test")
     WOW.AdvanceTime(0.5)
     assert_true(NewbieNudgePanel:IsShown())
-    assert_true(tContains(row_texts(), "T_a"))
+    -- every rule shows its sample; durability is first in priority so it is never cut off
+    assert_true(tContains(row_texts(), NewbieNudge.L.DURABILITY_ROW_LOW))
+    assert_eq(#row_texts(), NewbieNudge.MAX_ROWS + 1)
   end,
 }

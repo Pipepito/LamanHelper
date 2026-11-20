@@ -85,6 +85,12 @@ local T = {
   PET_ROW_MISSING = "Tu mascota no está invocada.",
   PET_ROW_UNHAPPY = "Tu mascota está descontenta; dale de comer.",
   PET_ROW_TRAINING = "Tu mascota tiene %d puntos de entrenamiento sin gastar.",
+  PROFESSIONS_TITLE = "Sin profesión",
+  PROFESSIONS_HELP = "Las profesiones se aprenden de los maestros en cualquier capital. Puedes tener dos.",
+  PROFESSIONS_ROW = "Aún no tienes profesión. Las de recolección (Herboristería, Minería, Desuello) dan oro mientras subes de nivel.",
+  RESTED_TITLE = "Experiencia de descanso",
+  RESTED_HELP = "Desconectar en una posada o ciudad acumula experiencia de descanso, que duplica la experiencia por matar enemigos durante un tiempo.",
+  RESTED_ROW = "No estás en una posada ni en una ciudad. Desconecta allí para ganar experiencia de descanso.",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end
