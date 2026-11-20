@@ -46,6 +46,19 @@ local T = {
   BAG_FULL_TITLE = "Bolsas casi llenas",
   BAG_FULL_HELP = "Vende los objetos grises a cualquier vendedor o consigue bolsas más grandes.",
   BAG_FULL_ROW = "Tus bolsas están casi llenas (quedan %d huecos).",
+  DURABILITY_TITLE = "Equipo dañado",
+  DURABILITY_HELP = "El equipo dañado es más débil y el roto no sirve. Cualquier vendedor con un icono de yunque lo repara.",
+  DURABILITY_ROW_LOW = "Parte de tu equipo tiene menos del 20% de durabilidad.",
+  DURABILITY_ROW_BROKEN = "Tienes equipo roto; repáralo en un vendedor.",
+  HEARTHSTONE_TITLE = "Piedra de hogar",
+  HEARTHSTONE_HELP = "La Piedra de hogar te teletransporta a la posada que fijaste como hogar. Si la perdiste, habla con cualquier posadero.",
+  HEARTHSTONE_ROW = "No tienes Piedra de hogar. Cualquier posadero te da una gratis.",
+  MAIL_TITLE = "Correo",
+  MAIL_HELP = "El correo puede contener objetos y oro. Los buzones están cerca de posadas y bancos.",
+  MAIL_ROW = "Tienes correo nuevo esperando en un buzón.",
+  QUESTS_TITLE = "Registro de misiones",
+  QUESTS_HELP = "Solo puedes llevar un número limitado de misiones. Termina o abandona algunas antes de aceptar más.",
+  QUESTS_ROW = "Tu registro de misiones está casi lleno (%d de %d).",
 }
 
 for key, value in pairs(T) do NN.L[key] = value end

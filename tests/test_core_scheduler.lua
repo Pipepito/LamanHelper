@@ -162,12 +162,17 @@ return {
     assert_eq(r.calls, 1)
   end,
   priority_orders_rows = function()
+    -- mail is registered before durability in the TOC order but ranks lower
+    WOW.state.newMail = true
+    WOW.state.inventory[5] = { itemID = 1, durability = { 0, 100 } }
     load_addon()
-    fakeRule("mail", { result = { text = "m" } })
-    fakeRule("durability", { result = { text = "d" } })
+    fakeRule("zz_unlisted", { result = { text = "z" } })
     fireAndRun()
-    assert_eq(NewbieNudge:ActiveRows()[1].rule.name, "durability")
-    assert_eq(NewbieNudge:ActiveRows()[2].rule.name, "mail")
+    local names = {}
+    for _, row in ipairs(NewbieNudge:ActiveRows()) do names[#names + 1] = row.rule.name end
+    assert_eq(names[1], "durability")
+    assert_eq(names[2], "mail")
+    assert_eq(names[#names], "zz_unlisted", "rules not in PRIORITY come last")
   end,
   test_mode_uses_sample = function()
     load_addon()
