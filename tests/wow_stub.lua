@@ -834,3 +834,33 @@ C_GamePad = {}
 function C_GamePad.IsEnabled() return S().gamepad.enabled end
 function C_GamePad.GetActiveDeviceID() return S().gamepad.deviceID end
 function GetBindingText(key) return "|" end
+
+-------------------------------------------------------------------------------
+-- Error handler, addon list, edit boxes (developer mode)
+-------------------------------------------------------------------------------
+WOW.errorsSeen = {}
+function WOW.defaultErrorHandler(msg) WOW.errorsSeen[#WOW.errorsSeen + 1] = msg end
+local currentErrorHandler = WOW.defaultErrorHandler
+function seterrorhandler(fn) currentErrorHandler = fn end
+function geterrorhandler() return currentErrorHandler end
+function debugstack(level, top, bottom) return "stack line 1\nstack line 2" end
+C_AddOns = {}
+function C_AddOns.GetAddOnMetadata(name, field) return field == "Version" and "0.3.2-test" or nil end
+function C_AddOns.GetNumAddOns() return 2 end
+function C_AddOns.GetAddOnInfo(i) return (i == 1 and "NewbieNudge" or "OtherAddon"), nil, nil, true end
+function C_AddOns.IsAddOnLoaded(i) return i == 1 end
+function GetRealmName() return "Realm" end
+UISpecialFrames = {}
+function Region:SetMultiLine(b) self.multiLine = b end
+function Region:SetAutoFocus(b) self.autoFocus = b end
+function Region:HighlightText() self.highlighted = true end
+function Region:SetCursorPosition(p) self.cursor = p end
+function Region:ClearFocus() end
+function Region:SetFocus() end
+function Region:SetMaxLetters(n) self.maxLetters = n end
+function Region:SetTextInsets() end
+function Region:EnableKeyboard() end
+function Region:SetScrollChild(c) self.scrollChild = c end
+function Region:SetVerticalScroll() end
+function Region:GetVerticalScrollRange() return 0 end
+function Region:SetPropagateKeyboardInput() end

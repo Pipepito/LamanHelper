@@ -450,6 +450,10 @@ function NN:HandleSlash(msg)
     end
   elseif command == "trash" then
     if self.BagFull then self.BagFull:Show("manual") end
+  elseif command == "dev" then
+    if self.Dev then self.Dev:HandleCommand(arg) end
+  elseif command == "dump" then
+    if self.Dev then self.Dev:Dump(rawArg) end
   elseif command == "map" then
     if self.MapReveal then
       self.MapReveal:Toggle()

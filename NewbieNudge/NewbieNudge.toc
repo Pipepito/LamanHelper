@@ -7,6 +7,7 @@
 ## X-License: GPL-3.0
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
 ## SavedVariablesPerCharacter: NewbieNudgeDB
+## SavedVariables: NewbieNudgeDev
 ## AllowLoadGameType: forever
 ## ExcludeLoadGameType: standard, classic
 
@@ -32,6 +33,7 @@ MapReveal.lua
 BagFull.lua
 Vendor.lua
 Tooltips.lua
+Dev.lua
 TalentBuild.lua
 Rules\Bags.lua
 Rules\MaterialsBag.lua
