@@ -5,6 +5,11 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
+## 0.3.4 - 2026-11-21
+
+- NewbieNudge has its own icon in the AddOns list.
+- First release published on CurseForge; releases are now built and uploaded automatically from GitHub.
+
 ## 0.3.3 - 2026-11-21
 
 - **Bank:** the "cheapest to destroy" window no longer opens by itself while the bank is open, and closes when the bank opens. Quest-item glows ignore the bank's bag frames.
