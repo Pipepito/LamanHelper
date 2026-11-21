@@ -120,18 +120,28 @@ end
 -- Error capture
 -------------------------------------------------------------------------------
 
-local function recordError(msg)
-  msg = tostring(msg)
+-- Adds an entry unless it repeats the previous one, which is counted instead.
+local function addOrCount(kind, text, stack)
   local db = Dev.db or ensureDB()
   local log = db.log
   local lastEntry = log[#log]
-  if lastEntry and lastEntry.kind == "error" and lastEntry.text == msg then
+  if lastEntry and lastEntry.kind == kind and lastEntry.text == text then
     lastEntry.count = (lastEntry.count or 1) + 1
     lastEntry.time = stamp()
     return
   end
-  local stack = debugstack and debugstack(3, 12, 0) or nil
-  Dev:Add({ kind = "error", text = msg, stack = stack, count = 1 })
+  Dev:Add({ kind = kind, text = text, stack = stack, count = 1 })
+end
+
+local function recordError(msg)
+  addOrCount("error", tostring(msg), debugstack and debugstack(3, 12, 0) or nil)
+end
+
+-- ADDON_ACTION_BLOCKED / ADDON_ACTION_FORBIDDEN never reach the error
+-- handler; they are the only trace a tainted call leaves.
+local BLOCKED_EVENTS = { ADDON_ACTION_BLOCKED = "blocked", ADDON_ACTION_FORBIDDEN = "forbidden" }
+local function recordBlocked(event, addon, func)
+  addOrCount(BLOCKED_EVENTS[event], ("%s: %s"):format(tostring(addon), tostring(func)))
 end
 
 function Dev:InstallHandler()
@@ -143,6 +153,7 @@ function Dev:InstallHandler()
     if previous then return previous(msg) end
   end
   if seterrorhandler then seterrorhandler(self.handler) end
+  for event in pairs(BLOCKED_EVENTS) do self.loader:RegisterEvent(event) end
 end
 
 function Dev:RemoveHandler()
@@ -151,6 +162,7 @@ function Dev:RemoveHandler()
     seterrorhandler(self.previousHandler)
   end
   self.handler, self.previousHandler = nil, nil
+  for event in pairs(BLOCKED_EVENTS) do self.loader:UnregisterEvent(event) end
 end
 
 function Dev:SetEnabled(on)
@@ -259,6 +271,22 @@ local SECTIONS = {
       for _ in pairs(H.hookedBagFrames) do hooked = hooked + 1 end
       out[#out + 1] = ("highlights active %d, hooked bag frames %d"):format(active, hooked)
     end
+  end },
+  { "bank", function(out)
+    local B = C_Bank
+    if not (B and Enum and Enum.BankType) then out[#out + 1] = "no C_Bank"; return end
+    local reasonName = {}
+    for name, value in pairs(Enum.BankLockedReason or {}) do reasonName[value] = name end
+    for _, typeName in ipairs(sortedKeys(Enum.BankType)) do
+      local bankType = Enum.BankType[typeName]
+      local locked = B.FetchBankLockedReason and B.FetchBankLockedReason(bankType)
+      local tabs = B.FetchPurchasedBankTabData and B.FetchPurchasedBankTabData(bankType)
+      out[#out + 1] = ("%s: viewable %s, locked %s, %d tab(s)"):format(typeName,
+        tostring(B.CanViewBank and B.CanViewBank(bankType)),
+        locked == nil and "nil" or tostring(reasonName[locked] or locked),
+        type(tabs) == "table" and #tabs or 0)
+    end
+    out[#out + 1] = "any bank viewable: " .. tostring(B.AreAnyBankTypesViewable and B.AreAnyBankTypesViewable())
   end },
 }
 
@@ -373,8 +401,14 @@ function Dev:HandleCommand(arg)
 end
 
 local loader = CreateFrame("Frame")
+Dev.loader = loader
 loader:RegisterEvent("ADDON_LOADED")
-loader:SetScript("OnEvent", function(_, _, name)
+loader:SetScript("OnEvent", function(_, event, ...)
+  if BLOCKED_EVENTS[event] then
+    if Dev:IsEnabled() then pcall(recordBlocked, event, ...) end
+    return
+  end
+  local name = ...
   if name ~= ADDON_NAME then return end
   ensureDB()
   if Dev:IsEnabled() then Dev:InstallHandler() end

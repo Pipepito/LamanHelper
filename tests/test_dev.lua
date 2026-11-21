@@ -129,6 +129,35 @@ return {
     assert_eq(last(), L().CHAT_PREFIX .. L().DEV_SNAPSHOT_SAVED)
   end,
 
+  snapshot_records_the_bank_state = function()
+    WOW.bank[Enum.BankType.Character] = { viewable = true, locked = Enum.BankLockedReason.BankConversionFailed, tabs = 0 }
+    load_addon()
+    WOW.OpenBank()
+    NewbieNudge:HandleSlash("dev snap")
+    local text = log()[1].text
+    assert_true(text:find("bank frame: true", 1, true), text)
+    assert_true(text:find("Character: viewable true, locked BankConversionFailed, 0 tab(s)", 1, true), text)
+    assert_true(text:find("Account: viewable false, locked nil, 0 tab(s)", 1, true), text)
+    assert_true(text:find("any bank viewable: true", 1, true), text)
+  end,
+
+  blocked_and_forbidden_actions_are_recorded_while_on = function()
+    load_addon()
+    WOW.FireEvent("ADDON_ACTION_BLOCKED", "NewbieNudge", "CastSpellByName()")
+    assert_eq(#log(), 0, "nothing recorded while off")
+    NewbieNudge:HandleSlash("dev on")
+    WOW.FireEvent("ADDON_ACTION_BLOCKED", "NewbieNudge", "CastSpellByName()")
+    WOW.FireEvent("ADDON_ACTION_FORBIDDEN", "Other", "C_Bank.CloseBankFrame()")
+    assert_eq(#log(), 2)
+    assert_eq(log()[1].kind, "blocked")
+    assert_true(log()[1].text:find("NewbieNudge", 1, true) and log()[1].text:find("CastSpellByName()", 1, true), log()[1].text)
+    assert_eq(log()[2].kind, "forbidden")
+    assert_true(log()[2].text:find("C_Bank.CloseBankFrame()", 1, true), log()[2].text)
+    NewbieNudge:HandleSlash("dev off")
+    WOW.FireEvent("ADDON_ACTION_BLOCKED", "NewbieNudge", "CastSpellByName()")
+    assert_eq(#log(), 2, "nothing recorded after off")
+  end,
+
   snapshot_survives_a_failing_section = function()
     load_addon()
     GetBuildInfo = function() error("no build") end

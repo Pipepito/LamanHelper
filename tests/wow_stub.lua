@@ -54,6 +54,7 @@ function WOW.Reset()
   if LootFrame then LootFrame.shown = false end
   if MerchantFrame then MerchantFrame.shown = false end
   if BankFrame then BankFrame.shown = false end
+  WOW.bank = { [0] = { viewable = true, tabs = 1 }, [1] = { viewable = false, tabs = 0 } }
   LegacyChallengesUnviewed = {}
   PlayerSpellsFrame = nil
 end
@@ -123,6 +124,21 @@ Enum = {
   SpellBookSpellBank = { Player = 0, Pet = 1 },
   ItemConsumableSubclass = { Generic = 0, Potion = 1, Elixir = 2, Flask = 3, Scroll = 4, FoodDrink = 5, ItemEnhancement = 6, Bandage = 7, Other = 8 },
   SpellBookItemType = { None = 0, Spell = 1, FutureSpell = 2, PetAction = 3, Flyout = 4 },
+  BankType = { Character = 0, Account = 1 },
+  BankLockedReason = { BankConversionFailed = 0, BankDisabled = 1, NoAccountInventoryLock = 2 },
+}
+
+-- Bank state: WOW.bank[bankType] = { viewable = bool, locked = reason or nil, tabs = n }.
+C_Bank = {
+  CanViewBank = function(bankType) local b = WOW.bank[bankType]; return b ~= nil and b.viewable end,
+  AreAnyBankTypesViewable = function() for _, b in pairs(WOW.bank) do if b.viewable then return true end end return false end,
+  FetchBankLockedReason = function(bankType) local b = WOW.bank[bankType]; return b and b.locked end,
+  FetchPurchasedBankTabData = function(bankType)
+    local out = {}
+    for i = 1, (WOW.bank[bankType] and WOW.bank[bankType].tabs or 0) do out[i] = { ID = i, name = "Tab " .. i } end
+    return out
+  end,
+  CanPurchaseBankTab = function(bankType) return WOW.bank[bankType] ~= nil and WOW.bank[bankType].viewable end,
 }
 
 -------------------------------------------------------------------------------
