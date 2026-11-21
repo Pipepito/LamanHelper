@@ -79,10 +79,21 @@ local function collect(iterFn, ...)
   return out
 end
 
+-- Only the player's own bags (0-4) carry glows; bank bag frames, which the
+-- same enumerator yields while the bank is open, are left untouched. A frame
+-- that cannot say which bag it shows is treated as a player bag.
+local LAST_PLAYER_BAG = 4
+local function isPlayerBagFrame(frame)
+  if type(frame.GetBagID) ~= "function" then return true end
+  local id = NN.Plain(frame:GetBagID())
+  return id == nil or (id >= 0 and id <= LAST_PLAYER_BAG)
+end
+
 -- The default bag frames fire no addon-visible event when the player opens
 -- them, so each is hooked once: showing it rescans its buttons and re-applies.
 function Highlight:HookBagFrame(frame)
   if not frame or self.hookedBagFrames[frame] or not frame.HookScript then return end
+  if not isPlayerBagFrame(frame) then return end
   self.hookedBagFrames[frame] = true
   frame:HookScript("OnShow", function()
     Highlight:InvalidateBagButtons()
@@ -102,7 +113,7 @@ function Highlight:ButtonForBagSlot(bag, slot)
     self.bagButtonCache = {}
     for _, frame in ipairs(collect(ContainerFrameUtil_EnumerateContainerFrames)) do
       self:HookBagFrame(frame)
-      if frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
+      if isPlayerBagFrame(frame) and frame.EnumerateValidItems and (not frame.IsShown or frame:IsShown()) then
         for _, button in ipairs(collect(frame.EnumerateValidItems, frame)) do
           local b = button.GetBagID and button:GetBagID()
           local id = button.GetID and button:GetID()

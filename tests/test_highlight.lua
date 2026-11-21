@@ -75,6 +75,22 @@ return {
     NewbieNudge.Highlight:Apply({})
     assert_eq(WOW.calls[#WOW.calls][1], "glow_hide")
   end,
+  bank_bag_frames_are_neither_hooked_nor_scanned = function()
+    load_addon()
+    local bag0 = WOW.NewContainerFrame(0, 16)
+    local bank = WOW.NewContainerFrame(6, 24)
+    NewbieNudge.Highlight:HookBagFrames()
+    assert_true(NewbieNudge.Highlight.hookedBagFrames[bag0], "player bag hooked")
+    assert_nil(NewbieNudge.Highlight.hookedBagFrames[bank], "bank bag left alone")
+    assert_true(NewbieNudge.Highlight:ButtonForBagSlot(0, 3) == bag0.Items[3])
+    assert_nil(NewbieNudge.Highlight:ButtonForBagSlot(6, 3))
+  end,
+  frames_without_a_bag_id_are_still_hooked = function()
+    load_addon()
+    local cf = WOW.NewContainerFrame(0, 16); cf.GetBagID = nil
+    NewbieNudge.Highlight:HookBagFrames()
+    assert_true(NewbieNudge.Highlight.hookedBagFrames[cf])
+  end,
   bagslot_without_open_bags_only_glows_backpack = function()
     load_addon()
     NewbieNudge.Highlight:Apply({ { rule = { name = "r" }, result = { text = "t", highlight = { key = "bags", bagslots = { { 0, 3 } } } }, stale = false } })

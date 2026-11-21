@@ -53,6 +53,7 @@ function WOW.Reset()
   if WorldMapFrame then WorldMapFrame.pins = {}; WorldMapFrame.shown = false end
   if LootFrame then LootFrame.shown = false end
   if MerchantFrame then MerchantFrame.shown = false end
+  if BankFrame then BankFrame.shown = false end
   LegacyChallengesUnviewed = {}
   PlayerSpellsFrame = nil
 end
@@ -400,6 +401,9 @@ function OpenWorldMap(mapID) record("OpenWorldMap", mapID) end
 function GetBindLocation() return S().bindLocation end
 -- Merchant: WOW.OpenMerchant()/WOW.CloseMerchant() fire the events and flip MerchantFrame.
 MerchantFrame = CreateFrame("Frame", "MerchantFrame", UIParent)
+BankFrame = CreateFrame("Frame", "BankFrame", UIParent); BankFrame.shown = false
+function WOW.OpenBank() BankFrame:Show(); WOW.FireEvent("BANKFRAME_OPENED") end
+function WOW.CloseBank() BankFrame:Hide(); WOW.FireEvent("BANKFRAME_CLOSED") end
 MerchantFrame.shown = false
 function WOW.OpenMerchant() S().merchantOpen = true; MerchantFrame:Show(); WOW.FireEvent("MERCHANT_SHOW") end
 function WOW.CloseMerchant() S().merchantOpen = false; MerchantFrame:Hide(); WOW.FireEvent("MERCHANT_CLOSED") end
@@ -487,6 +491,8 @@ end
 function WOW.NewContainerFrame(bagID, numSlots)
   local f = CreateFrame("Frame")
   f.Items = {}
+  f.bagID = bagID
+  function f:GetBagID() return self.bagID end
   for i = 1, numSlots do
     local b = CreateFrame("Button", nil, f)
     b.bagID = bagID

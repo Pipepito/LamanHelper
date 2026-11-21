@@ -228,9 +228,17 @@ end
 
 -- reason: "error" (inventory full message), "loot" (loot window with no
 -- space), "manual" (/nudge trash; never hides on its own).
+local function bankOpen()
+  return BankFrame ~= nil and BankFrame:IsShown()
+end
+
 function BagFull:Show(reason)
   if not (NN.db and NN.db.bagfull and NN.db.bagfull.enabled) then return end
-  self.reason = reason or "manual"
+  reason = reason or "manual"
+  -- At the bank the way to make room is to deposit, and the bank window
+  -- opens where this frame sits, so automatic opens wait until it closes.
+  if reason ~= "manual" and bankOpen() then return end
+  self.reason = reason
   self:Refresh()
   self:ApplyScale()
   self:Anchor()
@@ -296,6 +304,7 @@ end
 NN:RegisterEvent("UI_ERROR_MESSAGE")
 NN:RegisterEvent("LOOT_OPENED")
 NN:RegisterEvent("LOOT_CLOSED")
+NN:RegisterEvent("BANKFRAME_OPENED")
 
 -- Item info arrives in bursts; only listen while the frame is shown, on a
 -- private frame so the core scheduler is not woken by it.
@@ -311,6 +320,8 @@ NN:OnAnyEvent(function(event, arg1, arg2)
     if NN.db and NN.db.bagfull.onLoot and NN.RegularFreeSlots() == 0 then BagFull:Show("loot") end
   elseif event == "LOOT_CLOSED" then
     BagFull:MaybeAutoHide()
+  elseif event == "BANKFRAME_OPENED" then
+    if frame:IsShown() and BagFull.reason ~= "manual" then BagFull:Hide() end
   elseif event == "BAG_UPDATE_DELAYED" then
     if frame:IsShown() then BagFull:Refresh(); BagFull:MaybeAutoHide() end
   end
