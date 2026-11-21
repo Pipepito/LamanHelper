@@ -40,6 +40,8 @@ Then start the game or type `/reload`.
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
 | `/nudge show` | Bring the panel back after hiding it with the key binding. |
+| `/nudge dev` | Developer log window. `/nudge dev on` records every Lua error, `/nudge dev snap` saves a state snapshot, `/nudge dev clear` empties the log. |
+| `/nudge dump <expr>` | Evaluate a Lua expression and keep the result in the developer log (no 255-character limit on the output). |
 
 Right-click a row to snooze it for an hour (configurable). Shift+right-click
 snoozes it until your next login. Left-click a row to open the related window,
@@ -174,6 +176,15 @@ powershell -File tools/deploy.ps1
 
 Then `/reload` in game after each change. The in-game checklist is in
 `docs/testing-checklist.md`. Design notes live in `docs/superpowers/specs/`.
+
+## Reporting a problem
+
+Turn on developer mode (`/nudge dev on`, or Options → Developer), reproduce
+the problem, type `/nudge dev snap` while the misbehaving window is open, then
+`/reload`. The client writes the log to
+`WTF\Account\<account>\SavedVariables\NewbieNudge.lua`; attach that file, or
+open `/nudge dev` in game and copy the text. Every Lua error from any addon is
+recorded while the mode is on, so turn it off again afterwards.
 
 ## Refreshing game data
 
