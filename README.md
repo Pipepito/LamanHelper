@@ -177,6 +177,10 @@ powershell -File tools/deploy.ps1
 Then `/reload` in game after each change. The in-game checklist is in
 `docs/testing-checklist.md`. Design notes live in `docs/superpowers/specs/`.
 
+Releases are cut by pushing a `v*` tag; a GitHub Actions workflow builds the
+zip, publishes the GitHub release and uploads to CurseForge. Steps and setup in
+`docs/releasing.md`; the player-facing notes come from `CHANGELOG.md`.
+
 ## Reporting a problem
 
 Turn on developer mode (`/nudge dev on`, or Options → Developer), reproduce

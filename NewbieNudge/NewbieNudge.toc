@@ -5,6 +5,8 @@
 ## Notes-esES: Recordatorios y avisos para jugadores nuevos: talentos sin gastar, buffs que faltan, bolsas sin usar y más.
 ## Version: 0.3.3
 ## X-License: GPL-3.0
+## X-Website: https://github.com/Pipepito/newbie-nudge
+## X-Curse-Project-ID: 0
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
 ## SavedVariablesPerCharacter: NewbieNudgeDB
 ## SavedVariables: NewbieNudgeDev

@@ -1,0 +1,79 @@
+# Release: on a version tag (v0.3.4), check that the tag, the TOC and the
+# changelog agree, build the zip, publish the GitHub release and upload the
+# same zip to CurseForge. See docs/releasing.md.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release again (v0.3.4)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check tag, TOC and changelog
+        id: check
+        run: python tools/release.py check "$TAG" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Run the test suite
+        run: |
+          python -m pip install --quiet -r tools/requirements.txt
+          python tests/run.py
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build the zip and the release notes
+        run: |
+          python tools/release.py build --dest dist
+          python tools/release.py notes "$TAG" --out dist/notes.md
+          unzip -l "dist/${{ steps.check.outputs.zip_name }}"
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=(--title "NewbieNudge ${{ steps.check.outputs.version }}" --notes-file dist/notes.md)
+          if [ "${{ steps.check.outputs.release_type }}" = "release" ]; then flags+=(--latest); else flags+=(--prerelease); fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "dist/${{ steps.check.outputs.zip_name }}" --clobber
+            gh release edit "$TAG" "${flags[@]}"
+          else
+            gh release create "$TAG" "dist/${{ steps.check.outputs.zip_name }}" "${flags[@]}"
+          fi
+
+      - name: Upload to CurseForge
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ]; then
+            echo "::error::The CF_API_TOKEN repository secret is not set; see docs/releasing.md"
+            exit 1
+          fi
+          curl -sSf -H "x-api-token: $CF_API_TOKEN" \
+            "https://wow.curseforge.com/api/game/versions" -o dist/versions.json
+          python tools/release.py cf-metadata "$TAG" --versions dist/versions.json --out dist/metadata.json
+          cat dist/metadata.json
+          code=$(curl -sS --retry 3 --retry-delay 10 -w "%{http_code}" -o dist/upload.json \
+            -H "x-api-token: $CF_API_TOKEN" \
+            -F "metadata=<dist/metadata.json" \
+            -F "file=@dist/${{ steps.check.outputs.zip_name }}" \
+            "https://wow.curseforge.com/api/projects/${{ steps.check.outputs.project_id }}/upload-file")
+          echo "CurseForge answered $code: $(cat dist/upload.json)"
+          [ "$code" = "200" ]
