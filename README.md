@@ -7,6 +7,8 @@ glow. Rows appear only when they apply to your character and vanish the moment
 the problem is gone. In combat the list shrinks to a row of icons.
 
 English and Spanish (Spain) are included; the game's language setting decides.
+Each language is one data file under `NewbieNudge/Locales/`; see
+[Locales/README.md](NewbieNudge/Locales/README.md) to add another.
 
 Beyond the checklist it also: shows the unexplored parts of a zone on the
 world map, dimmed; lists the cheapest things to destroy when your bags are
@@ -135,7 +137,7 @@ local _, NN = ...
 local L = NN.L
 NN:RegisterRule({
   name = "my_rule",            -- lowercase, used by /nudge and the options page
-  title = L.MY_RULE_TITLE,     -- add the strings to both Locales files
+  title = L.MY_RULE_TITLE,     -- add the strings to every Locales file
   help = L.MY_RULE_HELP,
   events = { "SOME_EVENT" },   -- when to re-check; "UNIT_AURA:player" form is allowed
   combat = false,              -- true only if the data it reads is still readable in combat

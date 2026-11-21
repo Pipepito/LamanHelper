@@ -1,9 +1,9 @@
--- Spanish (Spain). Loads only when the game client is set to esES; every
--- other language, esMX included, keeps the English strings.
+-- Spanish (Spain) (esES). Pure data: translate the values, keep the keys.
+-- Missing keys fall back to English. Check with: python tools/locales.py check
 local _, NN = ...
-if GetLocale() ~= "esES" then return end
 
-local T = {
+NN.RegisterLocale("esES", {
+  -- General: panel, rows, chat
   ADDON_TITLE = "NewbieNudge",
   CHAT_PREFIX = "|cff7fd5ffNewbieNudge|r: ",
   PANEL_TITLE = "Recordatorios",
@@ -38,7 +38,7 @@ local T = {
   OPT_BUTTON_DO = "Restablecer",
   OPT_NOT_RELEVANT = "No aplica a este personaje",
 
-  -- Rules
+  -- Reminders (v1 rules)
   BAG_UNEQUIPPED_TITLE = "Bolsa sin usar",
   BAG_UNEQUIPPED_HELP = "Las bolsas te dan más espacio para el botín. Abre tus bolsas y arrastra la bolsa a un hueco vacío junto a tu mochila.",
   BAG_UNEQUIPPED_ROW_EMPTY = "Tienes una bolsa en el inventario que no está equipada.",
@@ -95,7 +95,7 @@ local T = {
   GEAR_UPGRADE_HELP = "Esto compara solo el nivel de objeto, así que tómalo como una pista. Abre tus bolsas y lee la descripción del objeto.",
   GEAR_UPGRADE_ROW = "Un objeto de tus bolsas parece una mejora: %s",
 
-  -- Camera settings
+  -- Options: camera page
   OPT_CAMERA = "Cámara",
   OPT_CAMERA_NOTE = "Son ajustes del juego que la ventana de opciones de Blizzard no muestra. Los guarda el propio juego.",
   OPT_CAMERA_OTHER = "Otras variables de cámara",
@@ -118,6 +118,7 @@ local T = {
   CAM_FOCUS_INTERACT_TT = "La cámara gira hacia los PNJ con los que hablas.",
   CAM_HEAD_MOVEMENT = "Intensidad del movimiento de cabeza",
   CAM_HEAD_MOVEMENT_TT = "Cuánto sigue la cámara la cabeza de tu personaje. 0 lo desactiva.",
+
   -- Map reveal
   OPT_MAP = "Mapa",
   OPT_MAP_REVEAL = "Mostrar zonas sin explorar en el mapa del mundo",
@@ -126,7 +127,8 @@ local T = {
   OPT_MAP_DESATURATE = "Zonas sin explorar en gris",
   SLASH_MAP_ON = "Las zonas sin explorar ahora se muestran en el mapa.",
   SLASH_MAP_OFF = "Las zonas sin explorar ahora se ocultan en el mapa.",
-  -- Quest planning
+
+  -- Quest planning rows
   QUEST_TURNIN_TITLE = "Misiones listas para entregar",
   QUEST_TURNIN_HELP = "Cuenta las misiones de tu registro que ya están completas y solo falta entregar.",
   QUEST_TURNIN_ROW = "%d misión(es) completa(s): entrégalas.",
@@ -136,28 +138,34 @@ local T = {
   QUEST_GREY_TITLE = "Misiones grises",
   QUEST_GREY_HELP = "Las misiones grises ya casi no dan experiencia. Hazlas al final o abandónalas para liberar el registro.",
   QUEST_GREY_ROW = "%d misión(es) gris(es) casi no dan XP: hazlas al final o abandónalas.",
+
   -- Quest bag slots
   QUEST_SLOTS_TITLE = "Espacio en las bolsas para misiones",
   QUEST_SLOTS_HELP = "Calcula cuántos huecos ocuparán los objetos que recogen tus misiones actuales y las recompensas de las completas. Es una estimación.",
   QUEST_SLOTS_ROW = "Deja %d huecos libres en las bolsas para tus misiones (tienes %d).",
+
   -- Quest-starting items
   QUEST_ITEM_TITLE = "Objetos que inician una misión",
   QUEST_ITEM_HELP = "Algunos objetos que recoges inician una misión al hacer clic derecho. Esto muestra los que esperan en tus bolsas.",
   QUEST_ITEM_ROW = "%s inicia una misión. Haz clic derecho en él en tus bolsas.",
   QUEST_ITEM_UNKNOWN = "Un objeto",
+
   -- Materials bag
   MATERIALS_BAG_TITLE = "Bolsa de materiales sin usar",
   MATERIALS_BAG_HELP = "Tienes un hueco aparte para una bolsa de materiales junto a tus bolsas normales. Esto te recuerda equipar la que llevas encima.",
   MATERIALS_BAG_ROW_EMPTY = "Tienes una bolsa de materiales en el inventario que no está equipada.",
   MATERIALS_BAG_ROW_BIGGER = "Una bolsa de materiales de tu inventario es más grande que la que usas.",
+
   -- Trainer spells
   TRAINER_SPELLS_TITLE = "Hechizos nuevos para tu nivel",
   TRAINER_SPELLS_HELP = "Hechizos y rangos que tu nivel permite y que aún no has aprendido. La mayoría los enseña tu instructor de clase; unos pocos vienen de misiones, así que si la fila sigue tras visitarlo, te espera una misión de clase.",
   TRAINER_SPELLS_ROW = "%d hechizos o rangos para tu nivel que no has aprendido. Visita a tu instructor de clase.",
+
   -- Profession rank
   PROFESSION_RANK_TITLE = "Siguiente rango de profesión disponible",
   PROFESSION_RANK_HELP = "Tu habilidad de profesión está cerca de su tope y ya tienes nivel para el siguiente rango. Los instructores enseñan los rangos principales; Cocina, Primeros Auxilios y Pesca necesitan un libro de vendedor para Experto y una misión para Artesano.",
   PROFESSION_RANK_ROW = "Puedes aprender el siguiente rango de %s (%d/%d). Visita a un instructor de %s.",
+
   -- Dungeons and zones
   DUNGEON_TITLE = "Una mazmorra para tu nivel",
   DUNGEON_HELP = "Nombra una mazmorra cuyo rango de nivel te encaja. Las mazmorras tienen sus propias misiones; cógelas fuera antes. La fila desaparece cuando has entrado o has hecho sus misiones.",
@@ -166,6 +174,7 @@ local T = {
   ZONE_HELP = "Compara la zona en la que estás con tu nivel, para que sepas cuándo las misiones dan menos experiencia o cuándo la zona es peligrosa.",
   ZONE_BELOW_ROW = "%s (%d–%d) está por debajo de tu nivel. Las misiones aquí dan menos XP.",
   ZONE_ABOVE_ROW = "%s (%d–%d) está por encima de tu nivel. Ten cuidado aquí.",
+
   -- Bag-full helper
   OPT_BAGS = "Bolsas",
   OPT_BAGFULL_ENABLED = "Con las bolsas llenas, listar los objetos más baratos para destruir",
@@ -178,7 +187,8 @@ local T = {
   BAGFULL_EMPTY = "No se encontró nada seguro que destruir.",
   BAGFULL_DESTROY = "Destruir",
   BAGFULL_SURE = "¿Seguro?",
-  -- Controller
+
+  -- Options: controller page
   OPT_CONTROLLER = "Mando",
   OPT_CONTROLLER_NOTE = "Ajuste del juego, guardado por el propio juego.",
   OPT_CONTROLLER_OTHER = "Otros ajustes de mando",
@@ -279,7 +289,8 @@ local T = {
   CTRL_SoftTargetNameplateEnemy_TT = "Muestra siempre la barra de vida del enemigo que sería tu objetivo.",
   CTRL_SoftTargetNameplateSize = "Tamaño de esa barra de vida",
   CTRL_SoftTargetNameplateSize_TT = "Tamaño de esa barra de vida.",
-  -- Controller-aware panel and bindings
+
+  -- Controller-aware panel and key bindings
   OPT_CONTROLLER_PANEL = "Panel de recordatorios con mando",
   OPT_CONTROLLER_BOOST = "Agrandar el panel cuando se usa un mando",
   OPT_CONTROLLER_BOOST_TT = "En una pantalla pequeña como la de la Steam Deck, el panel y la tira de combate crecen según el factor de abajo.",
@@ -293,7 +304,8 @@ local T = {
   BINDING_SNOOZE_TOP = "Posponer el primer recordatorio",
   BINDING_OPTIONS = "Abrir las opciones de NewbieNudge",
   SLASH_PANEL_HIDDEN = "El panel de recordatorios está oculto. Usa el atajo o /nudge show para recuperarlo.",
-  -- Game settings
+
+  -- Options: game settings page
   OPT_GAME_SETTINGS = "Ajustes del juego",
   OPT_GS_NOTE = "Ajuste del juego, guardado por el propio juego. Algunos solo afectan a este personaje.",
   OPT_GS_PRESET = "Recomendado para jugadores nuevos",
@@ -427,7 +439,8 @@ local T = {
   GS_guildMemberNotify_TT = "Una línea en el chat cuando entran y salen compañeros.",
   GS_Sound_EnableErrorSpeech = "Mensajes de error hablados",
   GS_Sound_EnableErrorSpeech_TT = "Tu personaje dice frases como 'Aún no puedo hacer eso'.",
-  -- Talent build
+
+  -- Talent builds (Icy Veins)
   OPT_BUILD = "Build de talentos",
   OPT_BUILD_PASTE = "Pegar un enlace de la calculadora de talentos de Icy Veins",
   OPT_BUILD_PASTE_TT = "Abre la guía de subida de nivel de tu clase en Icy Veins, elige una build en Leveling Talent Build, pulsa Open in Calculator y copia la dirección de esa página. El panel te dirá entonces el siguiente talento.",
@@ -457,21 +470,25 @@ local T = {
   MAP_BUTTON_TT = "Clic izquierdo: ajustes del mapa. Clic derecho: mostrar u ocultar las zonas sin explorar.",
   OPT_BUILD_BADGES = "Mostrar la build en la ventana de talentos",
   OPT_BUILD_BADGES_TT = "En cada talento que usa la build: abajo a la derecha, los puntos que tienes de los que la build pone ahí (verde al completar, amarillo en progreso); arriba a la izquierda, el nivel en que la build lo empieza, hasta que lo empieces.",
+
   -- Supplies
   SUPPLIES_TITLE = "Comida y vendas",
   SUPPLIES_HELP = "La comida, la bebida y las vendas cubren los huecos entre peleas. Te avisa cuando no llevas nada; las vendas solo cuentan si sabes Primeros Auxilios.",
   SUPPLIES_ROW_FOOD = "No llevas comida ni bebida en las bolsas.",
   SUPPLIES_ROW_BANDAGE = "No llevas vendas. Primeros Auxilios las hace con tela.",
+
   -- Group quests
   QUEST_GROUP_TITLE = "Misiones que necesitan grupo",
   QUEST_GROUP_HELP = "Las misiones de élite, de mazmorra y de banda están pensadas para varios jugadores. Déjalas para cuando tengas compañía en vez de morir solo en ellas.",
   QUEST_GROUP_ROW = "%d misión(es) de tu registro necesitan grupo.",
   PROFESSION_RANK_ROW_BOOK = "Lee el libro de Experto en %s para pasar de %d. Lo venden los mercaderes.",
   PROFESSION_RANK_ROW_QUEST = "Completa la misión de Artesano de %s (nivel 35) para pasar de %d.",
+
   -- Hearthstone binding
   HEARTH_BIND_TITLE = "Vincula tu Piedra de hogar cerca",
   HEARTH_BIND_HELP = "Cuando hablas con un posadero lejos de donde está vinculada tu Piedra de hogar, te recuerda que esta posada puede ser tu hogar.",
   HEARTH_BIND_ROW = "Tu Piedra de hogar está vinculada a %s. Este posadero puede vincularla aquí.",
+
   -- Vendor automation
   OPT_BAGS_VENDOR = "Vendedores",
   OPT_VENDOR_SELL = "Vender los objetos grises al abrir un vendedor",
@@ -481,6 +498,7 @@ local T = {
   VENDOR_SOLD = "Vendido(s) %d objeto(s) de chatarra por %s.",
   VENDOR_REPAIRED = "Equipo reparado por %s.",
   VENDOR_REPAIR_POOR = "Reparar costaría %s; tienes %s.",
+
   -- Tooltips and one-bag view
   OPT_TOOLTIPS = "Descripciones",
   OPT_TOOLTIP_PRICE = "Mostrar el precio de venta en las descripciones de objetos",
@@ -489,11 +507,13 @@ local T = {
   TOOLTIP_SELL_EACH = "%s cada uno",
   GS_combinedBags = "Vista de una sola bolsa (todas las bolsas en una ventana)",
   GS_combinedBags_TT = "Abre todas tus bolsas como una sola ventana. El preajuste Clásico de Forever lo desactiva; prueba ambos.",
+
   -- Mount
   MOUNT_TITLE = "Montar al nivel 40",
   MOUNT_HELP = "Aprender a montar y tu primera montura cuestan unas 100 monedas de oro en total al nivel 40. Te recuerda ahorrar desde el nivel 30 y aprender a montar en cuanto puedas.",
   MOUNT_ROW_SAVE = "Ahorra: montar y una montura cuestan unas 100 de oro al nivel 40 (tienes %s).",
   MOUNT_ROW_RIDE = "Ya puedes aprender a montar. Visita a un instructor de equitación.",
+
   -- Weapon skill and Legacy
   WEAPON_SKILL_TITLE = "Habilidad con el arma atrasada",
   WEAPON_SKILL_HELP = "Cada tipo de arma tiene su propia habilidad, que sube al luchar con ella. Un arma que apenas has usado falla mucho hasta que la habilidad se pone al día.",
@@ -502,15 +522,15 @@ local T = {
   LEGACY_HELP = "Los desafíos y ventajas de cuenta de Forever se abren hacia el nivel 25 (pulsa Y). Te avisa una vez, y siempre que haya desafíos nuevos por ver.",
   LEGACY_ROW_UNLOCK = "El sistema de Legado está abierto. Pulsa Y para gastar tu primer punto.",
   LEGACY_ROW_CHALLENGES = "Tienes desafíos de Legado nuevos por ver (pulsa Y).",
+
   -- Flight paths
   FLIGHT_PATH_TITLE = "Ruta de vuelo por desbloquear",
   FLIGHT_PATH_HELP = "Cada zona tiene maestros de vuelo; hablar con uno una vez desbloquea esa ruta para siempre. Muestra los de tu zona actual que aún no has visitado.",
   FLIGHT_PATH_ROW = "Ruta de vuelo por desbloquear en %s: %s.",
   FLIGHT_PATH_ROW_MANY = "Rutas de vuelo por desbloquear en %s: %s y %d más.",
+
   -- Warlock demon
   DEMON_TITLE = "Demonio sin invocar",
   DEMON_HELP = "Un brujo siempre debería tener un demonio fuera. Te avisa cuando no hay ninguno invocado y hace brillar el hechizo de invocación en tu barra.",
   DEMON_ROW_MISSING = "No tienes tu demonio invocado.",
-}
-
-for key, value in pairs(T) do NN.L[key] = value end
+})

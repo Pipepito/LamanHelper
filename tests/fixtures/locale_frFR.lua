@@ -1,0 +1,3 @@
+-- Fixture: a partial French locale registered the way a real one would be.
+local _, NN = ...
+NN.RegisterLocale("frFR", { PANEL_TITLE = "Rappels" })

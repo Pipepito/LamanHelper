@@ -7,7 +7,6 @@ Also checks that the enUS and esES locale files define the same keys.
 Usage: python tests/run.py [substring-filter]
 """
 import os
-import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,20 +52,15 @@ def run_test(path, name):
 
 
 def locale_parity():
-    en = os.path.join(ADDON_DIR, "Locales", "enUS.lua")
-    es = os.path.join(ADDON_DIR, "Locales", "esES.lua")
-    if not (os.path.exists(en) and os.path.exists(es)):
+    """Runs tools/locales.py check: every Locales/*.lua must match enUS's keys."""
+    import subprocess
+    tool = os.path.join(ROOT, "tools", "locales.py")
+    if not os.path.exists(tool):
         return None
-    key_re = re.compile(r"^\s*([A-Z][A-Z0-9_]+)\s*=", re.M)
-    with open(en, encoding="utf-8") as f:
-        en_keys = set(key_re.findall(f.read()))
-    with open(es, encoding="utf-8") as f:
-        es_keys = set(key_re.findall(f.read()))
-    missing_es = sorted(en_keys - es_keys)
-    missing_en = sorted(es_keys - en_keys)
-    if missing_es or missing_en:
-        return "missing in esES: %s; missing in enUS: %s" % (missing_es, missing_en)
-    return ""
+    proc = subprocess.run([sys.executable, "-I", tool, "check"], capture_output=True, text=True)
+    if proc.returncode == 0:
+        return ""
+    return (proc.stdout + proc.stderr).strip().replace(chr(10), " | ")
 
 
 def main(argv):

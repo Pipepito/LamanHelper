@@ -10,6 +10,7 @@
 ## AllowLoadGameType: forever
 ## ExcludeLoadGameType: standard, classic
 
+Locales\Loader.lua
 Locales\enUS.lua
 Locales\esES.lua
 Core.lua

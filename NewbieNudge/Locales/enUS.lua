@@ -1,9 +1,10 @@
--- English strings. This file always loads: it serves enUS and enGB clients
--- and is the fallback for every other language. A key with no translation
--- shows its own name instead of erroring.
+-- English (enUS). The reference language: every other Locales file must
+-- define exactly the same keys, in the same sections. Loads for every client
+-- and is the fallback for untranslated keys.
 local _, NN = ...
 
-NN.L = setmetatable({
+NN.RegisterLocale("enUS", {
+  -- General: panel, rows, chat
   ADDON_TITLE = "NewbieNudge",
   CHAT_PREFIX = "|cff7fd5ffNewbieNudge|r: ",
   PANEL_TITLE = "Reminders",
@@ -38,7 +39,7 @@ NN.L = setmetatable({
   OPT_BUTTON_DO = "Reset",
   OPT_NOT_RELEVANT = "Not relevant for this character",
 
-  -- Rules
+  -- Reminders (v1 rules)
   BAG_UNEQUIPPED_TITLE = "Unused bag",
   BAG_UNEQUIPPED_HELP = "Bags give you more room for loot. Open your bags and drag the bag onto an empty bag slot next to your backpack.",
   BAG_UNEQUIPPED_ROW_EMPTY = "You have a bag in your inventory that isn't equipped.",
@@ -95,7 +96,7 @@ NN.L = setmetatable({
   GEAR_UPGRADE_HELP = "This compares item levels only, so treat it as a hint. Open your bags and read the item's tooltip.",
   GEAR_UPGRADE_ROW = "An item in your bags looks like an upgrade: %s",
 
-  -- Camera settings
+  -- Options: camera page
   OPT_CAMERA = "Camera",
   OPT_CAMERA_NOTE = "These are game settings Blizzard's options window doesn't show. They are saved by the game itself.",
   OPT_CAMERA_OTHER = "Other camera variables",
@@ -118,6 +119,7 @@ NN.L = setmetatable({
   CAM_FOCUS_INTERACT_TT = "The camera turns toward NPCs you talk to.",
   CAM_HEAD_MOVEMENT = "Head movement strength",
   CAM_HEAD_MOVEMENT_TT = "How much the camera follows your character's head. 0 turns it off.",
+
   -- Map reveal
   OPT_MAP = "Map",
   OPT_MAP_REVEAL = "Show unexplored areas on the world map",
@@ -126,7 +128,8 @@ NN.L = setmetatable({
   OPT_MAP_DESATURATE = "Unexplored areas in grey",
   SLASH_MAP_ON = "Unexplored areas are now shown on the map.",
   SLASH_MAP_OFF = "Unexplored areas are now hidden on the map.",
-  -- Quest planning
+
+  -- Quest planning rows
   QUEST_TURNIN_TITLE = "Quests ready to turn in",
   QUEST_TURNIN_HELP = "Counts the quests in your log that are complete and only need handing in.",
   QUEST_TURNIN_ROW = "%d quest(s) complete: turn them in.",
@@ -136,28 +139,34 @@ NN.L = setmetatable({
   QUEST_GREY_TITLE = "Grey quests",
   QUEST_GREY_HELP = "Grey quests give almost no experience any more. Do them last, or abandon them to free the log.",
   QUEST_GREY_ROW = "%d grey quest(s) give almost no XP: do them last or abandon them.",
+
   -- Quest bag slots
   QUEST_SLOTS_TITLE = "Bag space for quests",
   QUEST_SLOTS_HELP = "Estimates how many bag slots the items your current quests collect, and the rewards of complete quests, will take. It is an estimate.",
   QUEST_SLOTS_ROW = "Keep %d bag slots free for your quests (you have %d).",
+
   -- Quest-starting items
   QUEST_ITEM_TITLE = "Items that start a quest",
   QUEST_ITEM_HELP = "Some items you pick up start a quest when you right-click them. This shows the ones waiting in your bags.",
   QUEST_ITEM_ROW = "%s starts a quest. Right-click it in your bags.",
   QUEST_ITEM_UNKNOWN = "An item",
+
   -- Materials bag
   MATERIALS_BAG_TITLE = "Materials bag not in use",
   MATERIALS_BAG_HELP = "You have a separate slot for a materials bag next to your normal bags. This reminds you to equip one you are carrying.",
   MATERIALS_BAG_ROW_EMPTY = "You have a materials bag in your inventory that isn't equipped.",
   MATERIALS_BAG_ROW_BIGGER = "A materials bag in your inventory is bigger than the one you're using.",
+
   -- Trainer spells
   TRAINER_SPELLS_TITLE = "New spells for your level",
   TRAINER_SPELLS_HELP = "Spells and ranks your level allows that you haven't learned. Most come from your class trainer; a few class spells come from quests instead, so a row that stays after a trainer visit means a class quest is waiting.",
   TRAINER_SPELLS_ROW = "%d spells or ranks for your level you haven't learned. Visit your class trainer.",
+
   -- Profession rank
   PROFESSION_RANK_TITLE = "Next profession rank available",
   PROFESSION_RANK_HELP = "Your profession skill is close to its cap and you are high enough level for the next rank. Trainers teach primary ranks; Cooking, First Aid and Fishing need a vendor book for Expert and a quest for Artisan.",
   PROFESSION_RANK_ROW = "You can learn the next rank of %s (%d/%d). Visit a %s trainer.",
+
   -- Dungeons and zones
   DUNGEON_TITLE = "A dungeon for your level",
   DUNGEON_HELP = "Names a dungeon whose level range fits you. Dungeons have their own quests; grab them outside first. The row goes away once you have been inside or done its quests.",
@@ -166,6 +175,7 @@ NN.L = setmetatable({
   ZONE_HELP = "Compares the zone you are in with your level, so you know when quests here give less experience or when the area is dangerous.",
   ZONE_BELOW_ROW = "%s (%d–%d) is below your level. Quests here give less XP.",
   ZONE_ABOVE_ROW = "%s (%d–%d) is above your level. Be careful here.",
+
   -- Bag-full helper
   OPT_BAGS = "Bags",
   OPT_BAGFULL_ENABLED = "When bags are full, list the cheapest items to destroy",
@@ -178,7 +188,8 @@ NN.L = setmetatable({
   BAGFULL_EMPTY = "Nothing safe to destroy was found.",
   BAGFULL_DESTROY = "Destroy",
   BAGFULL_SURE = "Sure?",
-  -- Controller
+
+  -- Options: controller page
   OPT_CONTROLLER = "Controller",
   OPT_CONTROLLER_NOTE = "Game setting, saved by the game itself.",
   OPT_CONTROLLER_OTHER = "Other controller settings",
@@ -279,7 +290,8 @@ NN.L = setmetatable({
   CTRL_SoftTargetNameplateEnemy_TT = "Always shows the health bar of the enemy that would be targeted.",
   CTRL_SoftTargetNameplateSize = "Picked-enemy health bar size",
   CTRL_SoftTargetNameplateSize_TT = "Size of that health bar.",
-  -- Controller-aware panel and bindings
+
+  -- Controller-aware panel and key bindings
   OPT_CONTROLLER_PANEL = "Reminder panel with a controller",
   OPT_CONTROLLER_BOOST = "Scale up the panel when a controller is in use",
   OPT_CONTROLLER_BOOST_TT = "On a small screen like the Steam Deck's, the panel and the combat strip grow by the factor below.",
@@ -293,7 +305,8 @@ NN.L = setmetatable({
   BINDING_SNOOZE_TOP = "Snooze the top reminder",
   BINDING_OPTIONS = "Open NewbieNudge options",
   SLASH_PANEL_HIDDEN = "The reminder panel is hidden. Use the key binding or /nudge show to bring it back.",
-  -- Game settings
+
+  -- Options: game settings page
   OPT_GAME_SETTINGS = "Game settings",
   OPT_GS_NOTE = "Game setting, saved by the game itself. Some apply to this character only.",
   OPT_GS_PRESET = "Recommended for new players",
@@ -427,7 +440,8 @@ NN.L = setmetatable({
   GS_guildMemberNotify_TT = "A chat line when guild mates come and go.",
   GS_Sound_EnableErrorSpeech = "Spoken error messages",
   GS_Sound_EnableErrorSpeech_TT = "Your character says lines like 'I can't do that yet'.",
-  -- Talent build
+
+  -- Talent builds (Icy Veins)
   OPT_BUILD = "Talent build",
   OPT_BUILD_PASTE = "Paste an Icy Veins talent calculator link",
   OPT_BUILD_PASTE_TT = "Open the Icy Veins leveling guide for your class, pick a build under Leveling Talent Build, click Open in Calculator and copy the address of that page. The panel then names the next talent to pick.",
@@ -457,21 +471,25 @@ NN.L = setmetatable({
   MAP_BUTTON_TT = "Left-click: map settings. Right-click: show or hide the unexplored areas.",
   OPT_BUILD_BADGES = "Show the build on the talent window",
   OPT_BUILD_BADGES_TT = "On each talent the build uses: bottom-right, the points you have of the points the build puts there (green when done, yellow in progress); top-left, the level the build first takes it at, until you start it.",
+
   -- Supplies
   SUPPLIES_TITLE = "Food and bandages",
   SUPPLIES_HELP = "Food, drink and bandages cover the gaps between fights. Reminds you when your bags hold none at all; bandages only count if you know First Aid.",
   SUPPLIES_ROW_FOOD = "You have no food or drink in your bags.",
   SUPPLIES_ROW_BANDAGE = "You have no bandages. First Aid makes them from cloth.",
+
   -- Group quests
   QUEST_GROUP_TITLE = "Quests that need a group",
   QUEST_GROUP_HELP = "Elite, dungeon and raid quests are meant for several players. Plan them for when you have company instead of dying to them alone.",
   QUEST_GROUP_ROW = "%d quest(s) in your log need a group.",
   PROFESSION_RANK_ROW_BOOK = "Read the Expert %s book to go past %d. Vendors sell it.",
   PROFESSION_RANK_ROW_QUEST = "Complete the Artisan %s quest (level 35) to go past %d.",
+
   -- Hearthstone binding
   HEARTH_BIND_TITLE = "Set your Hearthstone nearby",
   HEARTH_BIND_HELP = "When you talk to an innkeeper far from where your Hearthstone is set, reminds you that this inn can become your home instead.",
   HEARTH_BIND_ROW = "Your Hearthstone is set to %s. This innkeeper can set it here.",
+
   -- Vendor automation
   OPT_BAGS_VENDOR = "Vendors",
   OPT_VENDOR_SELL = "Sell grey items when you open a vendor",
@@ -481,6 +499,7 @@ NN.L = setmetatable({
   VENDOR_SOLD = "Sold %d junk item(s) for %s.",
   VENDOR_REPAIRED = "Repaired your gear for %s.",
   VENDOR_REPAIR_POOR = "Repairing would cost %s; you have %s.",
+
   -- Tooltips and one-bag view
   OPT_TOOLTIPS = "Tooltips",
   OPT_TOOLTIP_PRICE = "Show the vendor sell price on item tooltips",
@@ -489,11 +508,13 @@ NN.L = setmetatable({
   TOOLTIP_SELL_EACH = "%s each",
   GS_combinedBags = "One-bag view (all bags in one window)",
   GS_combinedBags_TT = "Opens all your bags as a single window. Forever's Classic preset turns this off; try both.",
+
   -- Mount
   MOUNT_TITLE = "Riding at level 40",
   MOUNT_HELP = "Riding training and your first mount cost about 100 gold together at level 40. Reminds you to save from level 30, and to learn to ride once you can.",
   MOUNT_ROW_SAVE = "Save up: riding and a mount cost about 100 gold at level 40 (you have %s).",
   MOUNT_ROW_RIDE = "You can learn to ride now. Visit a riding trainer.",
+
   -- Weapon skill and Legacy
   WEAPON_SKILL_TITLE = "Weapon skill behind",
   WEAPON_SKILL_HELP = "Each weapon type has its own skill that rises as you fight with it. A weapon you rarely used misses a lot until the skill catches up.",
@@ -502,13 +523,15 @@ NN.L = setmetatable({
   LEGACY_HELP = "Forever's account-wide challenges and perks open around level 25 (press Y). Reminds you once, and whenever new challenges wait to be looked at.",
   LEGACY_ROW_UNLOCK = "The Legacy system is open. Press Y to spend your first point.",
   LEGACY_ROW_CHALLENGES = "You have new Legacy challenges to look at (press Y).",
+
   -- Flight paths
   FLIGHT_PATH_TITLE = "Flight path to unlock",
   FLIGHT_PATH_HELP = "Each zone has flight masters; talking to one once unlocks that flight path for good. Shows the ones in your current zone you have not visited yet.",
   FLIGHT_PATH_ROW = "Flight path to unlock in %s: %s.",
   FLIGHT_PATH_ROW_MANY = "Flight paths to unlock in %s: %s and %d more.",
+
   -- Warlock demon
   DEMON_TITLE = "Demon not summoned",
   DEMON_HELP = "A warlock should always have a demon out. Reminds you when none is summoned, and glows the summon spell on your bar.",
   DEMON_ROW_MISSING = "Your demon isn't summoned.",
-}, { __index = function(_, key) return key end })
+})
