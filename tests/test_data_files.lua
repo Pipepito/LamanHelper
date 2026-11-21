@@ -1,5 +1,18 @@
 -- Shape checks on the generated data files under NewbieNudge/Data/.
 return {
+  toc_icon_texture_is_a_64px_tga_inside_the_addon = function()
+    local toc = assert(io.open(ADDON_DIR .. "/NewbieNudge.toc", "rb")):read("*a")
+    local path = toc:match("## IconTexture:%s*([^\r\n]+)")
+    assert_true(path, "TOC has an IconTexture line")
+    local rel = path:match("^Interface\\AddOns\\NewbieNudge\\(.+)$")
+    assert_true(rel, "icon lives inside the addon folder, got " .. tostring(path))
+    local f = assert(io.open(ADDON_DIR .. "/" .. rel:gsub("\\", "/") .. ".tga", "rb"), "icon file missing")
+    local header = f:read(18); f:close()
+    assert_eq(header:byte(3), 2, "uncompressed true-colour TGA")
+    assert_eq(header:byte(13) + header:byte(14) * 256, 64, "width 64")
+    assert_eq(header:byte(15) + header:byte(16) * 256, 64, "height 64")
+    assert_eq(header:byte(17), 32, "32 bits per pixel")
+  end,
   map_fog_entries_have_geometry_and_ids = function()
     WOW.keepData = true; load_addon()
     assert_true(NewbieNudge.MapFog[1412], "Mulgore present")

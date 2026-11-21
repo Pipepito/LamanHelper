@@ -7,7 +7,7 @@
 ## X-License: GPL-3.0
 ## X-Website: https://github.com/Pipepito/newbie-nudge
 ## X-Curse-Project-ID: 0
-## IconTexture: Interface\Icons\INV_Misc_Note_01
+## IconTexture: Interface\AddOns\NewbieNudge\Media\icon
 ## SavedVariablesPerCharacter: NewbieNudgeDB
 ## SavedVariables: NewbieNudgeDev
 ## AllowLoadGameType: forever
