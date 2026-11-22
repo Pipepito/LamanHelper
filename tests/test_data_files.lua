@@ -59,4 +59,21 @@ return {
     assert_true(NewbieNudge.TalentBuild:Set(link))
     assert_eq(#NewbieNudge.db.build.picks, 51)
   end,
+  service_npcs_have_positions_and_every_kind_points_at_an_npc = function()
+    WOW.keepData = true; load_addon()
+    local data = NewbieNudge.ServiceData
+    assert_true(data and #data.kinds.repair > 100, "repair vendors")
+    for _, kind in ipairs({ "inn", "supplies", "weapon", "trainer_MAGE", "trainer_WARRIOR", "prof_182", "prof_129" }) do
+      assert_true(data.kinds[kind] and #data.kinds[kind] > 0, kind)
+    end
+    assert_eq(#data.kinds.weapon, 8)
+    for kind, ids in pairs(data.kinds) do
+      for _, id in ipairs(ids) do
+        local npc = data.npcs[id]
+        assert_true(npc, kind .. " -> " .. id)
+        assert_true(type(npc[3]) == "number" and npc[4] >= 0 and npc[4] <= 100 and npc[5] >= 0 and npc[5] <= 100, "position of " .. id)
+        assert_true(npc[6] == "A" or npc[6] == "H" or npc[6] == "AH", "faction of " .. id)
+      end
+    end
+  end,
 }

@@ -34,6 +34,7 @@ Data\Zones.lua
 Data\Dungeons.lua
 Data\IcyTalents.lua
 Data\WeaponTrainers.lua
+Data\Services.lua
 MapReveal.lua
 BagFull.lua
 Vendor.lua
