@@ -9,6 +9,31 @@ local function callsNamed(name)
   return out
 end
 
+
+-- Calls recorded while the named options page was being built.
+local function pageCalls(title)
+  local out, inPage = {}, false
+  for _, c in ipairs(WOW.calls) do
+    if c[1] == "RegisterVerticalLayoutSubcategory" then inPage = (c[3] == title)
+    elseif c[1] == "RegisterAddOnCategory" then inPage = false
+    elseif inPage then out[#out + 1] = c end
+  end
+  return out
+end
+local function varsOf(calls)
+  local out = {}
+  for _, c in ipairs(calls) do if c[1] == "checkbox" or c[1] == "slider" or c[1] == "dropdown" then out[#out + 1] = c[2] end end
+  return out
+end
+local function mainPageCalls()
+  local out = {}
+  for _, c in ipairs(WOW.calls) do
+    if c[1] == "RegisterVerticalLayoutSubcategory" then break end
+    out[#out + 1] = c
+  end
+  return out
+end
+
 return {
   registers_category_and_addon_category = function()
     withRules()
@@ -169,5 +194,61 @@ return {
     for i, c in ipairs(callsNamed("checkbox")) do order[c[2]] = i end
     assert_true(order.NN_rule_durability < order.NN_rule_bag_unequipped)
     assert_true(order.NN_rule_bag_full < order.NN_rule_ammo)
+  end,
+  -- v4: page order and the merged Bags page.
+  subpage_order = function()
+    withRules()
+    local L = NewbieNudge.L
+    local names = {}
+    for _, c in ipairs(callsNamed("RegisterVerticalLayoutSubcategory")) do names[#names + 1] = c[3] end
+    local expected = { L.OPT_REMINDERS, L.OPT_BAGS, L.OPT_MAP, L.OPT_GS_COMBAT, L.OPT_GS_NAMES, L.OPT_GS_INTERFACE, L.OPT_CAMERA }
+    if tContains(names, L.OPT_CONTROLLER) then expected[#expected + 1] = L.OPT_CONTROLLER end
+    expected[#expected + 1] = L.OPT_BUILD
+    expected[#expected + 1] = L.OPT_DEV
+    assert_eq(names, expected)
+  end,
+  unknown_page_key_goes_last = function()
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/failing_page.lua" }
+    load_addon()
+    local subs = callsNamed("RegisterVerticalLayoutSubcategory")
+    assert_eq(subs[#subs][3], "Boom page")
+    assert_eq(subs[#subs - 1][3], NewbieNudge.L.OPT_DEV)
+  end,
+  main_page_sections = function()
+    withRules()
+    local L = NewbieNudge.L
+    local headers = {}
+    for _, c in ipairs(mainPageCalls()) do if c[1] == "initializer" and c[2] == "header" then headers[#headers + 1] = c[3] end end
+    assert_eq(headers, { L.OPT_GENERAL, L.OPT_INFOBAR_HEADER, L.OPT_MINIMAP_HEADER, L.OPT_SETUP })
+  end,
+  bags_page_holds_vendor_tooltip_and_game_controls = function()
+    withRules()
+    local L = NewbieNudge.L
+    local calls = pageCalls(L.OPT_BAGS)
+    local vars = varsOf(calls)
+    for _, v in ipairs({ "NN_bagfull_enabled", "NN_vendor_sellJunk", "NN_vendor_repair", "NN_tooltipPrice",
+      "NN_cvar_autoLootDefault", "NN_cvar_lootUnderMouse", "NN_cvar_expandBagBar", "NN_cvar_combinedBags" }) do
+      assert_true(tContains(vars, v), v)
+    end
+    local gsHeader, firstCvar
+    for i, c in ipairs(calls) do
+      if c[1] == "initializer" and c[3] == L.OPT_GS_HEADER then gsHeader = gsHeader or i end
+      if c[2] == "NN_cvar_autoLootDefault" then firstCvar = i end
+    end
+    assert_true(gsHeader and firstCvar and gsHeader < firstCvar, "game settings sit under their header")
+  end,
+  no_vendors_tooltips_or_game_settings_pages = function()
+    withRules()
+    local L = NewbieNudge.L
+    for _, c in ipairs(callsNamed("RegisterVerticalLayoutSubcategory")) do
+      assert_true(c[3] ~= L.OPT_BAGS_VENDOR and c[3] ~= L.OPT_TOOLTIPS and c[3] ~= "Game settings", c[3])
+    end
+  end,
+  map_page_holds_its_game_settings = function()
+    withRules()
+    local vars = varsOf(pageCalls(NewbieNudge.L.OPT_MAP))
+    for _, v in ipairs({ "NN_map_reveal", "NN_cvar_mapFade", "NN_cvar_rotateMinimap", "NN_cvar_questPOI" }) do
+      assert_true(tContains(vars, v), v)
+    end
   end,
 }

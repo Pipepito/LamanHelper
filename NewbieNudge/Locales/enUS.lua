@@ -26,7 +26,7 @@ NN.RegisterLocale("enUS", {
   SLASH_UNLOCKED = "Panel unlocked: drag the title bar to move it. /nudge lock when done.",
   SLASH_TEST_ON = "Test mode: showing every reminder with sample text. /nudge reset to leave.",
   RULE_ERROR = "The reminder '%s' hit an error and is off until next login. Please report: %s",
-  OPT_GENERAL = "General",
+  OPT_GENERAL = "Panel",
   OPT_REMINDERS = "Reminders",
   OPT_GROUP_GEAR = "Bags and gear",
   OPT_GROUP_SPELLS = "Spells and talents",
@@ -173,7 +173,7 @@ NN.RegisterLocale("enUS", {
   CAM_HEAD_MOVEMENT_TT = "How much the camera follows your character's head. 0 turns it off.",
 
   -- Map reveal
-  OPT_MAP = "Map",
+  OPT_MAP = "Map and minimap",
   OPT_MAP_REVEAL = "Show unexplored areas on the world map",
   OPT_MAP_REVEAL_TT = "Draws the parts of a zone you haven't visited yet, darker, so you can see the whole map.",
   OPT_MAP_BRIGHTNESS = "Unexplored area brightness (%)",
@@ -233,7 +233,7 @@ NN.RegisterLocale("enUS", {
   ZONE_ABOVE_ROW = "%s (%d–%d) is above your level. Be careful here.",
 
   -- Bag-full helper
-  OPT_BAGS = "Bags",
+  OPT_BAGS = "Bags and vendors",
   OPT_BAGFULL_ENABLED = "When bags are full, list the cheapest items to destroy",
   OPT_BAGFULL_ENABLED_TT = "Opens a small window next to the loot when your bags are full, with a Destroy button per item. Quest items, bags, ammo, reagents and useful gear are never listed.",
   OPT_BAGFULL_QUALITY = "Highest item quality to list",
@@ -363,16 +363,19 @@ NN.RegisterLocale("enUS", {
   SLASH_PANEL_HIDDEN = "The reminder panel is hidden. Use the key binding or /nudge show to bring it back.",
 
   -- Options: game settings page
-  OPT_GAME_SETTINGS = "Game settings",
   OPT_GS_NOTE = "Game setting, saved by the game itself. Some apply to this character only.",
-  OPT_GS_PRESET = "Recommended for new players",
+  OPT_SETUP = "New player setup",
+  OPT_GS_HEADER = "Game settings",
+  OPT_GS_PAGE_INTRO = "These are the game's own settings, gathered here with plain labels.",
+  OPT_GS_COMBAT = "Combat and action bars",
+  OPT_GS_NAMES = "Names and health bars",
+  OPT_GS_INTERFACE = "Quests and interface",
+  OPT_BAGFULL_HEADER = "When your bags are full",
+  OPT_GS_PRESET = "Apply recommended game settings",
   OPT_GS_PRESET_TT = "Sets the options below to values that help a new player: auto loot, enemy health bars, NPC names, cast on key down, cooldown numbers, quest tracking and more. Nothing it does not list is touched.",
-  OPT_GS_RESET = "Reset these to game defaults",
+  OPT_GS_RESET = "Reset these game settings to defaults",
   GS_PRESET_DONE = "%d game settings changed.",
   GS_IN_COMBAT = "Can't change game settings in combat. Try again after the fight.",
-  GS_GROUP_LOOT = "Looting",
-  GS_GROUP_NAMES = "Names and health bars",
-  GS_GROUP_COMBAT = "Combat and casting",
   GS_GROUP_MOVE = "Moving and interacting",
   GS_GROUP_QUESTS = "Quests, map and screen",
   GS_OPT_THREAT_OFF = "Off",

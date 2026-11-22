@@ -333,6 +333,7 @@ end)
 
 NN.Options.RegisterPage("bags", "OPT_BAGS", function(category, layout)
   local Options = NN.Options
+  Options.AddHeader(layout, L.OPT_BAGFULL_HEADER)
   Options.AddCheckbox(category, "NN_bagfull_enabled", L.OPT_BAGFULL_ENABLED, L.OPT_BAGFULL_ENABLED_TT,
     function() return NN.db.bagfull.enabled end,
     function(value) NN.db.bagfull.enabled = value and true or false; if not value then BagFull:Hide() end end)
@@ -346,4 +347,10 @@ NN.Options.RegisterPage("bags", "OPT_BAGS", function(category, layout)
   Options.AddCheckbox(category, "NN_bagfull_onLoot", L.OPT_BAGFULL_ONLOOT, nil,
     function() return NN.db.bagfull.onLoot end,
     function(value) NN.db.bagfull.onLoot = value and true or false end)
+  if NN.Vendor and NN.Vendor.AddOptions then NN.Vendor.AddOptions(category, layout) end
+  if NN.Tooltips and NN.Tooltips.AddOptions then NN.Tooltips.AddOptions(category, layout) end
+  if NN.GameSettings then
+    Options.AddGameSettingsHeader(layout)
+    NN.GameSettings:AddPageControls(category, layout, "bags")
+  end
 end)

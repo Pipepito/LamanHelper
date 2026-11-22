@@ -25,7 +25,7 @@ NN.RegisterLocale("esES", {
   SLASH_UNLOCKED = "Panel desbloqueado: arrastra la barra de título para moverlo. /nudge lock al terminar.",
   SLASH_TEST_ON = "Modo de prueba: se muestran todos los recordatorios con texto de ejemplo. /nudge reset para salir.",
   RULE_ERROR = "El recordatorio '%s' ha dado un error y queda desactivado hasta la próxima conexión. Por favor, infórmalo: %s",
-  OPT_GENERAL = "General",
+  OPT_GENERAL = "Panel",
   OPT_REMINDERS = "Recordatorios",
   OPT_GROUP_GEAR = "Bolsas y equipo",
   OPT_GROUP_SPELLS = "Hechizos y talentos",
@@ -172,7 +172,7 @@ NN.RegisterLocale("esES", {
   CAM_HEAD_MOVEMENT_TT = "Cuánto sigue la cámara la cabeza de tu personaje. 0 lo desactiva.",
 
   -- Map reveal
-  OPT_MAP = "Mapa",
+  OPT_MAP = "Mapa y minimapa",
   OPT_MAP_REVEAL = "Mostrar zonas sin explorar en el mapa del mundo",
   OPT_MAP_REVEAL_TT = "Dibuja más oscuras las partes de la zona que aún no has visitado, para que veas el mapa completo.",
   OPT_MAP_BRIGHTNESS = "Brillo de las zonas sin explorar (%)",
@@ -232,7 +232,7 @@ NN.RegisterLocale("esES", {
   ZONE_ABOVE_ROW = "%s (%d–%d) está por encima de tu nivel. Ten cuidado aquí.",
 
   -- Bag-full helper
-  OPT_BAGS = "Bolsas",
+  OPT_BAGS = "Bolsas y vendedores",
   OPT_BAGFULL_ENABLED = "Con las bolsas llenas, listar los objetos más baratos para destruir",
   OPT_BAGFULL_ENABLED_TT = "Abre una ventanita junto al botín cuando tus bolsas están llenas, con un botón Destruir por objeto. Nunca lista objetos de misión, bolsas, munición, reactivos ni equipo útil.",
   OPT_BAGFULL_QUALITY = "Calidad máxima de objeto a listar",
@@ -362,16 +362,19 @@ NN.RegisterLocale("esES", {
   SLASH_PANEL_HIDDEN = "El panel de recordatorios está oculto. Usa el atajo o /nudge show para recuperarlo.",
 
   -- Options: game settings page
-  OPT_GAME_SETTINGS = "Ajustes del juego",
   OPT_GS_NOTE = "Ajuste del juego, guardado por el propio juego. Algunos solo afectan a este personaje.",
-  OPT_GS_PRESET = "Recomendado para jugadores nuevos",
+  OPT_SETUP = "Preparación para jugadores nuevos",
+  OPT_GS_HEADER = "Opciones del juego",
+  OPT_GS_PAGE_INTRO = "Estas son opciones del propio juego, reunidas aquí con nombres claros.",
+  OPT_GS_COMBAT = "Combate y barras de acción",
+  OPT_GS_NAMES = "Nombres y barras de salud",
+  OPT_GS_INTERFACE = "Misiones e interfaz",
+  OPT_BAGFULL_HEADER = "Cuando tus bolsas están llenas",
+  OPT_GS_PRESET = "Aplicar las opciones de juego recomendadas",
   OPT_GS_PRESET_TT = "Pone las opciones de abajo en valores que ayudan a un jugador nuevo: botín automático, barras de vida de enemigos, nombres de PNJ, lanzar al pulsar, números de reutilización, seguimiento de misiones y más. No toca nada que no esté en la lista.",
-  OPT_GS_RESET = "Restablecer estos a los valores del juego",
+  OPT_GS_RESET = "Restablecer estas opciones del juego",
   GS_PRESET_DONE = "%d ajustes del juego cambiados.",
   GS_IN_COMBAT = "No se pueden cambiar ajustes del juego en combate. Inténtalo tras la pelea.",
-  GS_GROUP_LOOT = "Botín",
-  GS_GROUP_NAMES = "Nombres y barras de vida",
-  GS_GROUP_COMBAT = "Combate y lanzamiento",
   GS_GROUP_MOVE = "Moverse e interactuar",
   GS_GROUP_QUESTS = "Misiones, mapa y pantalla",
   GS_OPT_THREAT_OFF = "Desactivado",

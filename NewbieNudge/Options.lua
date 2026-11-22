@@ -66,11 +66,22 @@ function Options.AddDropdown(category, variable, name, tooltip, options, getter,
 end
 
 -- A subcategory under the addon's page (Map, Bags, Camera, ...).
-function Options.AddSubcategory(name)
+function Options.AddSubcategory(name, key)
   local category, layout = Settings.RegisterVerticalLayoutSubcategory(Options.category, name)
   Options.subcategories = Options.subcategories or {}
   Options.subcategories[name] = category
+  if key then Options.subcategoriesByKey[key] = category end
   return category, layout
+end
+Options.subcategoriesByKey = {}
+
+-- Page order in the AddOns list. Registered pages whose key is not here
+-- follow, in registration order.
+Options.PAGE_ORDER = { "reminders", "bags", "map", "gs_combat", "gs_names", "gs_interface", "camera", "controller", "build", "dev" }
+
+-- A game-settings header inside a page that mixes addon and game options.
+function Options.AddGameSettingsHeader(layout)
+  Options.AddHeader(layout, L.OPT_GS_HEADER)
 end
 
 -- Modules register their page before login; pages are built in order after
@@ -107,6 +118,23 @@ function Options.BuildReminders(category, layout)
       end
     end
   end
+end
+
+-- Registered pages (plus Reminders and Camera) in PAGE_ORDER, then the rest.
+function Options.OrderedPages()
+  local byKey, used, out = {}, {}, {}
+  byKey.reminders = { key = "reminders", titleKey = "OPT_REMINDERS", build = Options.BuildReminders }
+  if NN.Camera and NN.Camera.AddToOptions then
+    byKey.camera = { key = "camera", titleKey = "OPT_CAMERA", build = function(c, l) NN.Camera:AddToOptions(c, l) end }
+  end
+  for _, page in ipairs(Options.pages) do byKey[page.key] = byKey[page.key] or page end
+  for _, key in ipairs(Options.PAGE_ORDER) do
+    if byKey[key] then out[#out + 1] = byKey[key]; used[key] = true end
+  end
+  for _, page in ipairs(Options.pages) do
+    if not used[page.key] then out[#out + 1] = page; used[page.key] = true end
+  end
+  return out
 end
 
 function Options:Build()
@@ -156,15 +184,17 @@ function Options:Build()
       if NN.MinimapButton then NN.MinimapButton:SetShown(value and true or false) else db.minimap.hide = not value end
     end)
 
-  if NN.Camera and NN.Camera.AddToOptions and Settings.RegisterVerticalLayoutSubcategory then
-    local cameraCategory, cameraLayout = Options.AddSubcategory(L.OPT_CAMERA)
-    NN.Camera:AddToOptions(cameraCategory, cameraLayout)
+  -- New player setup: the game's recommended settings, all pages at once
+  if NN.GameSettings then
+    Options.AddHeader(layout, L.OPT_SETUP)
+    Options.AddButton(layout, L.OPT_GS_PRESET, L.OPT_BUTTON_DO, function() NN.GameSettings:ApplyPreset() end, L.OPT_GS_PRESET_TT)
+    Options.AddButton(layout, L.OPT_GS_RESET, L.OPT_BUTTON_DO, function() NN.GameSettings:Reset() end)
   end
+
   if Settings.RegisterVerticalLayoutSubcategory then
-    Options.BuildReminders(Options.AddSubcategory(L.OPT_REMINDERS))
-    for _, page in ipairs(Options.pages) do
+    for _, page in ipairs(Options.OrderedPages()) do
       local title = L[page.titleKey]
-      local pageCategory, pageLayout = Options.AddSubcategory(title)
+      local pageCategory, pageLayout = Options.AddSubcategory(title, page.key)
       -- One broken page must not take the whole options window down.
       local ok, err = pcall(page.build, pageCategory, pageLayout)
       if not ok then

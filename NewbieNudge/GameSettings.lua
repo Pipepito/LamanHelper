@@ -13,29 +13,41 @@ local STATUS = { { "NUMERIC", "GS_OPT_STATUS_NUMERIC" }, { "PERCENT", "GS_OPT_ST
 local OUTLINE = { { "0", "GS_OPT_OUTLINE_OFF" }, { "1", "GS_OPT_OUTLINE_MOUSEOVER" }, { "2", "GS_OPT_OUTLINE_BOTH" } }
 local FIND = { { "0", "GS_OPT_FIND_CIRCLE" }, { "1", "GS_OPT_FIND_CIRCLE_OUTLINE" }, { "2", "GS_OPT_FIND_OUTLINE" } }
 
-local CURATED = {
-  { header = "GS_GROUP_LOOT" },
-  cb("autoLootDefault"), cb("lootUnderMouse"),
-  { header = "GS_GROUP_NAMES" },
+-- Each entry names the options page it appears on (bags, map, combat, names,
+-- interface); the preset and the reset still cover the whole list.
+local CURATED = {}
+local function on(page, entries)
+  for _, e in ipairs(entries) do
+    e.page = page
+    CURATED[#CURATED + 1] = e
+  end
+end
+
+on("bags", { cb("autoLootDefault"), cb("lootUnderMouse"), cb("expandBagBar"), cb("combinedBags") })
+on("map", { cb("mapFade"), cb("rotateMinimap"), cb("questPOI") })
+on("names", {
   cb("nameplateShowEnemies"), cb("nameplateShowEnemyMinus"), cb("nameplateShowAll"),
   cb("nameplateShowFriendlyPlayers"), cb("nameplateShowFriendlyNpcs"), cb("nameplateShowSelf"),
   sl("nameplateMaxDistance", 20, 60, 5),
   cb("UnitNameNPC"), cb("UnitNameInteractiveNPC"), cb("UnitNameFriendlyPlayerName"), cb("UnitNameEnemyPlayerName"), cb("UnitNameOwn"),
-  { header = "GS_GROUP_COMBAT" },
+})
+on("combat", {
   cb("ActionButtonUseKeyDown"), cb("autoSelfCast"), cb("lockActionBars"), cb("AutoPushSpellToActionBar"), cb("countdownForCooldowns"),
   sl("SpellQueueWindow", 0, 400, 50),
   cb("deselectOnClick"), cb("TargetEnemyAttacker"), cb("assistAttack"), cb("stopAutoAttackOnTargetChange"),
   dd("threatWarning", THREAT),
   cb("enableFloatingCombatText"), cb("floatingCombatTextCombatDamage_v2"), cb("floatingCombatTextCombatHealing_v2"),
   cb("displaySpellActivationOverlays"), sl("spellActivationOverlayOpacity", 0, 1, 0.05), cb("secureAbilityToggle"),
+})
+on("interface", {
   { header = "GS_GROUP_MOVE" },
   cb("interactOnLeftClick"), cb("autoDismount"), cb("autoClearAFK"), cb("autoInteract"),
   { header = "GS_GROUP_QUESTS" },
-  cb("autoQuestWatch"), cb("autoQuestProgress"), cb("showQuestObjectivesInLog"), cb("questPOI"), cb("ShowQuestUnitCircles"),
+  cb("autoQuestWatch"), cb("autoQuestProgress"), cb("showQuestObjectivesInLog"), cb("ShowQuestUnitCircles"),
   cb("showTutorials"), cb("showNPETutorials"), cb("screenEdgeFlash"), cb("doNotFlashLowHealthWarning"),
-  cb("mapFade"), cb("rotateMinimap"), cb("statusText"), dd("statusTextDisplay", STATUS), cb("expandBagBar"), cb("combinedBags"),
+  cb("statusText"), dd("statusTextDisplay", STATUS),
   dd("Outline", OUTLINE), dd("findYourselfMode", FIND), cb("chatBubbles"), cb("guildMemberNotify"), cb("Sound_EnableErrorSpeech"),
-}
+})
 
 local GameSettings = NN.CVarSection.New({
   curated = CURATED,
@@ -77,9 +89,20 @@ function GameSettings:Reset()
   self:ResetCurated()
 end
 
-NN.Options.RegisterPage("gamesettings", "OPT_GAME_SETTINGS", function(category, layout)
-  local Options = NN.Options
-  Options.AddButton(layout, L.OPT_GS_PRESET, L.OPT_BUTTON_DO, function() GameSettings:ApplyPreset() end, L.OPT_GS_PRESET_TT)
-  Options.AddButton(layout, L.OPT_GS_RESET, L.OPT_BUTTON_DO, function() GameSettings:Reset() end)
-  GameSettings:AddControls(category, layout)
-end)
+-- One page's slice of the curated list (headers included).
+function GameSettings:AddPageControls(category, layout, page)
+  local entries = {}
+  for _, e in ipairs(self.CURATED) do
+    if e.page == page then entries[#entries + 1] = e end
+  end
+  self:AddControls(category, layout, entries)
+end
+
+-- The three pages that hold nothing but game settings.
+for _, p in ipairs({ { "gs_combat", "OPT_GS_COMBAT", "combat" }, { "gs_names", "OPT_GS_NAMES", "names" },
+                     { "gs_interface", "OPT_GS_INTERFACE", "interface" } }) do
+  NN.Options.RegisterPage(p[1], p[2], function(category, layout)
+    NN.Options.AddHeader(layout, L.OPT_GS_PAGE_INTRO)
+    GameSettings:AddPageControls(category, layout, p[3])
+  end)
+end

@@ -118,13 +118,14 @@ NN:OnAnyEvent(function(event)
   elseif event == "MERCHANT_CLOSED" then Vendor:OnMerchantClosed() end
 end)
 
--- Options: two checkboxes on their own "Vendors" page.
-NN.Options.RegisterPage("vendor", "OPT_BAGS_VENDOR", function(category, layout)
+-- Options: two checkboxes in a "Vendors" section of the Bags page.
+function Vendor.AddOptions(category, layout)
   local Options = NN.Options
+  Options.AddHeader(layout, L.OPT_BAGS_VENDOR)
   Options.AddCheckbox(category, "NN_vendor_sellJunk", L.OPT_VENDOR_SELL, L.OPT_VENDOR_SELL_TT,
     function() return NN.db.vendor.sellJunk end,
     function(value) NN.db.vendor.sellJunk = value and true or false end)
   Options.AddCheckbox(category, "NN_vendor_repair", L.OPT_VENDOR_REPAIR, L.OPT_VENDOR_REPAIR_TT,
     function() return NN.db.vendor.repair end,
     function(value) NN.db.vendor.repair = value and true or false end)
-end)
+end

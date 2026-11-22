@@ -33,8 +33,10 @@ elseif GameTooltip and GameTooltip.HookScript then
   GameTooltip:HookScript("OnTooltipSetItem", function(tooltip) Tooltips.AddSellPrice(tooltip) end)
 end
 
-NN.Options.RegisterPage("tooltips", "OPT_TOOLTIPS", function(category, layout)
+-- Options: a "Tooltips" section of the Bags page.
+function Tooltips.AddOptions(category, layout)
+  NN.Options.AddHeader(layout, L.OPT_TOOLTIPS)
   NN.Options.AddCheckbox(category, "NN_tooltipPrice", L.OPT_TOOLTIP_PRICE, L.OPT_TOOLTIP_PRICE_TT,
     function() return NN.db.tooltipPrice ~= false end,
     function(value) NN.db.tooltipPrice = value and true or false end)
-end)
+end

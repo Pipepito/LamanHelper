@@ -139,8 +139,8 @@ end
 
 -- Opens the addon's Map settings page (falls back to the main page).
 function MapReveal:OpenSettings()
-  local subs = NN.Options and NN.Options.subcategories
-  local category = subs and subs[L.OPT_MAP]
+  local subs = NN.Options and NN.Options.subcategoriesByKey
+  local category = subs and subs.map
   if category and Settings and Settings.OpenToCategory then
     Settings.OpenToCategory(category:GetID())
   elseif NN.OpenOptions then
@@ -208,4 +208,8 @@ NN.Options.RegisterPage("map", "OPT_MAP", function(category, layout)
   Options.AddCheckbox(category, "NN_map_desaturate", L.OPT_MAP_DESATURATE, nil,
     function() return NN.db.map.desaturate end,
     function(value) NN.db.map.desaturate = value and true or false; MapReveal:Refresh() end)
+  if NN.GameSettings then
+    Options.AddGameSettingsHeader(layout)
+    NN.GameSettings:AddPageControls(category, layout, "map")
+  end
 end)
