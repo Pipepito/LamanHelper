@@ -614,6 +614,21 @@ function PlaceAction(slot)
   if c then S().actions[slot] = { type = c.type, id = c.id }; S().cursor = nil end
 end
 function ClearCursor() S().cursor = nil; record("ClearCursor") end
+-- Equipped bags: pick one up from its inventory slot and put it in another.
+-- S().refuseBagMove makes the client keep the bag on the cursor.
+function PickupBagFromSlot(invSlot)
+  local it = S().inventory[invSlot]
+  record("PickupBagFromSlot", invSlot)
+  if it then S().cursor = { type = "item", itemID = it.itemID, fromInv = invSlot } end
+end
+function PutItemInBag(invSlot)
+  record("PutItemInBag", invSlot)
+  local c = S().cursor
+  if S().refuseBagMove or not (c and c.fromInv) or S().inventory[invSlot] then return end
+  S().inventory[invSlot] = S().inventory[c.fromInv]
+  S().inventory[c.fromInv] = nil
+  S().cursor = nil
+end
 function GetCursorInfo() local c = S().cursor; if c then return c.type, c.id end end
 
 -------------------------------------------------------------------------------

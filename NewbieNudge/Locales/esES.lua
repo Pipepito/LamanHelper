@@ -155,6 +155,10 @@ NN.RegisterLocale("esES", {
   MATERIALS_BAG_HELP = "Tienes un hueco aparte para una bolsa de materiales junto a tus bolsas normales. Esto te recuerda equipar la que llevas encima.",
   MATERIALS_BAG_ROW_EMPTY = "Tienes una bolsa de materiales en el inventario que no está equipada.",
   MATERIALS_BAG_ROW_BIGGER = "Una bolsa de materiales de tu inventario es más grande que la que usas.",
+  MATERIALS_BAG_ROW_SLOT = "Tu %s está en una ranura de bolsa normal. Haz clic para moverla a la ranura de materiales y dejar esa ranura libre para una bolsa normal.",
+  MATERIALS_BAG_GENERIC = "bolsa de materiales",
+  MATERIALS_BAG_MOVE_FAILED = "No he podido moverla: arrastra la bolsa desde su ranura hasta la ranura de materiales junto a tus bolsas.",
+  MATERIALS_BAG_IN_COMBAT = "No se pueden mover bolsas en combate.",
 
   -- Trainer spells
   TRAINER_SPELLS_TITLE = "Hechizos nuevos para tu nivel",

@@ -41,6 +41,51 @@ return {
     load_addon(); load_bags(); run_checks()
     assert_eq(#results_of("materials_bag"), 0); assert_eq(#results_of("bag_unequipped"), 0)
   end,
+  -- Owner request 2026-11-22: a profession bag in a normal bag slot while the
+  -- materials slot is empty. Default stub numbering: bag 2 -> slot 21, materials -> 24.
+  profession_bag_in_regular_slot_with_empty_materials_slot = function()
+    setup(); WOW.state.inventory[21] = { itemID = MINING12 }
+    load_addon(); load_bags(); run_checks()
+    local r = results_of("materials_bag")
+    assert_eq(#r, 1)
+    assert_eq(r[1].text, L().MATERIALS_BAG_ROW_SLOT:format("Small Mining Pack"))
+    assert_eq(r[1].highlight, "bags")
+  end,
+  no_slot_row_when_materials_slot_taken = function()
+    setup(); WOW.state.bags[5] = { numSlots = 12, family = 32, items = {} }
+    WOW.state.inventory[21] = { itemID = MINING12 }; WOW.state.inventory[24] = { itemID = HERB }
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("materials_bag"), 0)
+  end,
+  no_slot_row_for_plain_bag_or_quiver = function()
+    setup(); WOW.state.inventory[20] = { itemID = PLAIN }; WOW.state.inventory[21] = { itemID = QUIVER }
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("materials_bag"), 0)
+  end,
+  click_moves_bag_to_materials_slot = function()
+    setup(); WOW.state.inventory[21] = { itemID = MINING12 }
+    load_addon(); load_bags(); run_checks()
+    results_of("materials_bag")[1].onClick()
+    assert_eq(WOW.state.inventory[24].itemID, MINING12); assert_nil(WOW.state.inventory[21])
+    assert_nil(WOW.state.cursor)
+  end,
+  failed_move_clears_cursor_and_opens_bags = function()
+    setup(); WOW.state.refuseBagMove = true; WOW.state.inventory[21] = { itemID = MINING12 }
+    load_addon(); load_bags(); run_checks()
+    results_of("materials_bag")[1].onClick()
+    assert_nil(WOW.state.cursor)
+    local names = {}; for _, c in ipairs(WOW.calls) do names[#names + 1] = c[1] end
+    assert_true(tContains(names, "ClearCursor")); assert_true(tContains(names, "ToggleAllBags"))
+    assert_true(WOW.printed[#WOW.printed]:find(L().MATERIALS_BAG_MOVE_FAILED, 1, true))
+  end,
+  click_refuses_in_combat = function()
+    setup(); WOW.state.inventory[21] = { itemID = MINING12 }
+    load_addon(); load_bags(); run_checks()
+    WOW.state.inCombat = true
+    results_of("materials_bag")[1].onClick()
+    assert_eq(WOW.state.inventory[21].itemID, MINING12)
+    assert_true(WOW.printed[#WOW.printed]:find(L().MATERIALS_BAG_IN_COMBAT, 1, true))
+  end,
   not_applicable_without_a_materials_slot = function()
     setup(); Enum.BagIndex.ReagentBag = nil
     load_addon()

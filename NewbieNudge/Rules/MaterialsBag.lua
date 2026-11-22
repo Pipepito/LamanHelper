@@ -23,6 +23,45 @@ function NN.IsReagentBag(itemID)
   return family ~= 0 and not AMMO_FAMILIES[family]
 end
 
+-- Moves an equipped bag from a regular bag slot into the materials slot.
+-- True when it landed there; otherwise the cursor is cleared and the player
+-- is told how to drag it.
+function NN.MoveBagToMaterialsSlot(fromSlot)
+  if InCombatLockdown and InCombatLockdown() then
+    NN:Say(L.MATERIALS_BAG_IN_COMBAT)
+    return false
+  end
+  local index = reagentBagIndex()
+  local toSlot = index and NN.BagInventorySlot(index)
+  if toSlot and PickupBagFromSlot and PutItemInBag then
+    PickupBagFromSlot(fromSlot)
+    PutItemInBag(toSlot)
+    if not (CursorHasItem and CursorHasItem()) and GetInventoryItemID("player", fromSlot) == nil then return true end
+  end
+  if ClearCursor then ClearCursor() end
+  ToggleAllBags()
+  NN:Say(L.MATERIALS_BAG_MOVE_FAILED)
+  return false
+end
+
+-- A profession bag equipped in one of the four regular bag slots while the
+-- materials slot is empty: that bag wastes a slot a normal bag could use.
+local function professionBagInRegularSlot()
+  for bag = 1, 4 do
+    local slot = NN.BagInventorySlot(bag)
+    local itemID = NN.Plain(GetInventoryItemID("player", slot))
+    if itemID and NN.IsReagentBag(itemID) then
+      local name = NN.Plain(C_Item.GetItemInfo(itemID), "string")
+      return {
+        text = L.MATERIALS_BAG_ROW_SLOT:format(name or L.MATERIALS_BAG_GENERIC),
+        icon = BAG_ICON, highlight = "bags",
+        onClick = function() NN.MoveBagToMaterialsSlot(slot) end,
+      }
+    end
+  end
+  return nil
+end
+
 NN:RegisterRule({
   name = "materials_bag",
   title = L.MATERIALS_BAG_TITLE,
@@ -39,6 +78,10 @@ NN:RegisterRule({
     local slot = NN.BagInventorySlot(index)
     local equippedID = GetInventoryItemID("player", slot)
     local equippedSlots = equippedID and (NN.Plain(C_Container.GetContainerNumSlots(index)) or 0) or nil
+    if equippedID == nil then
+      local row = professionBagInRegularSlot()
+      if row then return row end
+    end
     for bag = 0, 4 do
       for s = 1, NN.Plain(C_Container.GetContainerNumSlots(bag)) or 0 do
         local info = C_Container.GetContainerItemInfo(bag, s)

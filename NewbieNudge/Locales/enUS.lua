@@ -156,6 +156,10 @@ NN.RegisterLocale("enUS", {
   MATERIALS_BAG_HELP = "You have a separate slot for a materials bag next to your normal bags. This reminds you to equip one you are carrying.",
   MATERIALS_BAG_ROW_EMPTY = "You have a materials bag in your inventory that isn't equipped.",
   MATERIALS_BAG_ROW_BIGGER = "A materials bag in your inventory is bigger than the one you're using.",
+  MATERIALS_BAG_ROW_SLOT = "Your %s is in a normal bag slot. Click to move it to the materials slot and free that slot for a normal bag.",
+  MATERIALS_BAG_GENERIC = "materials bag",
+  MATERIALS_BAG_MOVE_FAILED = "Couldn't move it for you: drag the bag from its slot onto the materials slot next to your bags.",
+  MATERIALS_BAG_IN_COMBAT = "Bags can't be moved in combat.",
 
   -- Trainer spells
   TRAINER_SPELLS_TITLE = "New spells for your level",
