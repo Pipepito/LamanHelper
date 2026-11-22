@@ -4,7 +4,10 @@ A World of Warcraft Forever addon for new players. It shows a small checklist
 of things worth fixing (unspent talent points, a missing buff, a bag you never
 equipped, broken gear, and so on) and makes the button that fixes each one
 glow. Rows appear only when they apply to your character and vanish the moment
-the problem is gone. In combat the list shrinks to a row of icons.
+the problem is gone. In combat the list shrinks to a row of icons; choose
+"Icons only" to keep it that small all the time (point at an icon to read it).
+A bar on top of the panel shows your bag space, gold and gear condition, and a
+button on the minimap opens a quick menu.
 
 English and Spanish (Spain) are included; the game's language setting decides.
 Each language is one data file under `NewbieNudge/Locales/`; see
@@ -37,6 +40,9 @@ Then start the game or type `/reload`.
 | `/nudge reset` | Clear snoozes and leave test mode. |
 | `/nudge test` | Show every reminder with sample text, to check the layout. |
 | `/nudge map` | Toggle the dimmed unexplored areas on the world map. |
+| `/nudge minimap` | Show or hide the minimap button. |
+| `/nudge style` | Switch the panel between the full list and icons only. |
+| `/nudge bar` | Turn the info bar on top of the panel on or off. |
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
 | `/nudge show` | Bring the panel back after hiding it with the key binding. |
@@ -56,7 +62,8 @@ on · damaged or broken gear · out of ammo · hunter pet not summoned, unhappy 
 with unspent training points · warlock demon not summoned · no profession by level 10 · no Hearthstone ·
 quest log nearly full · new mail · logging out outside an inn or city · gear
 upgrade sitting in your bags (off by default: `/nudge on gear_upgrade`) ·
-materials bag not equipped · an item in your bags that starts a quest (the
+materials bag not equipped, or sitting in a normal bag slot while the
+materials slot is empty (click to move it) · an item in your bags that starts a quest (the
 item glows) · quests ready to turn in · quests about to turn grey · grey
 quests · bag slots your current quests will need · new spells for your level
 you haven't learned · next profession rank available · a dungeon that fits
@@ -69,7 +76,25 @@ weapon skill far behind its cap · the Legacy system opening at 25, and new
 Legacy challenges to look at · a flight path in your zone you have not
 unlocked yet.
 
-Every reminder has its own checkbox in the options.
+Every reminder has its own checkbox in the options (Reminders page, grouped).
+
+## Minimap button
+
+A round button on the edge of the minimap. Click it for a menu: lock or
+unlock the panel, switch between the full list and icons only, show the info
+bar, snooze everything on the panel for your snooze length, wake every snoozed
+reminder, hide or show the panel, open the settings. Drag it around the
+minimap edge to move it. `/nudge minimap` or Options → NewbieNudge hides it;
+the same menu is also in the game's AddOns drop-down by the minimap when the
+client has one.
+
+## Info bar
+
+A row on top of the panel: bag space (used/total and free; orange below 6
+free, red below 3), gold, and gear condition (all your equipped items
+together; red when one item is about to break). Click bags to open them, gear
+to open your character. Hidden in combat. Each part can be turned off under
+Options → NewbieNudge → Info bar, or the whole bar with `/nudge bar`.
 
 ## World map
 
@@ -123,10 +148,13 @@ reminder, open the options.
 
 ## Game settings for new players
 
-Options → Game settings lists the game's own options a new player should set
-(auto loot, enemy health bars, NPC names, cast on key down, cooldown numbers,
-quest tracking, and so on) with plain labels, and a **Recommended for new
-players** button that applies them in one go. Camera has its own page with
+The game's own options a new player should set (auto loot, enemy health bars,
+NPC names, cast on key down, cooldown numbers, quest tracking, and so on) are
+gathered with plain labels next to the feature they belong to: loot and bag
+options on the Bags and vendors page, minimap options on Map and minimap, and
+three pages of their own (Combat and action bars, Names and health bars,
+Quests and interface). **Apply recommended game settings** on the main page
+sets all of them in one go. Camera has its own page with
 the maximum camera distance and other hidden camera settings.
 
 ## Adding a reminder

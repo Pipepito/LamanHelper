@@ -29,6 +29,9 @@ Where it differs, fix the rule and `tests/wow_stub.lua` together and add a test.
 | `/dump ActionButton_ShowOverlayGlow` | highlights | function (else the fallback pulse is used) |
 | `/dump #C_Console.GetAllCommands()` | camera | a few hundred |
 | `/dump C_CVar.GetCVar("cameraDistanceMaxZoomFactor")` | camera | "1.9" or similar |
+| `/dump type(MenuUtil), type(MenuUtil and MenuUtil.CreateContextMenu), type(EasyMenu)` | minimap menu (v4) | `table function …`; if `nil`, the EasyMenu fallback is used |
+| `/dump type(AddonCompartmentFrame), type(GetMinimapShape)` | AddOns drop-down, square minimap (v4) | `table`/`nil`, `function`/`nil` |
+| `/dump type(PickupBagFromSlot), type(PutItemInBag)` | materials bag move (v4) | `function function` |
 
 ### Materials bag (v2, rule `materials_bag`)
 
@@ -130,3 +133,12 @@ bag. Bag inventory slots are 31–34.
 - [ ] Log in: no "no Hearthstone" or bag rows flash before bags load.
 - [ ] A rule error (temporarily add `error("x")` to a check): one chat line, panel still works, `NewbieNudgeDB.errors` holds the message.
 - [ ] Reload with the Spanish client and English client both show the same number of rows for the same character.
+
+## v4 (0.4.0)
+
+- **Minimap button:** it sits on the minimap edge; drag it all the way round (also with a square-minimap addon if you use one); `/reload` keeps its place. Hover: reminder count and hints. Click: every menu entry does what it says; "Snooze everything" only appears with rows on the panel, "Wake all reminders" only while something is snoozed. `/nudge minimap` hides and shows it; the AddOns drop-down entry opens the same menu while it is hidden.
+- **Icons only:** switch in the menu, the options or `/nudge style`. Out of combat the panel is a row of icons, a second line after 8; hovering shows the text above the icon; clicks and right-click snooze work. Enter and leave combat: icons don't all flash again. With "compact strip in combat" off, the panel hides in combat in both styles.
+- **Info bar:** right numbers for bags (only normal bags count; a quiver doesn't), gold after buying or selling, gear % after a death and after repairing. Colours: bags orange under 6 free, red under 3; gear red when one item is under 20%. Clicks open bags / character. Hidden in combat, back afterwards. With no reminders the panel shows only the bar. Each checkbox under Options → Info bar hides its part.
+- **Materials bag:** put a profession bag in bag slot 2 with the materials slot empty → the row names the bag; click → it moves to the materials slot (try with items inside it, and in combat: it refuses with a chat line).
+- **Gathering tracking:** an herbalist or miner with tracking off sees the row; clicking it turns tracking on.
+- **Options:** the AddOns list shows NewbieNudge, Reminders, Bags and vendors, Map and minimap, Combat and action bars, Names and health bars, Quests and interface, Camera, (Controller), Talent build, Developer. Every page opens; no setting appears on two pages; "Apply recommended game settings" on the main page still works; the world-map icon opens Map and minimap.

@@ -5,6 +5,15 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
+## 0.4.0 - unreleased
+
+- **Minimap button** with a quick menu: lock or unlock the panel, switch its style, show the info bar, snooze everything, wake all reminders, hide the panel, open the settings. Drag it around the minimap. Also in the game's AddOns drop-down.
+- **Icons only:** a new panel style that keeps the panel as small as the combat strip all the time. Point at an icon to read the reminder.
+- **Info bar** on top of the panel: bag space, gold and gear condition at a glance. Each part can be turned off.
+- **Materials bag in a normal bag slot:** if a profession bag sits in one of your four bag slots while the materials slot is empty, a reminder offers to move it for you.
+- **Gathering tracking** now notices Find Herbs and Find Minerals on WoW Forever (profession spells sit apart from the class spells in the spellbook).
+- **Tidier options:** reminders have their own page, grouped; the game's own settings sit next to the feature they belong to, with Combat, Names and Interface pages of their own. "Apply recommended game settings" is on the main page.
+
 ## 0.3.4 - 2026-11-21
 
 - NewbieNudge has its own icon in the AddOns list.
