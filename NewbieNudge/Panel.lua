@@ -10,10 +10,19 @@ local STRIP_GAP, BAR_GAP = 4, 2
 local PIN_BUTTON = 16
 Panel.STRIP_PER_LINE = 8
 
--- Strip icon size: bigger while a controller is in use and the boost is on.
+-- Strip icon size: the player's choice, bigger (x 32/24) while a controller
+-- is in use and the boost is on.
 function Panel.STRIP_ICON()
-  if NN.Controller and NN.Controller:Boost() then return 32 end
-  return 24
+  local size = (NN.db and NN.db.panel.iconSize) or 24
+  if NN.Controller and NN.Controller:Boost() then return size * 32 / 24 end
+  return size
+end
+
+-- Icons per line, direction ("rows" / "columns") and gap, from the options.
+local function stripLayout()
+  local p = NN.db and NN.db.panel or {}
+  local perLine = math.max(1, math.floor(p.iconsPerLine or Panel.STRIP_PER_LINE))
+  return perLine, (p.iconFlow == "columns") and "columns" or "rows", p.iconGap or STRIP_GAP
 end
 local TEXT_WIDTH = WIDTH - PAD * 2 - ICON - 6
 
@@ -262,13 +271,15 @@ end
 function Panel:RefreshStrip(rows)
   local seen = {}
   local STRIP_ICON = Panel.STRIP_ICON()
-  local perLine, step = Panel.STRIP_PER_LINE, STRIP_ICON + STRIP_GAP
+  local perLine, flow, gap = stripLayout()
+  local step = STRIP_ICON + gap
   for i, data in ipairs(rows) do
     local button = self.stripIcons[i]
     if not button then button = newStripIcon(i); self.stripIcons[i] = button end
     button:SetSize(STRIP_ICON, STRIP_ICON)
     button:ClearAllPoints()
     local col, line = (i - 1) % perLine, math.floor((i - 1) / perLine)
+    if flow == "columns" then col, line = line, col end
     button:SetPoint("TOPLEFT", strip, "TOPLEFT", col * step, -line * step)
     button.icon:SetTexture(data.result.icon or 134400)
     button.data = data
@@ -287,8 +298,9 @@ function Panel:RefreshStrip(rows)
   self.stripSeen = seen
   local cols = math.min(#rows, perLine)
   local lines = math.max(1, math.ceil(#rows / perLine))
-  local width = math.max(1, cols * step - STRIP_GAP)
-  local height = (#rows > 0) and (lines * step - STRIP_GAP) or 0
+  if flow == "columns" then cols, lines = lines, math.min(#rows, perLine) end
+  local width = math.max(1, cols * step - gap)
+  local height = (#rows > 0) and (lines * step - gap) or 0
   local header, barWidth, barShown = self:LayoutHeader(nil)
   strip:ClearAllPoints()
   strip:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + header))

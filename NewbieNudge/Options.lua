@@ -161,6 +161,16 @@ function Options:Build()
   Options.AddCheckbox(category, "NN_combatStrip", L.OPT_COMBAT_STRIP, L.OPT_COMBAT_STRIP_TT,
     function() return db.combatStrip end,
     function(value) db.combatStrip = value and true or false; if NN.Panel then NN.Panel:Refresh(NN:ActiveRows()) end end)
+  local function relayout() if NN.Panel then NN.Panel:Refresh(NN:ActiveRows()) end end
+  Options.AddSlider(category, "NN_panel_iconsPerLine", L.OPT_ICONS_PER_LINE, nil, 1, 12, 1,
+    function() return db.panel.iconsPerLine end, function(value) db.panel.iconsPerLine = value; relayout() end)
+  Options.AddDropdown(category, "NN_panel_iconFlow", L.OPT_ICON_FLOW, L.OPT_ICON_FLOW_TT,
+    { { value = "rows", label = L.OPT_ICON_FLOW_ROWS }, { value = "columns", label = L.OPT_ICON_FLOW_COLUMNS } },
+    function() return db.panel.iconFlow or "rows" end, function(value) db.panel.iconFlow = value; relayout() end)
+  Options.AddSlider(category, "NN_panel_iconSize", L.OPT_ICON_SIZE, nil, 16, 40, 2,
+    function() return db.panel.iconSize end, function(value) db.panel.iconSize = value; relayout() end)
+  Options.AddSlider(category, "NN_panel_iconGap", L.OPT_ICON_GAP, nil, 0, 12, 1,
+    function() return db.panel.iconGap end, function(value) db.panel.iconGap = value; relayout() end)
   Options.AddButton(layout, L.OPT_RESET_SNOOZE, L.OPT_BUTTON_DO, function() NN:ClearSnoozes() end)
   Options.AddButton(layout, L.OPT_RESET_POS, L.OPT_BUTTON_DO, function() if NN.Panel then NN.Panel:ResetPosition() end end)
 

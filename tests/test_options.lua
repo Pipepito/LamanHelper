@@ -251,4 +251,17 @@ return {
       assert_true(tContains(vars, v), v)
     end
   end,
+  icon_layout_options_round_trip = function()
+    withRules()
+    local function slider(var) for _, c in ipairs(callsNamed("slider")) do if c[2] == var then return c end end end
+    assert_eq({ select(3, unpack(slider("NN_panel_iconsPerLine"))) }, { 1, 12, 1 })
+    assert_eq({ select(3, unpack(slider("NN_panel_iconSize"))) }, { 16, 40, 2 })
+    assert_eq({ select(3, unpack(slider("NN_panel_iconGap"))) }, { 0, 12, 1 })
+    WOW.settings["NN_panel_iconsPerLine"].setter(4)
+    WOW.settings["NN_panel_iconFlow"].setter("columns")
+    WOW.settings["NN_panel_iconSize"].setter(32)
+    WOW.settings["NN_panel_iconGap"].setter(2)
+    local p = NewbieNudge.db.panel
+    assert_eq({ p.iconsPerLine, p.iconFlow, p.iconSize, p.iconGap }, { 4, "columns", 32, 2 })
+  end,
 }

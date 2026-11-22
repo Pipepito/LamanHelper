@@ -225,4 +225,55 @@ return {
     WOW.FireEvent("PLAYER_REGEN_ENABLED")
     assert_nil(NewbieNudge.Panel.stripIcons[1].pulseTicker)
   end,
+  -- v4 icon layout options
+  icon_layout_defaults = function()
+    _G.NewbieNudgeDB = { panel = { locked = true } }
+    load_addon()
+    local p = NewbieNudge.db.panel
+    assert_eq({ p.iconsPerLine, p.iconFlow, p.iconSize, p.iconGap }, { 8, "rows", 24, 4 })
+  end,
+  rows_with_three_per_line = function()
+    load_addon()
+    NewbieNudge.db.infobar.enabled = false
+    NewbieNudge.db.panel.iconsPerLine = 3
+    NewbieNudge.Panel:SetStyle("icons")
+    local results = {}
+    for i = 1, 7 do results[i] = { text = "r" .. i } end
+    show(results)
+    local icons = NewbieNudge.Panel.stripIcons
+    assert_eq({ select(4, icons[4]:GetPoint(1)) }, { 0, -28 })
+    assert_eq({ select(4, icons[3]:GetPoint(1)) }, { 56, 0 })
+    assert_eq(NewbieNudgePanel:GetWidth(), 3 * 28 - 4 + 12)
+    assert_eq(NewbieNudgePanel:GetHeight(), 3 * 28 - 4 + 12)
+  end,
+  columns_with_three_per_line = function()
+    load_addon()
+    NewbieNudge.db.infobar.enabled = false
+    NewbieNudge.db.panel.iconsPerLine = 3
+    NewbieNudge.db.panel.iconFlow = "columns"
+    NewbieNudge.Panel:SetStyle("icons")
+    local results = {}
+    for i = 1, 4 do results[i] = { text = "r" .. i } end
+    show(results)
+    local icons = NewbieNudge.Panel.stripIcons
+    assert_eq({ select(4, icons[2]:GetPoint(1)) }, { 0, -28 })
+    assert_eq({ select(4, icons[4]:GetPoint(1)) }, { 28, 0 })
+    assert_eq(NewbieNudgePanel:GetWidth(), 2 * 28 - 4 + 12)
+    assert_eq(NewbieNudgePanel:GetHeight(), 3 * 28 - 4 + 12)
+  end,
+  icon_size_and_gap = function()
+    load_addon()
+    NewbieNudge.db.panel.iconSize, NewbieNudge.db.panel.iconGap = 30, 0
+    NewbieNudge.Panel:SetStyle("icons")
+    show({ { text = "a" }, { text = "b" } })
+    local icons = NewbieNudge.Panel.stripIcons
+    assert_eq(icons[1]:GetWidth(), 30)
+    assert_eq(select(4, icons[2]:GetPoint(1)), 30)
+  end,
+  controller_boost_scales_the_chosen_size = function()
+    load_addon()
+    NewbieNudge.db.panel.iconSize = 30
+    NewbieNudge.Controller.Boost = function() return true end
+    assert_eq(NewbieNudge.Panel.STRIP_ICON(), 40)
+  end,
 }
