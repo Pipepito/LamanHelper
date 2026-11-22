@@ -105,4 +105,38 @@ return {
     S():MarkClosest("trainer_MAGE", nil, true)
     assert_eq(#calls("SetTracking"), 0)
   end,
+  -- v4 §4g: quickest route, counting discovered flight points
+  walking_wins_when_near = function()
+    load()
+    local _, route = S():TravelTime(1)
+    assert_eq(route.kind, "foot")
+  end,
+  flying_wins_with_both_flight_points_known = function()
+    load()
+    local fly, route = S():TravelTime(5)
+    assert_eq(route, { kind = "fly", from = "Near Field", to = "City Port" })
+    assert_true(fly < 1900 / 7, "quicker than running all the way")
+  end,
+  undiscovered_landing_point_is_ignored = function()
+    load(); WOW.state.level = 30
+    local _, route = S():TravelTime(4)
+    assert_eq(route.kind, "foot")
+  end,
+  no_taxi_api_means_straight_line = function()
+    load(); C_TaxiMap = nil
+    local _, route = S():TravelTime(5)
+    assert_eq(route.kind, "foot")
+  end,
+  ranked_quickest_first_one_per_map = function()
+    load()
+    local ids = {}
+    for _, r in ipairs(S():Ranked("repair", nil, 4)) do ids[#ids + 1] = r.id end
+    -- 1 and 2 share map 1429 (1 is nearer); 5 by air; 6 on another continent last
+    assert_eq(ids, { 1, 5, 6 })
+  end,
+  chat_names_the_flight = function()
+    load()
+    S():MarkClosest("weapon", { 11867 }, true)
+    assert_true(said(L().SERVICES_ROUTE_FLY:format("Near Field", "City Port")))
+  end,
 }

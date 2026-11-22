@@ -77,22 +77,106 @@ function Services:PlayerWorldPos()
   return continent, wx, wy
 end
 
--- npcID of the closest candidate, or nil plus "position" / "none".
-function Services:Closest(kind, npcIDs)
-  local continent, px, py = self:PlayerWorldPos()
-  if not continent then return nil, "position" end
-  local best, bestDist
-  for _, id in ipairs(self:Candidates(kind, npcIDs)) do
-    local n = data().npcs[id]
-    local c, x, y = worldPos(n[3], n[4] / 100, n[5] / 100)
-    if c and x and y then
-      local d = (x - px) ^ 2 + (y - py) ^ 2
-      if c ~= continent then d = d + OTHER_CONTINENT end
-      if not bestDist or d < bestDist then best, bestDist = id, d end
+-------------------------------------------------------------------------------
+-- Travel time: running, or running to a discovered flight master, flying and
+-- running on. Rough numbers on purpose: they only need to rank the options.
+-------------------------------------------------------------------------------
+
+local RUN_SPEED = 7          -- yards per second on foot
+local FLIGHT_SPEED = 30      -- yards per second on a flight
+local ROUTE_FACTOR = 1.3     -- flight routes bend
+local TAKE_OFF = 20          -- seconds to get going
+local CONTINENT_MAPS = { 1414, 1415 } -- Kalimdor, Eastern Kingdoms
+local UNREACHABLE = (Enum and Enum.FlightPathState and Enum.FlightPathState.Unreachable) or 2
+
+local function distance(ax, ay, bx, by) return math.sqrt((ax - bx) ^ 2 + (ay - by) ^ 2) end
+
+-- Discovered flight masters with their world position.
+function Services:FlightMasters()
+  local out = {}
+  if not (C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap) then return out end
+  for _, map in ipairs(CONTINENT_MAPS) do
+    for _, node in ipairs(C_TaxiMap.GetTaxiNodesForMap(map) or {}) do
+      local state, pos = NN.Plain(node.state), node.position
+      if state and state ~= UNREACHABLE and type(pos) == "table" then
+        local x, y
+        if pos.GetXY then x, y = pos:GetXY() else x, y = pos.x, pos.y end
+        local c, wx, wy = worldPos(map, NN.Plain(x) or 0, NN.Plain(y) or 0)
+        if c and wx and wy then
+          out[#out + 1] = { name = NN.Plain(node.name, "string") or "?", continent = c, x = wx, y = wy }
+        end
+      end
     end
   end
-  if not best then return nil, "none" end
-  return best
+  return out
+end
+
+-- Seconds to reach the NPC and how: { kind = "foot" } or
+-- { kind = "fly", from = name, to = name }. Nil when a position is unknown.
+-- flights: FlightMasters() (passed in when ranking many NPCs).
+function Services:TravelTime(npcID, flights)
+  local continent, px, py = self:PlayerWorldPos()
+  if not continent then return nil end
+  local n = data().npcs[npcID]
+  local c, tx, ty = worldPos(n[3], n[4] / 100, n[5] / 100)
+  if not (c and tx and ty) then return nil end
+  if c ~= continent then return OTHER_CONTINENT + distance(px, py, tx, ty), { kind = "foot" } end
+  local best, route = distance(px, py, tx, ty) / RUN_SPEED, { kind = "foot" }
+  -- take off from the nearest discovered flight master, land at the best one
+  local from, fromDist
+  for _, fm in ipairs(flights or self:FlightMasters()) do
+    if fm.continent == continent then
+      local d = distance(px, py, fm.x, fm.y)
+      if not fromDist or d < fromDist then from, fromDist = fm, d end
+    end
+  end
+  if from then
+    for _, to in ipairs(flights or self:FlightMasters()) do
+      if to ~= from and to.continent == continent then
+        local t = fromDist / RUN_SPEED + TAKE_OFF
+          + distance(from.x, from.y, to.x, to.y) * ROUTE_FACTOR / FLIGHT_SPEED
+          + distance(to.x, to.y, tx, ty) / RUN_SPEED
+        if t < best then best, route = t, { kind = "fly", from = from.name, to = to.name } end
+      end
+    end
+  end
+  return best, route
+end
+
+-- The quickest candidates, at most one per map: { { id, time, route }, ... }.
+-- Empty plus "position" when the player's position is unknown.
+function Services:Ranked(kind, npcIDs, count)
+  if not self:PlayerWorldPos() then return {}, "position" end
+  local flights = self:FlightMasters()
+  local all = {}
+  for _, id in ipairs(self:Candidates(kind, npcIDs)) do
+    local time, route = self:TravelTime(id, flights)
+    if time then all[#all + 1] = { id = id, time = time, route = route } end
+  end
+  table.sort(all, function(a, b) if a.time ~= b.time then return a.time < b.time end return a.id < b.id end)
+  local out, maps = {}, {}
+  for _, option in ipairs(all) do
+    local map = data().npcs[option.id][3]
+    if not maps[map] then
+      maps[map] = true
+      out[#out + 1] = option
+      if count and #out >= count then break end
+    end
+  end
+  return out
+end
+
+-- npcID of the quickest candidate, or nil plus "position" / "none".
+function Services:Closest(kind, npcIDs)
+  local ranked, reason = self:Ranked(kind, npcIDs, 1)
+  if reason then return nil, reason end
+  if not ranked[1] then return nil, "none" end
+  return ranked[1].id, ranked[1]
+end
+
+function Services:RouteText(route)
+  if route and route.kind == "fly" then return L.SERVICES_ROUTE_FLY:format(route.from, route.to) end
+  return L.SERVICES_ROUTE_FOOT
 end
 
 -------------------------------------------------------------------------------
@@ -197,22 +281,25 @@ Services.ZoneName = zoneName
 -- and turns on the matching minimap tracking. Returns the npcID or nil.
 -- Marks one NPC and tells the player: a chat line, the minimap tracking,
 -- and (openMap) the world map on its zone.
-function Services:MarkNpc(kind, id, fromRow, rule, openMap)
+function Services:MarkNpc(kind, id, fromRow, rule, openMap, route)
   self:Mark(kind, id, fromRow, rule)
   local npc = self:Npc(id)
-  NN:Say(L.SERVICES_MARKED:format(npc.name, npc.title, zoneName(npc.map)))
+  local text = L.SERVICES_MARKED:format(npc.name, npc.title, zoneName(npc.map))
+  if route and route.kind == "fly" then text = text .. " " .. self:RouteText(route) end
+  NN:Say(text)
   turnOnTracking(kind)
   if openMap and OpenWorldMap then OpenWorldMap(npc.map) end
 end
 
 function Services:MarkClosest(kind, npcIDs, fromRow, rule)
   local id, reason = self:Closest(kind, npcIDs)
+  local option = type(reason) == "table" and reason or nil
   if not id then
     if reason == "position" then NN:Say(L.SERVICES_NO_POSITION)
     else NN:Say(L.SERVICES_NONE:format(self:KindLabel(kind))) end
     return nil
   end
-  self:MarkNpc(kind, id, fromRow, rule, true)
+  self:MarkNpc(kind, id, fromRow, rule, true, option and option.route)
   return id
 end
 

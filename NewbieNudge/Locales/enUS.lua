@@ -92,6 +92,8 @@ NN.RegisterLocale("enUS", {
   SERVICES_MARKED = "Marked %s (%s) in %s on your world map.",
   SERVICES_NO_POSITION = "Can't tell where you are right now (try again outside an instance).",
   SERVICES_NONE = "No %s found for your level and faction.",
+  SERVICES_ROUTE_FLY = "Fly from %s to %s.",
+  SERVICES_ROUTE_FOOT = "on foot",
   SERVICE_KIND_REPAIR = "repair vendor",
   SERVICE_KIND_INN = "innkeeper",
   SERVICE_KIND_SUPPLIES = "food or general goods vendor",

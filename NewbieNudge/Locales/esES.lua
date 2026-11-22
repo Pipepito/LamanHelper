@@ -91,6 +91,8 @@ NN.RegisterLocale("esES", {
   SERVICES_MARKED = "Marcado %s (%s) en %s en tu mapa del mundo.",
   SERVICES_NO_POSITION = "Ahora mismo no sé dónde estás (inténtalo fuera de una instancia).",
   SERVICES_NONE = "No hay ningún %s para tu nivel y facción.",
+  SERVICES_ROUTE_FLY = "Vuela de %s a %s.",
+  SERVICES_ROUTE_FOOT = "a pie",
   SERVICE_KIND_REPAIR = "vendedor que repare",
   SERVICE_KIND_INN = "tabernero",
   SERVICE_KIND_SUPPLIES = "vendedor de comida o víveres",

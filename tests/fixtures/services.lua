@@ -34,3 +34,12 @@ WOW.state.mapInfo[1453] = { name = "Stormwind City" }
 WOW.state.mapInfo[1457] = { name = "Darnassus" }
 WOW.state.tracking = { { name = "Find Herbs" }, { name = "Repair" }, { name = "Innkeeper" }, { name = "Food & Drink" }, { name = "Class Trainer" } }
 MINIMAP_TRACKING_REPAIR, MINIMAP_TRACKING_INNKEEPER, MINIMAP_TRACKING_VENDOR_FOOD = "Repair", "Innkeeper", "Food & Drink"
+-- Flight points on continent 0, read through continent map 1414 (world x
+-- -3000..3000, y -1000..2000): "Near Field" next to the player, "City Port"
+-- in the city (1453), "Far Hill" (not discovered) in the level-30 zone.
+WOW.state.mapWorld[1414] = { 0, -3000, -1000, 6000, 3000 }
+WOW.state.taxiNodes = { [1414] = {
+  { name = "Near Field", state = 1, position = { x = 3420 / 6000, y = 1600 / 3000 } },
+  { name = "City Port", state = 1, position = { x = 1500 / 6000, y = 1500 / 3000 } },
+  { name = "Far Hill", state = 2, position = { x = 4500 / 6000, y = 1500 / 3000 } },
+} }

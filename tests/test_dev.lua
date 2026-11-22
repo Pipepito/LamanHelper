@@ -217,8 +217,8 @@ return {
     WOW.extraFiles = { TESTS_DIR .. "/fixtures/services.lua" }
     WOW.state.professions = { prof1 = 1 }
     WOW.state.professionInfo = { [1] = { name = "Herbalism", icon = 4620675, skill = 10, maxSkill = 75, skillLine = 182 } }
-    WOW.state.taxiNodes = { [1414] = { { name = "The Crossroads", state = 1, position = { x = 0.5, y = 0.5 } } } }
     load_addon()
+    WOW.state.taxiNodes = { [1414] = { { name = "The Crossroads", state = 1, position = { x = 0.5, y = 0.5 } } } }
     NewbieNudge.Services:Mark("prof_182", 11, true, "profession_rank")
     WOW.ViewMap(1429)
     NewbieNudge:HandleSlash("dev snap")
