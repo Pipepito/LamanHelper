@@ -61,4 +61,10 @@ return {
     prof(1, "Alchemy", 60, 75); prof(2, "Mining", 60, 75); prof(4, "Fishing", 130, 150); prof(5, "Cooking", 130, 150)
     run(); assert_eq(#results_of("profession_rank"), 3)
   end,
+  row_uses_the_client_profession_icon = function()
+    WOW.state.level = 22; WOW.state.professions = { prof1 = 1 }
+    WOW.state.professionInfo[1] = { name = "Alchemy", icon = 4620669, skill = 60, maxSkill = 75 }
+    run()
+    assert_eq(results_of("profession_rank")[1].icon, 4620669)
+  end,
 }

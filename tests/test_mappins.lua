@@ -171,7 +171,22 @@ return {
     NewbieNudge.Services:ClearMarks()
     NewbieNudge.Services:Mark("inn", 7, true) -- reuses the same pooled pin
     local icon = pinFor(7).icon
-    assert_eq(icon.texture, 134414)
+    assert_eq(icon.texture, "Interface\\Icons\\INV_Misc_Rune_01")
     assert_eq(icon.texCoord, { 0, 1, 0, 1 })
+  end,
+  -- Forever: a hard-coded icon id drew nothing (herbalism pin, 2026-11-22).
+  profession_pins_use_the_client_profession_icon = function()
+    load()
+    WOW.state.professions = { prof1 = 1 }
+    WOW.state.professionInfo = { [1] = { name = "Herbalism", icon = 4620675, skill = 1, maxSkill = 75, skillLine = 182 } }
+    NewbieNudge.Services:Mark("prof_182", 11, true)
+    WOW.ViewMap(1429)
+    assert_eq(pinFor(11).icon.texture, 4620675)
+  end,
+  profession_pins_without_that_profession_use_a_named_icon = function()
+    load()
+    NewbieNudge.Services:Mark("prof_182", 11, true)
+    WOW.ViewMap(1429)
+    assert_eq(pinFor(11).icon.texture, "Interface\\Icons\\Trade_Herbalism")
   end,
 }

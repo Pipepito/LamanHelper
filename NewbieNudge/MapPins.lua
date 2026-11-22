@@ -10,8 +10,32 @@ NN.MapPins = MapPins
 
 local MARK_SIZE, PIN_SIZE = 20, 14
 local RING_OPENING = 21
-local ICONS = { repair = 136241, inn = 134414, supplies = 133950, weapon = 135324 }
-local TRAINER_ICON, PROF_ICON = 136243, 136240
+-- Named icon paths (a wrong file id draws nothing at all on the map).
+local ICONS = {
+  repair = "Interface\\Icons\\Trade_BlackSmithing", inn = "Interface\\Icons\\INV_Misc_Rune_01",
+  supplies = "Interface\\Icons\\INV_Misc_Food_15", weapon = "Interface\\Icons\\INV_Sword_04",
+}
+local TRAINER_ICON, PROF_ICON = "Interface\\Icons\\INV_Misc_Book_09", "Interface\\Icons\\INV_Misc_Note_01"
+-- profession skill line -> icon, for professions the player doesn't have
+local PROF_ICONS = {
+  [171] = "Interface\\Icons\\Trade_Alchemy", [164] = "Interface\\Icons\\Trade_BlackSmithing", [333] = "Interface\\Icons\\Trade_Engraving",
+  [202] = "Interface\\Icons\\Trade_Engineering", [182] = "Interface\\Icons\\Trade_Herbalism", [165] = "Interface\\Icons\\INV_Misc_ArmorKit_17",
+  [186] = "Interface\\Icons\\Trade_Mining", [393] = "Interface\\Icons\\INV_Misc_Pelt_Wolf_01", [197] = "Interface\\Icons\\Trade_Tailoring",
+  [185] = "Interface\\Icons\\INV_Misc_Food_15", [129] = "Interface\\Icons\\Spell_Holy_SealOfSacrifice", [356] = "Interface\\Icons\\Trade_Fishing",
+}
+
+-- The icon the client shows for one of the player's professions.
+local function playerProfessionIcon(skillLine)
+  if not (GetProfessions and GetProfessionInfo) then return nil end
+  for _, index in pairs({ GetProfessions() }) do
+    index = NN.Plain(index)
+    if index then
+      local _, icon, _, _, _, _, line = GetProfessionInfo(index)
+      if NN.Plain(line) == skillLine and icon then return icon end
+    end
+  end
+  return nil
+end
 
 local CLASS_ICONS = "Interface\\TargetingFrame\\UI-Classes-Circles"
 -- Same values as the client's CLASS_ICON_TCOORDS, used when it is missing.
@@ -33,6 +57,8 @@ local function iconFor(kind)
     if coords then return CLASS_ICONS, coords end
     return TRAINER_ICON
   end
+  local skillLine = tonumber(kind:match("^prof_(%d+)$"))
+  if skillLine then return playerProfessionIcon(skillLine) or PROF_ICONS[skillLine] or PROF_ICON end
   return PROF_ICON
 end
 

@@ -68,12 +68,12 @@ NN:RegisterRule({
     local results = {}
     for _, slot in ipairs(professionSlots()) do
       if #results >= MAX_ROWS then break end
-      local name, _, skill, maxSkill, _, _, skillLine = GetProfessionInfo(slot.index)
+      local name, icon, skill, maxSkill, _, _, skillLine = GetProfessionInfo(slot.index)
       name, skill, maxSkill, skillLine = NN.Plain(name, "string"), NN.Plain(skill), NN.Plain(maxSkill), NN.Plain(skillLine)
       if name and skill and maxSkill then
         local step = NN.ProfessionRankStep(skill, maxSkill, level, slot.secondary)
         if step then
-          local row = { text = rowFor(step, name, skill, maxSkill), icon = PROF_ICON }
+          local row = { text = rowFor(step, name, skill, maxSkill), icon = icon or PROF_ICON }
           -- only trainer ranks send the player somewhere; books and quests don't
           if step ~= "book" and step ~= "quest" and skillLine and skillLine > 0 then
             row.service = { kind = "prof_" .. skillLine }
