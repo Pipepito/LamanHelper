@@ -10,7 +10,9 @@ local L = NN.L
 
 local BAG_ICON = 133634
 local CONTAINER_CLASS = (Enum and Enum.ItemClass and Enum.ItemClass.Container) or 1
-local AMMO_FAMILIES = { [1] = true, [2] = true }
+-- Not materials bags: arrows (1), bullets (2) and soul shards (4); those
+-- fill their own slots and the materials slot doesn't take them.
+local AMMO_FAMILIES = { [1] = true, [2] = true, [4] = true }
 
 local function reagentBagIndex()
   return Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag
@@ -36,7 +38,9 @@ function NN.MoveBagToMaterialsSlot(fromSlot)
   if toSlot and PickupBagFromSlot and PutItemInBag then
     PickupBagFromSlot(fromSlot)
     PutItemInBag(toSlot)
-    if not (CursorHasItem and CursorHasItem()) and GetInventoryItemID("player", fromSlot) == nil then return true end
+    -- The move finishes after the server answers; an empty cursor means the
+    -- client accepted it (the slots still show the old state this frame).
+    if not (CursorHasItem and CursorHasItem()) then return true end
   end
   if ClearCursor then ClearCursor() end
   ToggleAllBags()

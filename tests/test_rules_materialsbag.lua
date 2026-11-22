@@ -91,4 +91,20 @@ return {
     load_addon()
     assert_true(not NewbieNudge:Applies(NewbieNudge.ruleByName.materials_bag))
   end,
+  -- Review fixes (v4)
+  successful_move_is_not_reported_as_failure = function()
+    setup(); WOW.state.deferBagMove = true; WOW.state.inventory[21] = { itemID = MINING12 }
+    load_addon(); load_bags(); run_checks()
+    local before = #WOW.printed
+    results_of("materials_bag")[1].onClick()
+    assert_eq(#WOW.printed, before, "no failure message")
+    for _, c in ipairs(WOW.calls) do assert_true(c[1] ~= "ToggleAllBags", "bags not toggled") end
+  end,
+  soul_bag_is_not_a_materials_bag = function()
+    setup(); WOW.state.itemInfo[7006] = { name = "Soul Pouch", classID = 1, subclassID = 1, family = 4, numSlots = 16 }
+    WOW.state.inventory[21] = { itemID = 7006 }
+    WOW.state.bags[0].items[1] = { itemID = 7006 }
+    load_addon(); load_bags(); run_checks()
+    assert_eq(#results_of("materials_bag"), 0)
+  end,
 }

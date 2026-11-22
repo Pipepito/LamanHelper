@@ -630,6 +630,11 @@ function PutItemInBag(invSlot)
   record("PutItemInBag", invSlot)
   local c = S().cursor
   if S().refuseBagMove or not (c and c.fromInv) or S().inventory[invSlot] then return end
+  if S().deferBagMove then -- real client: the cursor empties now, the slots change after the server answers
+    S().cursor = nil
+    S().pendingBagMove = { from = c.fromInv, to = invSlot }
+    return
+  end
   S().inventory[invSlot] = S().inventory[c.fromInv]
   S().inventory[c.fromInv] = nil
   S().cursor = nil
@@ -860,15 +865,17 @@ local function newMenuDescription()
   function d:CreateDivider() return add("divider") end
   function d:CreateButton(text, fn) local it = add("button", text); it.onClick = fn; return it end
   function d:CreateCheckbox(text, isSelected, setSelected, data)
-    local it = add("checkbox", text); it.checked = isSelected(data); it.onClick = function() setSelected(data) end; return it
+    local it = add("checkbox", text); it.checked = isSelected(data); it.isSelected = function() return isSelected(data) end
+    it.onClick = function() setSelected(data) end; return it
   end
   function d:CreateRadio(text, isSelected, setSelected, data)
-    local it = add("radio", text); it.checked = isSelected(data); it.onClick = function() setSelected(data) end; return it
+    local it = add("radio", text); it.checked = isSelected(data); it.isSelected = function() return isSelected(data) end
+    it.onClick = function() setSelected(data) end; return it
   end
   return d
 end
 MenuUtil = { CreateContextMenu = function(owner, generator)
-  local d = newMenuDescription(); generator(owner, d); WOW.lastMenu = d; record("CreateContextMenu"); return d
+  local d = newMenuDescription(); generator(owner, d); WOW.lastMenu = d; WOW.lastMenuOwner = owner; record("CreateContextMenu"); return d
 end }
 AddonCompartmentFrame = { RegisterAddon = function(self, info) WOW.compartment = info; record("RegisterAddon", info.text) end }
 

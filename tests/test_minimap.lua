@@ -141,6 +141,7 @@ return {
     assert_eq(WOW.compartment.text, L().ADDON_TITLE)
     MB():SetShown(false)
     WOW.compartment.func()
+    WOW.AdvanceTime(0)
     assert_eq(WOW.lastMenu.items[1].label, L().ADDON_TITLE)
   end,
   fallback_without_menuutil = function()
@@ -152,5 +153,28 @@ return {
     assert_true(got)
     assert_eq(got[1].isTitle, true)
     assert_eq(got[1].text, L().ADDON_TITLE)
+  end,
+  -- Review fixes (v4)
+  menu_ticks_follow_live_state_after_a_click = function()
+    load_addon()
+    WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
+    local box, icons
+    for _, it in ipairs(WOW.lastMenu.items) do
+      if it.label == L().MENU_INFOBAR then box = it end
+      if it.label == L().MENU_STYLE_ICONS then icons = it end
+    end
+    box.onClick()
+    assert_eq(box.isSelected(), false, "checkbox reads the new state")
+    icons.onClick()
+    assert_eq(icons.isSelected(), true, "radio reads the new state")
+  end,
+  compartment_menu_not_anchored_to_hidden_button = function()
+    load_addon()
+    MB():SetShown(false)
+    local anchor = CreateFrame("Button", nil, UIParent)
+    WOW.compartment.func(anchor)
+    WOW.AdvanceTime(0)
+    assert_true(WOW.lastMenu, "menu opened")
+    assert_true(WOW.lastMenuOwner ~= NewbieNudgeMinimapButton, "not anchored to the hidden button")
   end,
 }

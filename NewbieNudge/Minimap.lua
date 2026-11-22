@@ -85,11 +85,13 @@ function MinimapButton:MenuEntries()
   add({ kind = "divider" })
   add({ kind = "title", label = L.MENU_STYLE })
   for _, style in ipairs({ "list", "icons" }) do
+    local function isChecked() return (db.panel.style or "list") == style end
     add({ kind = "radio", label = style == "list" and L.MENU_STYLE_LIST or L.MENU_STYLE_ICONS,
-      checked = (db.panel.style or "list") == style,
+      checked = isChecked(), isChecked = isChecked,
       onClick = function() if NN.Panel then NN.Panel:SetStyle(style) else db.panel.style = style end end })
   end
-  add({ kind = "checkbox", label = L.MENU_INFOBAR, checked = db.infobar.enabled and true or false, onClick = function()
+  local function barOn() return db.infobar.enabled and true or false end
+  add({ kind = "checkbox", label = L.MENU_INFOBAR, checked = barOn(), isChecked = barOn, onClick = function()
     db.infobar.enabled = not db.infobar.enabled
     refresh()
   end })
@@ -116,8 +118,8 @@ local function openWithMenuUtil(owner, entries)
       if e.kind == "title" then root:CreateTitle(e.label)
       elseif e.kind == "divider" then root:CreateDivider()
       elseif e.kind == "button" then root:CreateButton(e.label, e.onClick)
-      elseif e.kind == "checkbox" then root:CreateCheckbox(e.label, function() return e.checked end, e.onClick)
-      elseif e.kind == "radio" then root:CreateRadio(e.label, function() return e.checked end, e.onClick)
+      elseif e.kind == "checkbox" then root:CreateCheckbox(e.label, e.isChecked, e.onClick)
+      elseif e.kind == "radio" then root:CreateRadio(e.label, e.isChecked, e.onClick)
       end
     end
   end)
@@ -231,7 +233,13 @@ NN:AfterLogin(function()
       text = L.ADDON_TITLE,
       icon = ICON,
       notCheckable = true,
-      func = function() MinimapButton:OpenMenu() end,
+      -- Opened on the next frame, anchored to the compartment entry: the
+      -- compartment's own menu closes as this click ends, and the minimap
+      -- button may be hidden (that's when this entry matters most).
+      func = function(owner)
+        local anchor = (type(owner) == "table" and owner) or UIParent
+        C_Timer.After(0, function() MinimapButton:OpenMenu(anchor) end)
+      end,
       funcOnEnter = function(owner)
         GameTooltip:SetOwner(owner or UIParent, "ANCHOR_LEFT")
         fillTooltip(GameTooltip)
