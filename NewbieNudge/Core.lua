@@ -27,7 +27,7 @@ NN.isForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 NN.defaults = {
   disabled = {},
   snoozed = {},
-  panel = { point = "RIGHT", x = -40, y = 60, locked = true, scale = 1, hidden = false },
+  panel = { point = "RIGHT", x = -40, y = 60, locked = true, scale = 1, hidden = false, style = "list" },
   combatStrip = true,
   snoozeMinutes = 60,
   errors = {},

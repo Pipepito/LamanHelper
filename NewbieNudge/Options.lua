@@ -90,6 +90,10 @@ function Options:Build()
   Options.AddCheckbox(category, "NN_lock", L.OPT_LOCK, L.OPT_LOCK_TT,
     function() return db.panel.locked end,
     function(value) db.panel.locked = value and true or false; if NN.Panel then NN.Panel:SetLocked(db.panel.locked) end end)
+  Options.AddDropdown(category, "NN_panel_style", L.OPT_STYLE, L.OPT_STYLE_TT,
+    { { value = "list", label = L.OPT_STYLE_LIST }, { value = "icons", label = L.OPT_STYLE_ICONS } },
+    function() return db.panel.style or "list" end,
+    function(value) if NN.Panel then NN.Panel:SetStyle(value) else db.panel.style = value end end)
   Options.AddSlider(category, "NN_scale", L.OPT_SCALE, nil, 0.8, 1.5, 0.1,
     function() return db.panel.scale end,
     function(value) db.panel.scale = value; if NN.Panel then NN.Panel:ApplyScale() end end)

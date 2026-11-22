@@ -7,6 +7,7 @@ NN.Panel = Panel
 
 local WIDTH, PAD, ROW_H, ROW_H2, ICON, TITLE_H = 260, 6, 24, 36, 20, 18
 local STRIP_GAP = 4
+Panel.STRIP_PER_LINE = 8
 
 -- Strip icon size: bigger while a controller is in use and the boost is on.
 function Panel.STRIP_ICON()
@@ -61,9 +62,9 @@ strip:Hide()
 -- Tooltip and clicks
 -------------------------------------------------------------------------------
 
-local function showTooltip(owner, data)
+local function showTooltip(owner, data, anchor)
   if not data then return end
-  GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
+  GameTooltip:SetOwner(owner, anchor or "ANCHOR_LEFT")
   GameTooltip:SetText(data.rule.title)
   GameTooltip:AddLine(data.result.text, 1, 0.82, 0, true)
   GameTooltip:AddLine(data.rule.help, 1, 1, 1, true)
@@ -91,10 +92,10 @@ local function onClick(button, mouseButton)
   end
 end
 
-local function bindClickable(button)
+local function bindClickable(button, anchor)
   button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   button:SetScript("OnClick", onClick)
-  button:SetScript("OnEnter", function(self) showTooltip(self, self.data) end)
+  button:SetScript("OnEnter", function(self) showTooltip(self, self.data, anchor) end)
   button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 end
 
@@ -176,7 +177,7 @@ local function newStripIcon(index)
   button:SetSize(Panel.STRIP_ICON(), Panel.STRIP_ICON())
   button.icon = button:CreateTexture(nil, "ARTWORK")
   button.icon:SetAllPoints()
-  bindClickable(button)
+  bindClickable(button, "ANCHOR_TOP")
   return button
 end
 
@@ -193,12 +194,14 @@ end
 function Panel:RefreshStrip(rows)
   local seen = {}
   local STRIP_ICON = Panel.STRIP_ICON()
+  local perLine, step = Panel.STRIP_PER_LINE, STRIP_ICON + STRIP_GAP
   for i, data in ipairs(rows) do
     local button = self.stripIcons[i]
     if not button then button = newStripIcon(i); self.stripIcons[i] = button end
     button:SetSize(STRIP_ICON, STRIP_ICON)
     button:ClearAllPoints()
-    button:SetPoint("LEFT", strip, "LEFT", (i - 1) * (STRIP_ICON + STRIP_GAP), 0)
+    local col, line = (i - 1) % perLine, math.floor((i - 1) / perLine)
+    button:SetPoint("TOPLEFT", strip, "TOPLEFT", col * step, -line * step)
     button.icon:SetTexture(data.result.icon or 134400)
     button.data = data
     button:Show()
@@ -214,12 +217,16 @@ function Panel:RefreshStrip(rows)
   end
   for i = #rows + 1, #self.stripIcons do self.stripIcons[i]:Hide(); self.stripIcons[i].data = nil end
   self.stripSeen = seen
+  local cols = math.min(#rows, perLine)
+  local lines = math.max(1, math.ceil(#rows / perLine))
+  local width = math.max(1, cols * step - STRIP_GAP)
+  local height = lines * step - STRIP_GAP
   local titleHeight = title:IsShown() and TITLE_H or 0
   strip:ClearAllPoints()
   strip:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + titleHeight))
-  strip:SetSize(math.max(1, #rows * (STRIP_ICON + STRIP_GAP) - STRIP_GAP), STRIP_ICON)
-  frame:SetWidth(math.max(#rows * (STRIP_ICON + STRIP_GAP) - STRIP_GAP, 1) + PAD * 2)
-  frame:SetHeight(STRIP_ICON + PAD * 2 + titleHeight)
+  strip:SetSize(width, height)
+  frame:SetWidth(width + PAD * 2)
+  frame:SetHeight(height + PAD * 2 + titleHeight)
   if #rows == 0 then frame:Hide() else frame:Show() end
 end
 
@@ -227,11 +234,21 @@ end
 -- Public
 -------------------------------------------------------------------------------
 
+-- The strip is used in combat, and all the time in the "icons" style.
+function Panel:UsesStrip()
+  return self.combat or (NN.db and NN.db.panel.style == "icons") or false
+end
+
+function Panel:SetStyle(style)
+  NN.db.panel.style = (style == "icons") and "icons" or "list"
+  self:Refresh(NN:ActiveRows())
+end
+
 function Panel:Refresh(rows)
   self.currentRows = rows
   if NN.db and NN.db.panel.hidden then frame:Hide(); return end
-  if self.combat then
-    if NN.db and NN.db.combatStrip == false then frame:Hide(); return end
+  if self.combat and NN.db and NN.db.combatStrip == false then frame:Hide(); return end
+  if self:UsesStrip() then
     list:Hide(); strip:Show()
     self:RefreshStrip(rows)
   else
@@ -244,7 +261,9 @@ function Panel:SetCombatMode(inCombat)
   inCombat = inCombat and true or false
   if self.combat == inCombat then return end
   self.combat = inCombat
-  if not inCombat then self.stripSeen = {} end
+  -- in the list style the strip only exists in combat: let its icons pulse
+  -- again next fight; in the icons style the strip never went away
+  if not inCombat and not (NN.db and NN.db.panel.style == "icons") then self.stripSeen = {} end
   self:Refresh(NN:ActiveRows())
 end
 

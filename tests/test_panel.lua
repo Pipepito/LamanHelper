@@ -161,4 +161,65 @@ return {
     assert_true(tContains(row_texts(), NewbieNudge.L.DURABILITY_ROW_LOW))
     assert_eq(#row_texts(), NewbieNudge.MAX_ROWS + 1)
   end,
+  -- v4: panel style "list" (default) or "icons" (the strip, out of combat too).
+  default_style_is_list = function()
+    load_addon()
+    assert_eq(NewbieNudge.db.panel.style, "list")
+  end,
+  icons_style_uses_strip_out_of_combat = function()
+    load_addon()
+    NewbieNudge.Panel:SetStyle("icons")
+    show({ { text = "one" }, { text = "two" }, { text = "three" } })
+    assert_eq(visibleStripIcons(), 3)
+    assert_eq(#row_texts(), 0)
+    assert_true(NewbieNudge.Panel:UsesStrip())
+  end,
+  strip_wraps_after_eight = function()
+    load_addon()
+    NewbieNudge.Panel:SetStyle("icons")
+    local results = {}
+    for i = 1, 10 do results[i] = { text = "r" .. i } end
+    show(results)
+    local icons = NewbieNudge.Panel.stripIcons
+    local point, _, _, x, y = icons[9]:GetPoint(1)
+    assert_eq({ point, x, y }, { "TOPLEFT", 0, -(24 + 4) })
+    assert_eq(select(4, icons[8]:GetPoint(1)), 7 * (24 + 4))
+    assert_eq(NewbieNudgePanel:GetHeight(), 2 * 24 + 4 + 12)
+    assert_eq(NewbieNudgePanel:GetWidth(), 8 * 24 + 7 * 4 + 12)
+  end,
+  strip_tooltip_above_icon = function()
+    load_addon()
+    NewbieNudge.Panel:SetStyle("icons")
+    show({ { text = "one" } })
+    WOW.Hover(NewbieNudge.Panel.stripIcons[1])
+    assert_eq(GameTooltip.anchor, "ANCHOR_TOP")
+    assert_eq(GameTooltip.lines[2], "one")
+  end,
+  list_row_tooltip_stays_left = function()
+    load_addon()
+    show({ { text = "one" } })
+    WOW.Hover(NewbieNudge.Panel.rows[1])
+    assert_eq(GameTooltip.anchor, "ANCHOR_LEFT")
+  end,
+  icons_style_combat_strip_off_hides_in_combat = function()
+    load_addon()
+    NewbieNudge.Panel:SetStyle("icons")
+    NewbieNudge.db.combatStrip = false
+    show({ { text = "one" } })
+    assert_true(NewbieNudgePanel:IsShown())
+    WOW.FireEvent("PLAYER_REGEN_DISABLED")
+    assert_true(not NewbieNudgePanel:IsShown())
+    WOW.FireEvent("PLAYER_REGEN_ENABLED")
+    assert_true(NewbieNudgePanel:IsShown())
+  end,
+  leaving_combat_in_icons_style_does_not_repulse = function()
+    load_addon()
+    NewbieNudge.Panel:SetStyle("icons")
+    show({ { text = "one" }, { text = "two" } })
+    WOW.AdvanceTime(2) -- let the first-appearance pulse finish
+    assert_nil(NewbieNudge.Panel.stripIcons[1].pulseTicker)
+    WOW.FireEvent("PLAYER_REGEN_DISABLED")
+    WOW.FireEvent("PLAYER_REGEN_ENABLED")
+    assert_nil(NewbieNudge.Panel.stripIcons[1].pulseTicker)
+  end,
 }

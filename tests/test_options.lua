@@ -122,4 +122,12 @@ return {
     assert_true(printed:find("page boom", 1, true), printed)
     assert_true(tostring(NewbieNudge.db.errors["options:Boom page"]):find("page boom", 1, true))
   end,
+  style_dropdown_round_trips = function()
+    withRules()
+    local s = WOW.settings["NN_panel_style"]
+    assert_eq(s.getter(), "list")
+    s.setter("icons")
+    assert_eq(NewbieNudge.db.panel.style, "icons")
+    assert_true(NewbieNudge.Panel:UsesStrip())
+  end,
 }
