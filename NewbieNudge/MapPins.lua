@@ -334,8 +334,13 @@ function MapPins.CityRect(cityMap, viewedMap)
     local viewed = C_Map.GetMapInfo(viewedMap)
     if viewed and NN.Plain(viewed.mapType) == CONTINENT_TYPE then return nil end
     left, right, top, bottom = cornersOnMap(cityMap, viewedMap)
-    -- inside the viewed map (a city), not a neighbouring zone
-    if not left or left < 0 or top < 0 or right > 1 or bottom > 1 then return nil end
+    if not left then return nil end
+    -- a city: its centre inside the viewed map and much smaller than it
+    -- (Orgrimmar pokes out past the top of Durotar's map); a neighbouring
+    -- zone has its centre outside
+    local cx, cy = (left + right) / 2, (top + bottom) / 2
+    if cx < 0 or cx > 1 or cy < 0 or cy > 1 then return nil end
+    if right - left > 0.6 or bottom - top > 0.6 then return nil end
   end
   if not (left and right and top and bottom) then return nil end
   return left, right, top, bottom

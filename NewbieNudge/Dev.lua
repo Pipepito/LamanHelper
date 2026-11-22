@@ -327,6 +327,23 @@ local SECTIONS = {
       local f = NN.MapList.frame
       out[#out + 1] = ("map list shown %s strata %s level %s"):format(tostring(f:IsShown()), tostring(f:GetFrameStrata()), tostring(f:GetFrameLevel()))
     end
+    -- every map holding service NPCs, as the badges see it from this map
+    if NN.ServiceData and NN.MapPins and NN.MapPins.CityRect and W.GetMapID then
+      local viewed, maps = W:GetMapID(), {}
+      for _, n in pairs(NN.ServiceData.npcs) do maps[n[3]] = true end
+      local ids = {}
+      for id in pairs(maps) do ids[#ids + 1] = id end
+      table.sort(ids)
+      for _, id in ipairs(ids) do
+        local info = C_Map.GetMapInfo and C_Map.GetMapInfo(id)
+        local parent = info and info.parentMapID
+        if parent == viewed or (info and C_Map.GetMapInfo(parent or 0) and C_Map.GetMapInfo(parent).mapType == 2) then
+          local l, r, t, b = NN.MapPins.CityRect(id, viewed)
+          out[#out + 1] = ("city %s (%s) parent %s rect %s"):format(tostring(id), tostring(info and info.name), tostring(parent),
+            l and ("%.2f-%.2f x %.2f-%.2f"):format(l, r, t, b) or "none")
+        end
+      end
+    end
     for i, p in ipairs(NN.MapPins and NN.MapPins.pins or {}) do
       local point, rel, relPoint, x, y = p:GetPoint(1)
       out[#out + 1] = ("pin %d: npc %s kind %s marked %s shown %s visible %s alpha %s"):format(i, tostring(p.npcID), tostring(p.kind),

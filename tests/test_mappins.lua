@@ -391,4 +391,18 @@ return {
     WOW.Hover(pinFor(14))
     assert_true(tContains(GameTooltip.lines, L().MAPPIN_FLIGHT_UNCHECKED))
   end,
+  -- Orgrimmar pokes out past the top of Durotar's map (owner 2026-11-22:
+  -- Thunder Bluff badged on Mulgore, Orgrimmar not on Durotar)
+  city_poking_past_the_zone_edge_still_badges = function()
+    load()
+    WOW.state.mapWorld[1461] = { 0, 400, -100, 200, 200 } -- y -100..100: partly above Elwynn's top edge
+    WOW.state.mapInfo[1461] = { name = "Edge Town", parentMapID = 1414, mapType = 3 }
+    NewbieNudge.ServiceData.npcs[21] = { "Edge Flyer", "Gryphon Master", 1461, 50, 60, "A" }
+    table.insert(NewbieNudge.ServiceData.kinds.flight, 21)
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local badge
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() and b.mapID == 1461 then badge = b end end
+    assert_true(badge, "badge for the town on the edge")
+  end,
 }
