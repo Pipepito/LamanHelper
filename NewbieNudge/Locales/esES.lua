@@ -249,8 +249,10 @@ NN.RegisterLocale("esES", {
 
   -- Trainer spells
   TRAINER_SPELLS_TITLE = "Hechizos nuevos para tu nivel",
-  TRAINER_SPELLS_HELP = "Hechizos y rangos que tu nivel permite y que aún no has aprendido. La mayoría los enseña tu instructor de clase; unos pocos vienen de misiones, así que si la fila sigue tras visitarlo, te espera una misión de clase.",
+  TRAINER_SPELLS_HELP = "Hechizos y rangos que tu nivel permite y aún no has aprendido: los que enseña tu instructor de clase, y hechizos de clase que vienen de una misión de clase (la empieza tu instructor de clase).",
   TRAINER_SPELLS_ROW = "%d hechizos o rangos para tu nivel que no has aprendido. Visita a tu instructor de clase.",
+  TRAINER_SPELLS_ROW_QUEST = "Misión de clase (nivel %d): %s. La empieza tu instructor de clase.",
+  TRAINER_SPELLS_ROW_QUEST_MORE = "+%d hechizos más de misiones de clase.",
 
   -- Profession rank
   PROFESSION_RANK_TITLE = "Siguiente rango de profesión disponible",

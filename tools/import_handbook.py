@@ -101,11 +101,15 @@ def _trainer_spells(table):
         entries = []
         for spell_index, spell in enumerate(table[class_key], start=1):
             races = spell.get("races") if isinstance(spell, dict) else None
+            # warlock demon abilities: learned by the demon, not the player
+            pet = isinstance(spell, dict) and spell.get("pet") is not None
             for rank_index, rank in enumerate(spell.get("ranks") or [], start=1):
                 if not isinstance(rank, dict) or rank.get("id") is None or rank.get("level") is None:
                     continue
                 entry = "{ level = %d, id = %d, spell = %d, rank = %d" % (
                     int(rank["level"]), int(rank["id"]), spell_index, rank_index)
+                if pet:
+                    entry += ", pet = true"
                 if races:
                     entry += ", races = { %s }" % ", ".join(_lua_str(_race_token(r)) for r in races)
                 entries.append(entry + " }")

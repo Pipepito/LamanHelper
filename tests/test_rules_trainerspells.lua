@@ -38,4 +38,37 @@ return {
     known(5143); WOW.FireEvent("LEARNED_SPELL_IN_SKILL_LINE", 5143); run_checks()
     assert_eq(#results_of("trainer_spells"), 0)
   end,
+  -- v4 §4h: class quests and pet spells
+  pet_spells_and_quest_spells_never_in_the_trainer_count = function()
+    setup(); exist(5555, 7777); WOW.state.level = 10; known(133)
+    run()
+    assert_eq(results_of("trainer_spells")[1].text, L().TRAINER_SPELLS_ROW:format(2))
+  end,
+  quest_spell_gets_its_own_row = function()
+    setup(); exist(7777); WOW.state.level = 10; known(133, 143, 5143)
+    run()
+    local r = results_of("trainer_spells")
+    assert_eq(#r, 1)
+    assert_eq(r[1].text, L().TRAINER_SPELLS_ROW_QUEST:format(10, "S7777"))
+    assert_eq(r[1].service, { kind = "trainer_MAGE" })
+  end,
+  known_quest_spell_has_no_row = function()
+    setup(); exist(7777); WOW.state.level = 10; known(133, 143, 5143, 7777)
+    run()
+    assert_eq(#results_of("trainer_spells"), 0)
+  end,
+  quest_spell_waits_for_its_level = function()
+    setup(); exist(7777); WOW.state.level = 9; known(133, 143)
+    run()
+    assert_eq(#results_of("trainer_spells"), 0)
+  end,
+  two_quest_rows_then_a_count = function()
+    setup(); exist(7777, 7778, 7779, 7780); WOW.state.level = 12; known(133, 143, 5143)
+    run()
+    local r = results_of("trainer_spells")
+    assert_eq(#r, 3)
+    assert_eq(r[1].text, L().TRAINER_SPELLS_ROW_QUEST:format(10, "S7777"))
+    assert_eq(r[2].text, L().TRAINER_SPELLS_ROW_QUEST:format(12, "S7778"))
+    assert_eq(r[3].text, L().TRAINER_SPELLS_ROW_QUEST_MORE:format(2))
+  end,
 }

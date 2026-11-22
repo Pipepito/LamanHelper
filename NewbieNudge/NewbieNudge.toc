@@ -34,6 +34,7 @@ GameSettings.lua
 Data_Buffs.lua
 Data\MapFog.lua
 Data\TrainerSpells.lua
+Data\ClassQuestSpells.lua
 Data\Zones.lua
 Data\Dungeons.lua
 Data\IcyTalents.lua

@@ -6,3 +6,4 @@ local _, NN = ...
 NN.Dungeons = {}
 NN.Zones = {}
 NN.TrainerSpells = {}
+NN.ClassQuestSpells = {}

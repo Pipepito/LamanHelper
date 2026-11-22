@@ -17,6 +17,7 @@ in `dist/` and are not tracked.
 - **Show services on the world map:** repair vendors, inns, food vendors and your trainers on the map you're looking at (minimap menu or `/nudge services`).
 - **NewbieNudge list on the world map:** click the NewbieNudge icon on the map for switches per kind of service and the list of your marks (jump to the zone, remove one, remove all).
 - **Icon layout:** icons per line, rows or columns, icon size and gap for the icons-only panel.
+- **New spells for your level** tells trainer spells from class-quest spells ("Class quest (level 10): Bear Form. Your class trainer starts it."), and no longer counts warlock demon abilities, which the demon learns.
 - **Gathering tracking** now notices Find Herbs and Find Minerals on WoW Forever (profession spells sit apart from the class spells in the spellbook).
 - **Tidier options:** reminders have their own page, grouped; the game's own settings sit next to the feature they belong to, with Combat, Names and Interface pages of their own. "Apply recommended game settings" is on the main page.
 

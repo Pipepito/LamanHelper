@@ -16,6 +16,7 @@ SPELLS = '''local ADDON_NAME, ns = ...
 ns.Data = ns.Data or {}
 ns.Data.spells = { warrior = { { name = { enUS = "Heroic Strike" }, ranks = { { rank = "Rank 1", level = 1, id = 78 }, { rank = "Rank 2", level = 8, id = 284 } } },
   { name = { enUS = "Noid" }, ranks = { { rank = "", level = 4 } } } },
+  warlock = { { name = { enUS = "Spell Lock" }, pet = { enUS = "Felhunter" }, ranks = { { rank = "Rank 1", level = 36, id = 19244, innate = true }, { rank = "Rank 2", level = 52, id = 19647, book = 16390 } } } },
   paladin = { { name = { enUS = "Holy Light" }, races = { "Dwarf", "Human", "Undead", "Night Elf" }, ranks = { { rank = "Rank 1", level = 1, id = 635 } } } } }'''
 ZONES = '''local ADDON_NAME, ns = ...
 ns.Data = ns.Data or {}
@@ -49,6 +50,10 @@ class Transform(unittest.TestCase):
         self.assertIn('"Scourge"', out)
         self.assertIn('"NightElf"', out)
         self.assertIn("spell = 1, rank = 2", out)
+        # warlock demon abilities are marked: the demon learns them, not the player
+        self.assertIn("id = 19244, spell = 1, rank = 1, pet = true", out)
+        self.assertIn("id = 19647, spell = 1, rank = 2, pet = true", out)
+        self.assertNotIn("id = 78, spell = 1, rank = 1, pet", out)
 
     def test_zones_only_zone_kind_with_levels(self):
         out = ih.transform(self.tables(), source="x", commit="abc", date="d")["Zones"]

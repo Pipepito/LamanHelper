@@ -10,3 +10,7 @@ NN.TrainerSpells.MAGE = {
   { level = 10, id = 99999, spell = 3, rank = 1 },  -- stale id, does not exist
   { level = 4,  id = 1180,  spell = 4, rank = 1, races = { "Gnome" } }, -- race-locked
 }
+-- v4: a warlock-demon-style pet spell (never counted) and class quest spells
+table.insert(NN.TrainerSpells.MAGE, { level = 1, id = 5555, spell = 5, rank = 1, pet = true })
+table.insert(NN.TrainerSpells.MAGE, { level = 10, id = 7777, spell = 6, rank = 1 }) -- also a quest spell
+NN.ClassQuestSpells = { MAGE = { { id = 7777, level = 10 }, { id = 7778, level = 12 }, { id = 7779, level = 12 }, { id = 7780, level = 12 } } }

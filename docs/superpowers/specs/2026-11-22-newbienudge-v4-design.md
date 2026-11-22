@@ -507,6 +507,38 @@ fly now.
   load; numbered pins with gold first; right-click removes one option; list
   shows heading + options; chat "N more options".
 
+## 4h. Trainer spells: trainer, class quest or book (owner, 2026-11-22)
+
+The "new spells for your level" reminder sent every missing spell to the
+class trainer. Some come from class quests, some from books, some are
+taught to the pet.
+
+- Importer (`tools/import_handbook.py`): spells the handbook marks with
+  `pet` (warlock demon abilities: their `book` ranks are grimoires, their
+  `innate` ranks come with the demon) get `pet = true` in
+  `Data/TrainerSpells.lua`. They are learned by the demon, so the player's
+  spellbook can't tell whether they are known: the reminder leaves them out
+  (it counted them as "visit your trainer" for every warlock until now).
+- `Data/ClassQuestSpells.lua` (hand-written, classic class quests; verify on
+  Forever in the checklist): per class `{ spellID, level }`:
+  - WARRIOR Defensive Stance 71 (10), Berserker Stance 2458 (30);
+  - DRUID Bear Form 5487 (10), Cure Poison 8946 (14), Aquatic Form 1066 (16);
+  - HUNTER Tame Beast 1515 (10);
+  - PALADIN Redemption 7328 (12), Summon Warhorse 13819 (40), Summon Charger 23214 (60);
+  - WARLOCK Summon Voidwalker 697 (10), Summon Succubus 712 (20), Summon Felhunter 691 (30),
+    Inferno 1122 (50), Ritual of Doom 18540 (60), Summon Dreadsteed 23161 (60);
+  - ROGUE Poisons 2842 (20).
+  A spell in this table counts as a quest spell even if the handbook lists it.
+- Rows (`trainer_spells`):
+  - trainer: "N spells or ranks for your level you haven't learned. Visit
+    your class trainer." — books, pet spells, innate spells and quest
+    spells left out; map button → class trainer.
+  - one row per quest spell the player is old enough for and doesn't know:
+    "Class quest (level 10): Bear Form. Your class trainer starts it." — map
+    button → class trainer. At most 2 rows; more → "+N more class quests".
+- Tests: each split; quest spell known → gone; level gate; pet spells never
+  in the trainer count; importer marks pet spells.
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list
