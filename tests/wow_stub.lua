@@ -282,6 +282,7 @@ end
 function Region:CreateTexture(name, layer) local t = newRegion("Texture", name, self); t.layer = layer; return t end
 function Region:CreateFontString(name, layer, template) local t = newRegion("FontString", name, self); t.layer = layer; t.fontObject = template; return t end
 function Region:CreateMaskTexture(name) return newRegion("MaskTexture", name, self) end
+function Region:AddMaskTexture(mask) self.mask = mask end
 function Region:CreateAnimationGroup() local g = newRegion("AnimationGroup", nil, self); g.Play = noop; g.Stop = noop; g.IsPlaying = function() return false end; g.SetLooping = noop; g.CreateAnimation = function() local a = newRegion("Animation", nil, g); a.SetDuration = noop; a.SetFromAlpha = noop; a.SetToAlpha = noop; a.SetOrder = noop; a.SetSmoothing = noop; return a end; return g end
 
 function CreateFrame(kind, name, parent, template)

@@ -73,9 +73,13 @@ local function acquire()
     pin = CreateFrame("Button", nil, canvas())
     pin.icon = pin:CreateTexture(nil, "ARTWORK")
     pin.icon:SetAllPoints()
+    -- round icon, so its corners don't stick out of the ring
+    local mask = pin:CreateMaskTexture()
+    mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    mask:SetAllPoints(pin.icon)
+    pin.icon:AddMaskTexture(mask)
     pin.ring = pin:CreateTexture(nil, "OVERLAY")
     pin.ring:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    pin.ring:SetPoint("TOPLEFT", pin, "TOPLEFT", -4, 4)
     pin.ring:SetVertexColor(1, 0.82, 0)
     pin:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     pin:SetScript("OnEnter", onEnter)
@@ -94,7 +98,12 @@ local function place(npcID, kind, marked)
   pin.npcID, pin.kind, pin.marked = npcID, kind, marked
   pin:SetSize(size, size)
   pin.icon:SetTexture(iconFor(kind))
-  pin.ring:SetSize(size * 1.7, size * 1.7)
+  -- The border's ring sits in the top-left of its texture: minimap buttons
+  -- put a 17 px icon at (7, -6) inside the 53 px border. Same proportions.
+  local k = size / 17
+  pin.ring:SetSize(53 * k, 53 * k)
+  pin.ring:ClearAllPoints()
+  pin.ring:SetPoint("TOPLEFT", pin, "TOPLEFT", -7 * k, 6 * k)
   if marked then pin.ring:Show() else pin.ring:Hide() end
   -- Same map strata, above the canvas and Blizzard's own pins.
   pin:SetFrameLevel((child:GetFrameLevel() or 1) + 500)
