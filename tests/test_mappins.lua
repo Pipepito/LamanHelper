@@ -339,4 +339,34 @@ return {
     WOW.ViewMap(1429)
     for _, b in ipairs(NewbieNudge.MapPins.badges) do assert_true(not b:IsShown()) end
   end,
+  -- Forever: city maps hang off the continent, not their zone (owner
+  -- 2026-11-22: badges on Kalimdor, none on Durotar or Mulgore)
+  city_under_the_continent_still_badges_its_zone = function()
+    load()
+    WOW.state.mapWorld[1460] = { 0, 200, 200, 200, 200 } -- inside Elwynn's 0-1000 square
+    WOW.state.mapInfo[1460] = { name = "Inner Town", parentMapID = 1414, mapType = 3 }
+    WOW.state.mapInfo[1414] = { name = "Continent", mapType = 2 }
+    NewbieNudge.ServiceData.npcs[18] = { "Town Flyer", "Gryphon Master", 1460, 50, 50, "A" }
+    table.insert(NewbieNudge.ServiceData.kinds.flight, 18)
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local badge
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() and b.mapID == 1460 then badge = b end end
+    assert_true(badge, "badge for the town inside the zone")
+    local _, _, _, x, y = badge:GetPoint(1)
+    assert_true(math.abs(x - 300) < 0.01 and math.abs(y + 0.3 * 667) < 0.01, x .. "," .. y)
+  end,
+  a_neighbouring_zone_gets_no_badge = function()
+    load()
+    -- 1431 sits beside Elwynn (world x 1000-2000): not inside it
+    WOW.state.mapInfo[1431] = { name = "Next Zone", parentMapID = 1414, mapType = 3 }
+    NewbieNudge.ServiceData.npcs[19] = { "Next Flyer", "Gryphon Master", 1431, 10, 10, "A" }
+    table.insert(NewbieNudge.ServiceData.kinds.flight, 19)
+    WOW.state.level = 40
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do
+      if b:IsShown() then assert_true(b.mapID ~= 1431, "no badge for a neighbouring zone") end
+    end
+  end,
 }

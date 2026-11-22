@@ -771,6 +771,11 @@ function C_Map.GetMapRectOnMap(child, parent)
   local r = S().mapRects and S().mapRects[child .. ":" .. parent]
   if r then return r[1], r[2], r[3], r[4] end
 end
+function C_Map.GetMapPosFromWorldPos(continent, pos, mapID)
+  local w = S().mapWorld and S().mapWorld[mapID]
+  if not w or w[1] ~= continent then return nil end
+  return mapID, CreateVector2D((pos.x - w[2]) / w[4], (pos.y - w[3]) / w[5])
+end
 function C_Map.GetWorldPosFromMapPos(mapID, pos)
   local w = S().mapWorld and S().mapWorld[mapID]
   if not w then return nil end

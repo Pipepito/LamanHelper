@@ -297,13 +297,43 @@ end
 -- player's trainers, weapon masters and flight points they hold.
 -------------------------------------------------------------------------------
 
--- The rectangle of a city map on the viewed zone map, or nil.
+-- The rectangle of a city map on the viewed map, or nil. The city's own
+-- parent link is used when it points at the viewed map (continent maps);
+-- otherwise the city's corners go through world positions, because on
+-- Forever a city map hangs off the continent, not its zone (Orgrimmar is not
+-- a child of Durotar). Only a city lying inside the viewed map counts.
+local CONTINENT_TYPE = (Enum and Enum.UIMapType and Enum.UIMapType.Continent) or 2
+
+local function cornersOnMap(cityMap, viewedMap)
+  if not (C_Map.GetWorldPosFromMapPos and C_Map.GetMapPosFromWorldPos and CreateVector2D) then return nil end
+  local c1, p1 = C_Map.GetWorldPosFromMapPos(cityMap, CreateVector2D(0, 0))
+  local c2, p2 = C_Map.GetWorldPosFromMapPos(cityMap, CreateVector2D(1, 1))
+  if not (c1 and p1 and c2 and p2) then return nil end
+  local _, a = C_Map.GetMapPosFromWorldPos(c1, p1, viewedMap)
+  local _, b = C_Map.GetMapPosFromWorldPos(c2, p2, viewedMap)
+  if not (a and b) then return nil end
+  local ax, ay = a:GetXY()
+  local bx, by = b:GetXY()
+  ax, ay, bx, by = NN.Plain(ax), NN.Plain(ay), NN.Plain(bx), NN.Plain(by)
+  if not (ax and ay and bx and by) then return nil end
+  return math.min(ax, bx), math.max(ax, bx), math.min(ay, by), math.max(ay, by)
+end
+
 function MapPins.CityRect(cityMap, viewedMap)
-  if not (C_Map and C_Map.GetMapRectOnMap and C_Map.GetMapInfo) then return nil end
+  if cityMap == viewedMap or not (C_Map and C_Map.GetMapInfo) then return nil end
   local info = C_Map.GetMapInfo(cityMap)
-  if not info or NN.Plain(info.parentMapID) ~= viewedMap then return nil end
-  local left, right, top, bottom = C_Map.GetMapRectOnMap(cityMap, viewedMap)
-  left, right, top, bottom = NN.Plain(left), NN.Plain(right), NN.Plain(top), NN.Plain(bottom)
+  if not info then return nil end
+  local left, right, top, bottom
+  if NN.Plain(info.parentMapID) == viewedMap and C_Map.GetMapRectOnMap then
+    left, right, top, bottom = C_Map.GetMapRectOnMap(cityMap, viewedMap)
+    left, right, top, bottom = NN.Plain(left), NN.Plain(right), NN.Plain(top), NN.Plain(bottom)
+  else
+    local viewed = C_Map.GetMapInfo(viewedMap)
+    if viewed and NN.Plain(viewed.mapType) == CONTINENT_TYPE then return nil end
+    left, right, top, bottom = cornersOnMap(cityMap, viewedMap)
+    -- inside the viewed map (a city), not a neighbouring zone
+    if not left or left < 0 or top < 0 or right > 1 or bottom > 1 then return nil end
+  end
   if not (left and right and top and bottom) then return nil end
   return left, right, top, bottom
 end
