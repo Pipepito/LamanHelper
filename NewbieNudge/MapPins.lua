@@ -14,7 +14,7 @@ local RING_OPENING = 21
 local ICONS = {
   repair = "Interface\\Icons\\Trade_BlackSmithing", inn = "Interface\\Icons\\INV_Misc_Rune_01",
   food = "Interface\\Icons\\INV_Misc_Food_15", goods = "Interface\\Icons\\INV_Misc_Bag_10",
-  trade = "Interface\\Icons\\INV_Fabric_Linen_01", weapon = "Interface\\Icons\\INV_Sword_04",
+  trade = "Interface\\Icons\\INV_Fabric_Linen_01", flight = "Interface\\Icons\\Ability_Hunter_EagleEye", weapon = "Interface\\Icons\\INV_Sword_04",
 }
 local TRAINER_ICON, PROF_ICON = "Interface\\Icons\\INV_Misc_Book_09", "Interface\\Icons\\INV_Misc_Note_01"
 -- profession skill line -> icon, for professions the player doesn't have
@@ -94,7 +94,7 @@ end
 -- Kinds that "show nearby services" can draw: the fixed ones, the class
 -- trainer, then every profession (the player's first).
 function MapPins.ShowAllKinds()
-  local kinds = { "repair", "inn", "food", "goods", "trade", "weapon" }
+  local kinds = { "repair", "inn", "food", "goods", "trade", "weapon", "flight" }
   local class = select(2, UnitClass("player"))
   if class then kinds[#kinds + 1] = "trainer_" .. class end
   local mine = MapPins.PlayerProfessions()
@@ -139,6 +139,13 @@ local function onEnter(self)
   end
   if npc.title ~= "" then GameTooltip:AddLine(npc.title, 1, 0.82, 0) end
   GameTooltip:AddLine(NN.Services.ZoneName(npc.map), 1, 1, 1)
+  if self.kind == "flight" then
+    if NN.Services:FlightKnown(self.npcID) then
+      GameTooltip:AddLine(L.MAPPIN_FLIGHT_KNOWN, 0.3, 1, 0.3)
+    else
+      GameTooltip:AddLine(L.MAPPIN_FLIGHT_UNKNOWN, 1, 0.5, 0.2)
+    end
+  end
   GameTooltip:AddLine(self.marked and L.MAPPIN_REMOVE_OPTION or L.MAPPIN_CLICK_MARK, 0.8, 0.8, 0.8)
   GameTooltip:Show()
 end

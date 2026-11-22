@@ -6,7 +6,7 @@ new player looks for, and writes NewbieNudge/Data/Services.lua:
 
     NN.ServiceData = {
       npcs = { [npcID] = { name, title, uiMapID, x, y, faction }, ... },
-      kinds = { repair = { npcID, ... }, inn = {...}, food = {...}, goods = {...}, trade = {...},
+      kinds = { repair = { npcID, ... }, inn = {...}, food = {...}, goods = {...}, trade = {...}, flight = {...},
                 weapon = {...}, trainer_MAGE = {...}, prof_182 = {...}, ... },
     }
 
@@ -37,7 +37,7 @@ NPC_FILE = "data/Forever/foreverNpcDB.lua"
 CONVERSION_FILE = "data/Forever/conversion.json"
 
 # cmangos classic npc flags (confirmed against the Forever data)
-FLAG_VENDOR, FLAG_TRAINER, FLAG_INNKEEPER, FLAG_REPAIR = 4, 16, 128, 16384
+FLAG_VENDOR, FLAG_FLIGHT, FLAG_TRAINER, FLAG_INNKEEPER, FLAG_REPAIR = 4, 8, 16, 128, 16384
 
 # QuestieDB npcKeys
 NAME, SPAWNS, FRIENDLY, TITLE, FLAGS = 1, 7, 13, 14, 15
@@ -91,6 +91,8 @@ def kinds_for(title, flags):
     out = []
     if flags & FLAG_REPAIR:
         out.append("repair")
+    if flags & FLAG_FLIGHT:
+        out.append("flight")
     if flags & FLAG_INNKEEPER and title == "Innkeeper":
         out.append("inn")
     if flags & FLAG_VENDOR:

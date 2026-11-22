@@ -186,4 +186,9 @@ return {
     assert_true(tContains(S():Candidates("prof_all"), 11), "every profession's trainers")
     assert_eq(S():Closest("prof_all"), 11)
   end,
+  marking_a_flight_master_turns_on_flight_tracking = function()
+    load()
+    S():MarkClosest("flight", nil, true)
+    assert_eq(WOW.state.tracking[6].active, true)
+  end,
 }

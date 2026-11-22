@@ -62,4 +62,9 @@ return {
     WOW.FireEvent("TAXIMAP_OPENED"); WOW.FireEvent("TAXIMAP_CLOSED"); run_checks()
     assert_eq(#results_of("flight_path"), 0)
   end,
+  row_marks_flight_masters = function()
+    zone(1436, { { name = "Sentinel Hill", state = U } })
+    run()
+    assert_eq(results_of("flight_path")[1].service, { kind = "flight" })
+  end,
 }

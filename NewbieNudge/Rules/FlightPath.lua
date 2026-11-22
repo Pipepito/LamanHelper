@@ -69,7 +69,7 @@ NN:RegisterRule({
     else
       text = L.FLIGHT_PATH_ROW:format(zoneName, table.concat(shown, ", "))
     end
-    return { text = text, icon = FLIGHT_ICON, onClick = ToggleWorldMap }
+    return { text = text, icon = FLIGHT_ICON, onClick = ToggleWorldMap, service = { kind = "flight" } }
   end,
   sample = function() return { { text = L.FLIGHT_PATH_ROW:format("Westfall", "Sentinel Hill"), icon = FLIGHT_ICON } } end,
 })

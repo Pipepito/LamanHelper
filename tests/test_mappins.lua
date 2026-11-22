@@ -46,8 +46,8 @@ return {
     for _, pin in ipairs(shown()) do ids[#ids + 1] = pin.npcID end
     table.sort(ids)
     -- repair 1, 2 (3 is Horde), inn 7, mage trainer 8, baker 10, herbalism trainer 11,
-    -- general goods 12, trade supplies 13
-    assert_eq(ids, { 1, 2, 7, 8, 10, 11, 12, 13 })
+    -- general goods 12, trade supplies 13, flight master 14
+    assert_eq(ids, { 1, 2, 7, 8, 10, 11, 12, 13, 14 })
     assert_eq(pinFor(1):GetWidth(), 14); assert_eq(pinFor(1).marked, false)
   end,
   a_marked_npc_is_drawn_once = function()
@@ -272,5 +272,21 @@ return {
     WorldMapFrame:SetFrameStrata("HIGH")
     NewbieNudge.MapPins:Refresh()
     assert_eq(pinFor(7).strata, "DIALOG")
+  end,
+  -- flight points (owner 2026-11-22)
+  flight_points_are_a_kind = function()
+    load()
+    assert_true(tContains(NewbieNudge.MapPins.ShowAllKinds(), "flight"))
+  end,
+  flight_pin_says_whether_it_is_discovered = function()
+    load()
+    NewbieNudge.Services:Mark("flight", { 14 }, false)
+    WOW.ViewMap(1429)
+    WOW.Hover(pinFor(14))
+    assert_true(tContains(GameTooltip.lines, L().MAPPIN_FLIGHT_KNOWN))
+    NewbieNudge.Services:Mark("flight", { 15 }, false)
+    WOW.ViewMap(1431)
+    WOW.Hover(pinFor(15))
+    assert_true(tContains(GameTooltip.lines, L().MAPPIN_FLIGHT_UNKNOWN))
   end,
 }

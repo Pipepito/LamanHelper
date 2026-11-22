@@ -18,6 +18,8 @@ in `dist/` and are not tracked.
 - **NewbieNudge list on the world map:** click the NewbieNudge icon on the map for switches per kind of service and the list of your marks (jump to the zone, remove one, remove all).
 - **Icon layout:** icons per line, rows or columns, icon size and gap for the icons-only panel.
 - **New spells for your level** tells trainer spells from class-quest spells ("Class quest (level 10): Bear Form. Your class trainer starts it."), and no longer counts warlock demon abilities, which the demon learns.
+- **Flight points on the map:** a "Flight points" line in the map list; each pin says whether you've discovered it. The "flight path to unlock" reminder marks the nearest flight masters (and now works on Forever: discovered flight points are remembered each time you open a flight master's map).
+- **Profession filter:** the map list has a line per profession (yours ticked at first) and a "My professions only" button.
 - **Gathering tracking** now notices Find Herbs and Find Minerals on WoW Forever (profession spells sit apart from the class spells in the spellbook).
 - **Tidier options:** reminders have their own page, grouped; the game's own settings sit next to the feature they belong to, with Combat, Names and Interface pages of their own. "Apply recommended game settings" is on the main page.
 

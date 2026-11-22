@@ -32,6 +32,7 @@ QuestieDB.npcData = [[return {
 [1014] = {'Felika',1,1,20,20,0,{[14]={{2.0,2.0}}},nil,14,nil,nil,29,"H","General Trade Goods Merchant",6},
 [1015] = {'Olvia',1,1,20,20,0,{[14]={{3.0,3.0}}},nil,14,nil,nil,29,"H","Meat Vendor",6},
 [1016] = {'Kaymard',1,1,20,20,0,{[14]={{4.0,4.0}}},nil,14,nil,nil,29,"H","Smokywood Pastures",7},
+[1018] = {'Devrak',1,1,20,20,0,{[14]={{6.0,6.0}}},nil,14,nil,nil,29,"H","Wind Rider Master",9},
 [1017] = {'Shan',1,1,20,20,0,{[14]={{5.0,5.0}}},nil,14,nil,nil,29,"H","Fruit Vendor",4},
 }]]
 """
@@ -64,6 +65,9 @@ class Classify(unittest.TestCase):
         self.assertEqual(kinds_of(self.out, 1003), ["food"])        # Baker
         self.assertEqual(kinds_of(self.out, 1015), ["food"])        # Meat Vendor
         self.assertEqual(kinds_of(self.out, 1017), ["food"])        # Fruit Vendor
+
+    def test_flight_masters(self):
+        self.assertEqual(kinds_of(self.out, 1018), ["flight"])
 
     def test_seasonal_vendors_left_out(self):
         self.assertEqual(kinds_of(self.out, 1016), [])

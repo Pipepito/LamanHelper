@@ -14,6 +14,7 @@ local TRACKING = {
   repair = function() return MINIMAP_TRACKING_REPAIR or "Repair" end,
   inn = function() return MINIMAP_TRACKING_INNKEEPER or "Innkeeper" end,
   food = function() return MINIMAP_TRACKING_VENDOR_FOOD or "Food & Drink" end,
+  flight = function() return MINIMAP_TRACKING_FLIGHTMASTER or "Flight Master" end,
 }
 
 local function data() return NN.ServiceData or { npcs = {}, kinds = {} } end
@@ -159,6 +160,19 @@ function Services:TravelTime(npcID, flights)
     end
   end
   return best, route
+end
+
+-- Whether a flight master stands at a flight point the player has
+-- discovered (a known flight point within 80 yards of it).
+function Services:FlightKnown(npcID, flights)
+  local n = data().npcs[npcID]
+  if not n then return false end
+  local c, x, y = worldPos(n[3], n[4] / 100, n[5] / 100)
+  if not c then return false end
+  for _, fm in ipairs(flights or self:FlightMasters()) do
+    if fm.continent == c and distance(fm.x, fm.y, x, y) < 80 then return true end
+  end
+  return false
 end
 
 -- The quickest candidates, at most one per map: { { id, time, route }, ... }.
