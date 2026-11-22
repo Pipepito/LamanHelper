@@ -250,8 +250,8 @@ function MapList:Place()
   else
     frame:SetPoint("BOTTOMRIGHT", WorldMapFrame or UIParent, "BOTTOMRIGHT", -8, 40)
   end
-  frame:SetFrameStrata((anchor and anchor.GetFrameStrata and anchor:GetFrameStrata()) or "HIGH")
-  frame:SetFrameLevel(((anchor and anchor:GetFrameLevel()) or 1) + 10)
+  -- above the map and its pins (ours sit above the map's own pins)
+  frame:SetFrameStrata("DIALOG")
 end
 
 function MapList:SetOpen(open)

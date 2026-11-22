@@ -151,6 +151,22 @@ end
 
 -- rank: the option's place in its mark (1 = quickest); numbered when the
 -- mark has more than one option; gold ring for the quickest, grey otherwise.
+-- One level above the highest of the map's own pins (and at least the
+-- canvas + 500). Worked out once per Refresh.
+function MapPins.TopLevel()
+  if MapPins.topLevel then return MapPins.topLevel end
+  local child = canvas()
+  local top = ((child and child:GetFrameLevel()) or 1) + 500
+  if WorldMapFrame and WorldMapFrame.EnumerateAllPins then
+    for pin in WorldMapFrame:EnumerateAllPins() do
+      local level = pin.GetFrameLevel and pin:GetFrameLevel()
+      if level and level + 10 > top then top = level + 10 end
+    end
+  end
+  MapPins.topLevel = top
+  return top
+end
+
 local function place(npcID, kind, marked, rank, options)
   local npc = NN.Services:Npc(npcID)
   local child = canvas()
@@ -175,8 +191,9 @@ local function place(npcID, kind, marked, rank, options)
   pin.ring:ClearAllPoints()
   pin.ring:SetPoint("TOPLEFT", pin, "TOPLEFT", size / 2 - 15.5 * k, -size / 2 + 14.5 * k)
   if marked then pin.ring:Show() else pin.ring:Hide() end
-  -- Same map strata, above the canvas and Blizzard's own pins.
-  pin:SetFrameLevel((child:GetFrameLevel() or 1) + 500)
+  -- Same map strata, above every pin the map draws itself (the explored-area
+  -- layer covered ours in game while still letting the mouse through).
+  pin:SetFrameLevel(MapPins.TopLevel())
   -- The pin keeps its size whatever the zoom: scale 1/canvasScale. SetPoint
   -- offsets are in the pin's own scale, so they grow by canvasScale.
   local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and NN.Plain(WorldMapFrame.ScrollContainer:GetCanvasScale()) or 1
@@ -189,6 +206,7 @@ end
 
 function MapPins:Refresh()
   self.used = 0
+  self.topLevel = nil
   local map = WorldMapFrame and WorldMapFrame.GetMapID and NN.Plain(WorldMapFrame:GetMapID())
   if map and canvas() and NN.db and NN.Services then
     local drawn = {}

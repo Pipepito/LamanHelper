@@ -311,6 +311,22 @@ local SECTIONS = {
       out[#out + 1] = ("canvas %sx%s scale %s level %s visible %s"):format(tostring(child:GetWidth()), tostring(child:GetHeight()),
         tostring(scale), tostring(child:GetFrameLevel()), tostring(child.IsVisible and child:IsVisible()))
     end
+    local count, top, topName = 0, nil, nil
+    if W.EnumerateAllPins then
+      for pin in W:EnumerateAllPins() do
+        count = count + 1
+        local level = pin.GetFrameLevel and pin:GetFrameLevel()
+        if level and (not top or level > top) then
+          top, topName = level, tostring(pin.pinTemplate or (pin.GetDebugName and pin:GetDebugName()) or "?")
+        end
+      end
+    end
+    out[#out + 1] = ("map's own pins: %d, highest level %s (%s) strata %s"):format(count, tostring(top or "-"), tostring(topName or "-"),
+      tostring(W.ScrollContainer and W.ScrollContainer.GetFrameStrata and W.ScrollContainer:GetFrameStrata()))
+    if NN.MapList and NN.MapList.frame then
+      local f = NN.MapList.frame
+      out[#out + 1] = ("map list shown %s strata %s level %s"):format(tostring(f:IsShown()), tostring(f:GetFrameStrata()), tostring(f:GetFrameLevel()))
+    end
     for i, p in ipairs(NN.MapPins and NN.MapPins.pins or {}) do
       local point, rel, relPoint, x, y = p:GetPoint(1)
       out[#out + 1] = ("pin %d: npc %s kind %s marked %s shown %s visible %s alpha %s"):format(i, tostring(p.npcID), tostring(p.kind),

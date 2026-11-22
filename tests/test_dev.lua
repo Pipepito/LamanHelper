@@ -225,7 +225,7 @@ return {
     local text = log()[1].text
     for _, want in ipairs({
       "[services]", "showAll false", "mark prof_182 npc 11 fromRow true rule profession_rank",
-      "[map]", "world map shown true, map 1429", "canvas 1000x667 scale 1",
+      "[map]", "world map shown true, map 1429", "map's own pins: 0, highest level -", "canvas 1000x667 scale 1",
       "pin 1: npc 11 kind prof_182 marked true shown true", "texture 4620675", "ring shown true",
       "[player]", "map 1429 at 0.40,0.61", "continent 0",
       "[taxi]", "The Crossroads state 1",

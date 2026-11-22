@@ -220,4 +220,21 @@ return {
     assert_eq(GameTooltip.lines[1], L().MAPPIN_OPTION:format(1, 1, L().SERVICES_ROUTE_FOOT))
     assert_eq(GameTooltip.lines[2], "Near Smith")
   end,
+  -- In game the explored-area layer covered our pins (tooltip worked, nothing
+  -- visible): pins go above every pin the map itself has.
+  pins_sit_above_the_maps_own_pins = function()
+    load()
+    local explored = WOW.NewMapPin(1429)
+    explored:SetFrameLevel(2000)
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    assert_true(pinFor(7):GetFrameLevel() > 2000, tostring(pinFor(7):GetFrameLevel()))
+  end,
+  the_map_list_sits_above_the_pins = function()
+    load()
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    NewbieNudge.MapList:Toggle()
+    assert_eq(NewbieNudge.MapList.frame.strata, "DIALOG")
+  end,
 }

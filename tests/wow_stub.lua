@@ -810,6 +810,10 @@ function WorldMapFrame:OnMapChanged() end
 function WorldMapFrame:OnCanvasScaleChanged() end
 function WorldMapFrame:SetMapID(id) S().worldMapID = id; record("SetMapID", id); self:OnMapChanged() end
 function WOW.ViewMap(mapID) S().worldMapID = mapID; WorldMapFrame:Show(); WorldMapFrame:OnMapChanged() end
+function WorldMapFrame:EnumerateAllPins()
+  local i = 0
+  return function() i = i + 1; return self.pins[i] end
+end
 function WorldMapFrame:EnumeratePinsByTemplate(template)
   local i = 0
   return function() i = i + 1; return self.pins[i] end
