@@ -27,6 +27,14 @@ return {
     assert_eq(r[1].highlight, "tracking")
     assert_eq(r[1].icon, 77)
   end,
+  herbs_outside_skill_lines_still_gives_row = function()
+    knows({})
+    WOW.state.spellBook.items[38] = { spellID = HERBS }
+    tracking({ { name = "Find Herbs", spellID = HERBS } })
+    load_addon(); run_checks()
+    assert_eq(NewbieNudge:Applies(NewbieNudge.ruleByName.tracking), true)
+    assert_eq(results_of("tracking")[1].text, L().TRACKING_ROW_HERBS:format("Find Herbs"))
+  end,
   herbs_active_gives_nothing = function()
     knows({ HERBS })
     tracking({ { name = "Find Herbs", spellID = HERBS, active = true } })

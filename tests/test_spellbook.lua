@@ -30,6 +30,28 @@ return {
     load_addon()
     assert_nil(NewbieNudge.Spellbook:TopRankByName("Fireball"))
   end,
+  -- Forever (2026-11-22, druid herbalist): the skill lines cover slots 1-34,
+  -- but Find Herbs sits at slot 38, outside every line.
+  knows_spell_outside_every_skill_line = function()
+    book({ { id = 143, name = "Fireball" } })
+    WOW.state.spellBook.items[38] = { spellID = 2383 }
+    WOW.state.spellInfo[2383] = { name = "Find Herbs" }
+    load_addon()
+    assert_true(NewbieNudge.Spellbook:Knows(2383))
+  end,
+  offspec_spell_found_by_slot_is_still_unknown = function()
+    book({ { id = 143, name = "Fireball" } })
+    WOW.state.spellBook.lines[1].offSpecID = 63
+    load_addon()
+    assert_true(not NewbieNudge.Spellbook:Knows(143))
+  end,
+  future_spell_found_by_slot_is_unknown = function()
+    book({})
+    WOW.state.spellBook.items[38] = { spellID = 2383, type = "FUTURESPELL" }
+    WOW.state.spellInfo[2383] = { name = "Find Herbs" }
+    load_addon()
+    assert_true(not NewbieNudge.Spellbook:Knows(2383))
+  end,
   invalidate_rebuilds_after_spells_changed = function()
     book({ { id = 143, name = "Fireball" } })
     load_addon()

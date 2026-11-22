@@ -49,9 +49,36 @@ function Spellbook:TopRankByName(name)
   return map(self)[name]
 end
 
+-- True when slot falls inside a skill line that belongs to another
+-- specialization (those spells are listed but not usable).
+local function inOffSpecLine(slot)
+  local numLines = NN.Plain(C_SpellBook.GetNumSpellBookSkillLines()) or 0
+  for line = 1, numLines do
+    local info = C_SpellBook.GetSpellBookSkillLineInfo(line)
+    if info and info.offSpecID then
+      local first = (info.itemIndexOffset or 0) + 1
+      if slot >= first and slot < first + (info.numSpellBookItems or 0) then return true end
+    end
+  end
+  return false
+end
+
+-- Asks the client where the spell sits. Needed because Forever lists
+-- profession spells (Find Herbs at slot 38 on a druid, 2026-11-22) after
+-- the last skill line, where the name scan never looks.
+local function knownBySlot(spellID)
+  if not (C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell) then return false end
+  local slot, bank = C_SpellBook.FindSpellBookSlotForSpell(spellID)
+  slot = NN.Plain(slot)
+  if not slot then return false end
+  if C_SpellBook.GetSpellBookItemType(slot, bank or PLAYER_BANK) ~= SPELL_TYPE then return false end
+  return not inOffSpecLine(slot)
+end
+
 function Spellbook:Knows(spellID)
   local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID)
-  return name ~= nil and map(self)[name] ~= nil
+  if name ~= nil and map(self)[name] ~= nil then return true end
+  return knownBySlot(spellID)
 end
 
 function Spellbook:KnowsAny(ids)
