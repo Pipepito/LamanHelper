@@ -212,4 +212,27 @@ return {
     assert_true(L().SLASH_HELP:find("/nudge dev", 1, true))
     assert_true(L().SLASH_HELP:find("/nudge dump", 1, true))
   end,
+  -- v4: enough map / service state to debug a pin from one snapshot.
+  snapshot_records_map_pins_marks_taxi_professions_and_tracking = function()
+    WOW.extraFiles = { TESTS_DIR .. "/fixtures/services.lua" }
+    WOW.state.professions = { prof1 = 1 }
+    WOW.state.professionInfo = { [1] = { name = "Herbalism", icon = 4620675, skill = 10, maxSkill = 75, skillLine = 182 } }
+    WOW.state.taxiNodes = { [1414] = { { name = "The Crossroads", state = 1, position = { x = 0.5, y = 0.5 } } } }
+    load_addon()
+    NewbieNudge.Services:Mark("prof_182", 11, true, "profession_rank")
+    WOW.ViewMap(1429)
+    NewbieNudge:HandleSlash("dev snap")
+    local text = log()[1].text
+    for _, want in ipairs({
+      "[services]", "showAll false", "mark prof_182 npc 11 fromRow true rule profession_rank",
+      "[map]", "world map shown true, map 1429", "canvas 1000x667 scale 1",
+      "pin 1: npc 11 kind prof_182 marked true shown true", "texture 4620675", "ring shown true",
+      "[player]", "map 1429 at 0.40,0.61", "continent 0",
+      "[taxi]", "The Crossroads state 1",
+      "[professions]", "Herbalism skillLine 182 icon 4620675 10/75",
+      "[tracking]", "Repair active false",
+    }) do
+      assert_true(text:find(want, 1, true), "missing: " .. want .. " in " .. text)
+    end
+  end,
 }

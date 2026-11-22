@@ -288,6 +288,88 @@ local SECTIONS = {
     end
     out[#out + 1] = "any bank viewable: " .. tostring(B.AreAnyBankTypesViewable and B.AreAnyBankTypesViewable())
   end },
+  -- v4 map marks: everything needed to debug a pin from one snapshot.
+  { "services", function(out)
+    local db = NN.db and NN.db.services
+    if not db then out[#out + 1] = "no services settings"; return end
+    out[#out + 1] = ("showAll %s kinds %s"):format(tostring(db.showAll), Dev.Serialize(db.kinds))
+    for _, m in ipairs(NN.db.marks or {}) do
+      out[#out + 1] = ("mark %s npc %s fromRow %s rule %s"):format(tostring(m.kind),
+        tostring(m.npcID or Dev.Serialize(m.npcs)), tostring(m.fromRow), tostring(m.rule))
+    end
+  end },
+  { "map", function(out)
+    local W = WorldMapFrame
+    if not W then out[#out + 1] = "no WorldMapFrame"; return end
+    local child = W.ScrollContainer and W.ScrollContainer.Child
+    out[#out + 1] = ("world map shown %s, map %s, strata %s level %s"):format(tostring(W:IsShown()),
+      tostring(W.GetMapID and W:GetMapID()), tostring(W.GetFrameStrata and W:GetFrameStrata()), tostring(W.GetFrameLevel and W:GetFrameLevel()))
+    if child then
+      local scale = W.ScrollContainer.GetCanvasScale and W.ScrollContainer:GetCanvasScale()
+      out[#out + 1] = ("canvas %sx%s scale %s level %s visible %s"):format(tostring(child:GetWidth()), tostring(child:GetHeight()),
+        tostring(scale), tostring(child:GetFrameLevel()), tostring(child.IsVisible and child:IsVisible()))
+    end
+    for i, p in ipairs(NN.MapPins and NN.MapPins.pins or {}) do
+      local point, rel, relPoint, x, y = p:GetPoint(1)
+      out[#out + 1] = ("pin %d: npc %s kind %s marked %s shown %s visible %s alpha %s"):format(i, tostring(p.npcID), tostring(p.kind),
+        tostring(p.marked), tostring(p:IsShown()), tostring(p.IsVisible and p:IsVisible()), tostring(p:GetAlpha()))
+      out[#out + 1] = ("  size %sx%s scale %s effective %s strata %s level %s at %s %s %s,%s"):format(tostring(p:GetWidth()), tostring(p:GetHeight()),
+        tostring(p.GetScale and p:GetScale()), tostring(p:GetEffectiveScale()), tostring(p:GetFrameStrata()), tostring(p:GetFrameLevel()),
+        tostring(point), tostring(relPoint), tostring(x), tostring(y))
+      local icon, ring = p.icon, p.ring
+      out[#out + 1] = ("  texture %s icon shown %s alpha %s coords %s mask %s ring shown %s ring size %sx%s"):format(
+        Dev.Serialize(icon:GetTexture()), tostring(icon:IsShown()), tostring(icon:GetAlpha()),
+        Dev.Serialize(icon.GetTexCoord and { icon:GetTexCoord() }), tostring(icon.GetNumMaskTextures and icon:GetNumMaskTextures()),
+        tostring(ring and ring:IsShown()), tostring(ring and ring:GetWidth()), tostring(ring and ring:GetHeight()))
+    end
+  end },
+  { "player", function(out)
+    local map = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    local pos = map and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(map, "player")
+    local x, y
+    if pos then x, y = pos:GetXY() end
+    out[#out + 1] = ("map %s at %s,%s level %s faction %s"):format(tostring(map),
+      x and ("%.2f"):format(x) or "?", y and ("%.2f"):format(y) or "?",
+      tostring(UnitLevel and UnitLevel("player")), tostring(UnitFactionGroup and UnitFactionGroup("player")))
+    if NN.Services and NN.Services.PlayerWorldPos then
+      local c, wx, wy = NN.Services:PlayerWorldPos()
+      out[#out + 1] = ("continent %s world %s,%s"):format(tostring(c), tostring(wx), tostring(wy))
+    end
+  end },
+  { "taxi", function(out)
+    if not (C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap) then out[#out + 1] = "no C_TaxiMap"; return end
+    for _, continent in ipairs({ 1414, 1415 }) do
+      local nodes = C_TaxiMap.GetTaxiNodesForMap(continent) or {}
+      out[#out + 1] = ("continent map %d: %d node(s)"):format(continent, #nodes)
+      for _, n in ipairs(nodes) do
+        local pos = n.position
+        local px, py
+        if type(pos) == "table" then
+          if pos.GetXY then px, py = pos:GetXY() else px, py = pos.x, pos.y end
+        end
+        out[#out + 1] = ("  %s state %s at %s,%s"):format(tostring(n.name), tostring(n.state), tostring(px), tostring(py))
+      end
+    end
+  end },
+  { "professions", function(out)
+    if not (GetProfessions and GetProfessionInfo) then out[#out + 1] = "no profession API"; return end
+    for slot, index in pairs({ GetProfessions() }) do
+      local name, icon, skill, max, _, _, line = GetProfessionInfo(index)
+      out[#out + 1] = ("slot %s: %s skillLine %s icon %s %s/%s"):format(tostring(slot), tostring(name), tostring(line),
+        tostring(icon), tostring(skill), tostring(max))
+    end
+  end },
+  { "tracking", function(out)
+    if not (C_Minimap and C_Minimap.GetNumTrackingTypes) then out[#out + 1] = "no tracking API"; return end
+    for i = 1, C_Minimap.GetNumTrackingTypes() or 0 do
+      local info = C_Minimap.GetTrackingInfo(i)
+      if type(info) == "table" then
+        out[#out + 1] = ("%s active %s"):format(tostring(info.name), tostring(info.active))
+      else
+        out[#out + 1] = Dev.Serialize({ C_Minimap.GetTrackingInfo(i) })
+      end
+    end
+  end },
 }
 
 function Dev:Snapshot()
