@@ -165,4 +165,34 @@ return {
     WOW.Hover(markRow(7).removeButton)
     assert_eq(GameTooltip.lines[1], L().MAPLIST_REMOVE_OPTION_TT)
   end,
+  -- owner 2026-11-22: profession filter
+  only_your_professions_are_ticked_at_first = function()
+    load(herbalist); ML():Toggle()
+    NewbieNudge.MapPins:SetShowAll(true)
+    assert_eq(kindRow("prof_182").checked, true, "herbalism: yours")
+    assert_eq(kindRow("prof_171").checked, false, "alchemy: not yours")
+    assert_eq(kindRow("prof_171").label:GetText(), L().MAPLIST_KIND_PROF:format(L().PROF_NAME_171))
+  end,
+  ticking_another_profession_shows_its_trainers = function()
+    load(herbalist); ML():Toggle()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.Click(kindRow("prof_171"), "LeftButton")
+    assert_eq(kindRow("prof_171").checked, true)
+    assert_true(NewbieNudge.MapPins.KindShown("prof_171"))
+  end,
+  my_professions_only_button = function()
+    load(herbalist); ML():Toggle()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.Click(kindRow("prof_171"), "LeftButton")
+    WOW.Click(kindRow("prof_182"), "LeftButton")
+    WOW.Click(ML().myProfessions, "LeftButton")
+    assert_eq(kindRow("prof_182").checked, true)
+    assert_eq(kindRow("prof_171").checked, false)
+    assert_eq(NewbieNudge.db.services.showAll, true)
+  end,
+  professions_section_has_its_header = function()
+    load(herbalist); ML():Toggle()
+    assert_true(ML().profHeader:IsShown())
+    assert_eq(ML().profHeader:GetText(), L().MAPLIST_PROFESSIONS)
+  end,
 }

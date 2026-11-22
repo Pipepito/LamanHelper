@@ -73,21 +73,44 @@ MapPins.IconFor = function(kind) return iconFor(kind) end
 -- Kinds shown by "show nearby services"
 -------------------------------------------------------------------------------
 
-function MapPins.ShowAllKinds()
-  local kinds = { "repair", "inn", "food", "goods", "trade", "weapon" }
-  local class = select(2, UnitClass("player"))
-  if class then kinds[#kinds + 1] = "trainer_" .. class end
+-- Every profession, in this order on the map list.
+MapPins.PROFESSIONS = { 171, 164, 333, 202, 182, 165, 186, 393, 197, 185, 129, 356 }
+
+-- Skill lines of the player's professions, as a set.
+function MapPins.PlayerProfessions()
+  local set = {}
   if GetProfessions and GetProfessionInfo then
     for _, index in pairs({ GetProfessions() }) do
       index = NN.Plain(index)
       if index then
         local skillLine = NN.Plain(select(7, GetProfessionInfo(index)))
-        if skillLine and skillLine > 0 then kinds[#kinds + 1] = "prof_" .. skillLine end
+        if skillLine and skillLine > 0 then set[skillLine] = true end
       end
     end
   end
-  kinds[#kinds + 1] = "prof_all" -- trainers of every profession, to pick one
+  return set
+end
+
+-- Kinds that "show nearby services" can draw: the fixed ones, the class
+-- trainer, then every profession (the player's first).
+function MapPins.ShowAllKinds()
+  local kinds = { "repair", "inn", "food", "goods", "trade", "weapon" }
+  local class = select(2, UnitClass("player"))
+  if class then kinds[#kinds + 1] = "trainer_" .. class end
+  local mine = MapPins.PlayerProfessions()
+  for _, id in ipairs(MapPins.PROFESSIONS) do if mine[id] then kinds[#kinds + 1] = "prof_" .. id end end
+  for _, id in ipairs(MapPins.PROFESSIONS) do if not mine[id] then kinds[#kinds + 1] = "prof_" .. id end end
   return kinds
+end
+
+-- Whether a kind is switched on in the map list. Not chosen yet: on, except
+-- professions the player doesn't have.
+function MapPins.KindShown(kind)
+  local chosen = NN.db and NN.db.services.kinds[kind]
+  if chosen ~= nil then return chosen end
+  local skillLine = tonumber(kind:match("^prof_(%d+)$"))
+  if skillLine then return MapPins.PlayerProfessions()[skillLine] == true end
+  return true
 end
 
 -------------------------------------------------------------------------------
@@ -239,7 +262,7 @@ function MapPins:Refresh()
     if NN.db.services.showAll then
       for _, kind in ipairs(self.ShowAllKinds()) do
         -- kinds switched off in the map list are skipped
-        local ids = (NN.db.services.kinds[kind] == false) and {} or NN.Services:Candidates(kind)
+        local ids = MapPins.KindShown(kind) and NN.Services:Candidates(kind) or {}
         for _, id in ipairs(ids) do
           local npc = NN.Services:Npc(id)
           if npc.map == map and not drawn[id] then

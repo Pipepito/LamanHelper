@@ -251,13 +251,14 @@ return {
     assert_true(tContains(kinds, "food")); assert_true(tContains(kinds, "goods")); assert_true(tContains(kinds, "trade"))
     assert_true(not tContains(kinds, "supplies"))
   end,
-  show_all_offers_every_profession_trainer = function()
+  -- owner 2026-11-22: a filter per profession instead of "all profession trainers"
+  every_profession_is_a_kind_but_not_all_at_once = function()
     load()
-    assert_true(tContains(NewbieNudge.MapPins.ShowAllKinds(), "prof_all"))
-    NewbieNudge.MapList:Toggle()
-    local found
-    for _, row in ipairs(NewbieNudge.MapList.rows) do if row.kindKey == "prof_all" then found = row end end
-    assert_eq(found.label:GetText(), L().MAPLIST_KIND_PROF_ALL)
+    local kinds = NewbieNudge.MapPins.ShowAllKinds()
+    for _, id in ipairs({ 171, 164, 333, 202, 182, 165, 186, 393, 197, 185, 129, 356 }) do
+      assert_true(tContains(kinds, "prof_" .. id), "prof_" .. id)
+    end
+    assert_true(not tContains(kinds, "prof_all"))
   end,
   -- Forever (snapshots 2026-11-22): the map is MEDIUM strata with no pins of
   -- its own; pins at MEDIUM were hidden by the zone art, visible in cities.

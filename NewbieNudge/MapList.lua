@@ -58,6 +58,23 @@ MapList.removeAll = newButton(L.MAPLIST_REMOVE_ALL, function() NN.Services:Clear
 MapList.settings = newButton(L.MAPLIST_SETTINGS, function()
   if NN.MapReveal and NN.MapReveal.OpenSettings then NN.MapReveal:OpenSettings() end
 end)
+MapList.myProfessions = CreateFrame("Button", nil, content)
+MapList.myProfessions:SetHeight(ROW_H)
+MapList.myProfessions.text = MapList.myProfessions:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+MapList.myProfessions.text:SetPoint("CENTER", MapList.myProfessions, "CENTER", 0, 0)
+MapList.myProfessions.text:SetText(L.MAPLIST_MY_PROFESSIONS)
+MapList.myProfessions.bg = MapList.myProfessions:CreateTexture(nil, "BACKGROUND")
+MapList.myProfessions.bg:SetAllPoints()
+MapList.myProfessions.bg:SetColorTexture(0.2, 0.4, 0.6, 0.8)
+MapList.myProfessions:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+MapList.myProfessions:SetScript("OnClick", function()
+  local db = NN.db.services
+  local mine = NN.MapPins.PlayerProfessions()
+  for _, id in ipairs(NN.MapPins.PROFESSIONS) do db.kinds["prof_" .. id] = mine[id] == true end
+  db.showAll = true
+  NN.MapPins:Refresh()
+  MapList:Refresh()
+end)
 MapList.noneLabel = content:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 MapList.noneLabel:SetText(L.MAPLIST_NONE)
 
@@ -67,6 +84,7 @@ local function header(text)
   return fs
 end
 MapList.showHeader = header(L.MAPLIST_SHOW)
+MapList.profHeader = header(L.MAPLIST_PROFESSIONS)
 MapList.marksHeader = header(L.MAPLIST_MARKS)
 
 -------------------------------------------------------------------------------
@@ -145,7 +163,7 @@ local function professionName(skillLine)
 end
 
 local FIXED_LABELS = { repair = "MAPLIST_KIND_REPAIR", inn = "MAPLIST_KIND_INN",
-  prof_all = "MAPLIST_KIND_PROF_ALL", food = "MAPLIST_KIND_FOOD", goods = "MAPLIST_KIND_GOODS", trade = "MAPLIST_KIND_TRADE",
+  food = "MAPLIST_KIND_FOOD", goods = "MAPLIST_KIND_GOODS", trade = "MAPLIST_KIND_TRADE",
   weapon = "MAPLIST_KIND_WEAPON" }
 
 function MapList.KindLabel(kind)
@@ -155,12 +173,12 @@ function MapList.KindLabel(kind)
     return L.MAPLIST_KIND_TRAINER:format(className)
   end
   local skillLine = tonumber(kind:match("^prof_(%d+)$"))
-  return L.MAPLIST_KIND_PROF:format(professionName(skillLine) or NN.Services:KindLabel(kind))
+  local name = professionName(skillLine) or L["PROF_NAME_" .. tostring(skillLine)]
+  return L.MAPLIST_KIND_PROF:format(name or NN.Services:KindLabel(kind))
 end
 
 local function kindOn(kind)
-  local db = NN.db.services
-  return db.showAll and db.kinds[kind] ~= false
+  return NN.db.services.showAll and NN.MapPins.KindShown(kind)
 end
 
 local function place(widget, y, height)
@@ -186,7 +204,13 @@ function MapList:Refresh()
   y = place(reveal, y)
 
   y = place(self.showHeader, y + 4, 16)
+  local inProfessions = false
   for _, kind in ipairs(NN.MapPins.ShowAllKinds()) do
+    if not inProfessions and kind:find("^prof_") then
+      inProfessions = true
+      y = place(self.profHeader, y + 4, 16)
+      self.profHeader:Show()
+    end
     local row = acquireRow()
     row.kindKey = kind
     local texture, coords = NN.MapPins.IconFor(kind)
@@ -199,7 +223,7 @@ function MapList:Refresh()
         db.showAll = true
         for _, k in ipairs(NN.MapPins.ShowAllKinds()) do db.kinds[k] = (k == kind) end
       else
-        db.kinds[kind] = not kindOn(kind)
+        db.kinds[kind] = not NN.MapPins.KindShown(kind)
         local any = false
         for _, k in ipairs(NN.MapPins.ShowAllKinds()) do if kindOn(k) then any = true end end
         if not any then db.showAll = false end
@@ -208,6 +232,13 @@ function MapList:Refresh()
       MapList:Refresh()
     end)
     y = place(row, y)
+  end
+
+  if inProfessions then
+    y = place(self.myProfessions, y + 2) + 2
+    self.myProfessions:Show()
+  else
+    self.profHeader:Hide(); self.myProfessions:Hide()
   end
 
   y = place(self.marksHeader, y + 4, 16)
