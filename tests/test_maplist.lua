@@ -11,10 +11,18 @@ local function rows(field)
   for _, row in ipairs(ML().rows) do if row:IsShown() and row[field] ~= nil then out[#out + 1] = row end end
   return out
 end
+-- Opens the professions section and every mark, for tests about their lines.
+local function openAll()
+  NewbieNudge.db.map.sections.professions = true
+  for _, m in ipairs(NewbieNudge.Services:Marks()) do NewbieNudge.db.map.openMarks[m.kind] = true end
+  ML():Refresh()
+end
 local function kindRow(kind)
+  if kind:find("^prof_") then openAll() end
   for _, row in ipairs(rows("kindKey")) do if row.kindKey == kind then return row end end
 end
 local function markRow(npcID)
+  openAll()
   for _, row in ipairs(rows("npcID")) do if row.npcID == npcID then return row end end
 end
 local function herbalist()
@@ -38,6 +46,7 @@ return {
   reveal_row_then_one_row_per_service_kind = function()
     load(herbalist)
     ML():Toggle()
+    openAll()
     local first = ML().rows[1]
     assert_true(first.isReveal); assert_eq(first.label:GetText(), L().MAPLIST_REVEAL); assert_eq(first.checked, true)
     local kinds = {}
@@ -116,9 +125,10 @@ return {
     load(); ML():Toggle()
     NewbieNudge.Services:Mark("repair", { 1, 5 }, true)
     local heading
+    openAll()
     for _, row in ipairs(rows("markKind")) do if row.isHeading then heading = row end end
     assert_true(heading, "heading row")
-    assert_eq(heading.label:GetText(), ML().KindLabel("repair"))
+    assert_eq(heading.label:GetText(), ML().KindLabel("repair") .. " · " .. L().MAPLIST_OPTIONS:format(2))
     assert_true(markRow(1).label:GetText():find("1. Near Smith · Elwynn Forest", 1, true), markRow(1).label:GetText())
     assert_true(markRow(5).label:GetText():find("2. City Smith · Stormwind City", 1, true))
     WOW.Click(markRow(5).removeButton, "LeftButton")
@@ -185,6 +195,7 @@ return {
     NewbieNudge.MapPins:SetShowAll(true)
     WOW.Click(kindRow("prof_171"), "LeftButton")
     WOW.Click(kindRow("prof_182"), "LeftButton")
+    openAll()
     WOW.Click(ML().myProfessions, "LeftButton")
     assert_eq(kindRow("prof_182").checked, true)
     assert_eq(kindRow("prof_171").checked, false)
@@ -192,7 +203,42 @@ return {
   end,
   professions_section_has_its_header = function()
     load(herbalist); ML():Toggle()
-    assert_true(ML().profHeader:IsShown())
-    assert_eq(ML().profHeader:GetText(), L().MAPLIST_PROFESSIONS)
+    local header
+    for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "professions" then header = row end end
+    assert_eq(header.label:GetText(), L().MAPLIST_SECTION_PROF:format(1, 12))
+  end,
+  -- owner 2026-11-22: the list was too big; sections fold
+  professions_section_starts_closed_and_remembers = function()
+    load(herbalist); ML():Toggle()
+    for _, row in ipairs(rows("kindKey")) do assert_true(not row.kindKey:find("^prof_"), "no profession lines while closed") end
+    local header
+    for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "professions" then header = row end end
+    WOW.Click(header, "LeftButton")
+    assert_eq(NewbieNudge.db.map.sections.professions, true)
+    local found = false
+    for _, row in ipairs(rows("kindKey")) do if row.kindKey == "prof_182" then found = true end end
+    assert_true(found, "profession lines after opening")
+  end,
+  services_section_can_fold_too = function()
+    load(); ML():Toggle()
+    local header
+    for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "services" then header = row end end
+    WOW.Click(header, "LeftButton")
+    assert_eq(#rows("kindKey"), 0)
+  end,
+  a_marks_options_fold_under_its_heading = function()
+    load(); ML():Toggle()
+    NewbieNudge.Services:Mark("repair", { 1, 5 }, true)
+    assert_eq(#rows("npcID"), 0, "options closed at first")
+    local heading
+    for _, row in ipairs(rows("markKind")) do if row.isHeading then heading = row end end
+    WOW.Click(heading, "LeftButton")
+    assert_eq(#rows("npcID"), 2)
+  end,
+  my_professions_button_takes_clicks = function()
+    load(herbalist); ML():Toggle()
+    openAll()
+    assert_true(ML().myProfessions.mouse, "mouse enabled")
+    assert_eq(ML().myProfessions.clicks, { "LeftButtonUp" })
   end,
 }

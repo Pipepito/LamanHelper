@@ -11,6 +11,7 @@ local WIDTH, PAD, ROW_H, ICON = 230, 8, 18, 14
 local CHECK_ON = "Interface\\Buttons\\UI-CheckBox-Check"
 local CHECK_BOX = "Interface\\Buttons\\UI-CheckBox-Up"
 local REVEAL_ICON = "Interface\\Icons\\INV_Misc_Map_01"
+local PLUS, MINUS = "Interface\\Buttons\\UI-PlusButton-Up", "Interface\\Buttons\\UI-MinusButton-Up"
 
 -------------------------------------------------------------------------------
 -- Frame
@@ -60,6 +61,8 @@ MapList.settings = newButton(L.MAPLIST_SETTINGS, function()
 end)
 MapList.myProfessions = CreateFrame("Button", nil, content)
 MapList.myProfessions:SetHeight(ROW_H)
+MapList.myProfessions:EnableMouse(true)
+MapList.myProfessions:RegisterForClicks("LeftButtonUp")
 MapList.myProfessions.text = MapList.myProfessions:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 MapList.myProfessions.text:SetPoint("CENTER", MapList.myProfessions, "CENTER", 0, 0)
 MapList.myProfessions.text:SetText(L.MAPLIST_MY_PROFESSIONS)
@@ -83,9 +86,7 @@ local function header(text)
   fs:SetText(text)
   return fs
 end
-MapList.showHeader = header(L.MAPLIST_SHOW)
-MapList.profHeader = header(L.MAPLIST_PROFESSIONS)
-MapList.marksHeader = header(L.MAPLIST_MARKS)
+
 
 -------------------------------------------------------------------------------
 -- Rows (a pool of buttons: check box, icon, label, optional remove button)
@@ -120,7 +121,7 @@ local function acquireRow()
     row.removeButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     MapList.rows[MapList.used] = row
   end
-  row.isReveal, row.kindKey, row.npcID, row.markKind, row.checked, row.isHeading = nil, nil, nil, nil, nil, nil
+  row.isReveal, row.kindKey, row.npcID, row.markKind, row.checked, row.isHeading, row.sectionKey = nil, nil, nil, nil, nil, nil, nil
   row.icon:SetTexCoord(0, 1, 0, 1)
   row:Show()
   return row
@@ -203,14 +204,22 @@ function MapList:Refresh()
   end)
   y = place(reveal, y)
 
-  y = place(self.showHeader, y + 4, 16)
-  local inProfessions = false
-  for _, kind in ipairs(NN.MapPins.ShowAllKinds()) do
-    if not inProfessions and kind:find("^prof_") then
-      inProfessions = true
-      y = place(self.profHeader, y + 4, 16)
-      self.profHeader:Show()
-    end
+  local sections, openMarks = NN.db.map.sections, NN.db.map.openMarks
+
+  -- a section heading: plus / minus icon, label, click folds it
+  local function sectionRow(key, label)
+    local row = acquireRow()
+    row.sectionKey = key
+    layoutRow(row, false, nil, sections[key] and MINUS or PLUS, nil, label)
+    row.removeButton:Hide()
+    row:SetScript("OnClick", function()
+      sections[key] = not sections[key]
+      MapList:Refresh()
+    end)
+    return place(row, y)
+  end
+
+  local function kindLine(kind)
     local row = acquireRow()
     row.kindKey = kind
     local texture, coords = NN.MapPins.IconFor(kind)
@@ -234,48 +243,72 @@ function MapList:Refresh()
     y = place(row, y)
   end
 
-  if inProfessions then
-    y = place(self.myProfessions, y + 2) + 2
-    self.myProfessions:Show()
-  else
-    self.profHeader:Hide(); self.myProfessions:Hide()
+  local services, professions = {}, {}
+  for _, kind in ipairs(NN.MapPins.ShowAllKinds()) do
+    if kind:find("^prof_") then professions[#professions + 1] = kind else services[#services + 1] = kind end
   end
 
-  y = place(self.marksHeader, y + 4, 16)
+  -- Show on the map
+  y = sectionRow("services", L.MAPLIST_SHOW)
+  if sections.services then
+    for _, kind in ipairs(services) do kindLine(kind) end
+  end
+
+  -- Profession trainers (n of 12)
+  local shown = 0
+  for _, kind in ipairs(professions) do if NN.MapPins.KindShown(kind) then shown = shown + 1 end end
+  y = sectionRow("professions", L.MAPLIST_SECTION_PROF:format(shown, #professions))
+  if sections.professions then
+    y = place(self.myProfessions, y + 2) + 2
+    self.myProfessions:Show()
+    for _, kind in ipairs(professions) do kindLine(kind) end
+  else
+    self.myProfessions:Hide()
+  end
+
+  -- Your marks (n): a heading per mark, its options folded under it
   local marks = NN.Services:Marks()
-  if #marks == 0 then
+  y = sectionRow("marks", L.MAPLIST_SECTION_MARKS:format(#marks))
+  if sections.marks and #marks == 0 then
     self.noneLabel:Show()
     y = place(self.noneLabel, y)
   else
     self.noneLabel:Hide()
+  end
+  if sections.marks then
+    local flights = NN.Services:FlightMasters()
     for _, mark in ipairs(marks) do
-      -- heading: the kind; its ✕ removes the whole mark
       local heading = acquireRow()
       heading.markKind, heading.isHeading = mark.kind, true
       local texture, coords = NN.MapPins.IconFor(mark.kind)
-      layoutRow(heading, false, nil, texture, coords, MapList.KindLabel(mark.kind))
+      layoutRow(heading, false, nil, texture, coords,
+        MapList.KindLabel(mark.kind) .. " · " .. L.MAPLIST_OPTIONS:format(#mark.npcs))
       heading.removeButton:Show()
       heading.removeButton:SetScript("OnClick", function() NN.Services:Unmark(mark.kind) end)
-      heading:SetScript("OnClick", nil)
+      heading:SetScript("OnClick", function()
+        openMarks[mark.kind] = not openMarks[mark.kind]
+        MapList:Refresh()
+      end)
       y = place(heading, y)
-      -- one line per option, quickest first: "1. Jandi · Orgrimmar · ~3 min"
-      local flights = NN.Services:FlightMasters()
-      for rank, id in ipairs(mark.npcs) do
-        local npc = NN.Services:Npc(id)
-        local row = acquireRow()
-        row.npcID, row.markKind = id, mark.kind
-        local text = ("%d. %s · %s"):format(rank, npc.name, NN.Services.ZoneName(npc.map))
-        local time = NN.Services:TravelTime(id, flights)
-        if time and time < 359999 then text = text .. (" · ~%d min"):format(math.max(1, math.ceil(time / 60)))
-        elseif time then text = text .. " · " .. L.SERVICES_ROUTE_CONTINENT end
-        layoutRow(row, false, nil, nil, nil, text)
-        row.icon:SetTexture(nil)
-        row.removeButton:Show()
-        row.removeButton:SetScript("OnClick", function() NN.Services:UnmarkOption(mark.kind, id) end)
-        row:SetScript("OnClick", function()
-          if WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:SetMapID(npc.map) end
-        end)
-        y = place(row, y)
+      if openMarks[mark.kind] then
+        -- one line per option, quickest first: "1. Jandi · Orgrimmar · ~3 min"
+        for rank, id in ipairs(mark.npcs) do
+          local npc = NN.Services:Npc(id)
+          local row = acquireRow()
+          row.npcID, row.markKind = id, mark.kind
+          local text = ("   %d. %s · %s"):format(rank, npc.name, NN.Services.ZoneName(npc.map))
+          local time = NN.Services:TravelTime(id, flights)
+          if time and time < 359999 then text = text .. (" · ~%d min"):format(math.max(1, math.ceil(time / 60)))
+          elseif time then text = text .. " · " .. L.SERVICES_ROUTE_CONTINENT end
+          layoutRow(row, false, nil, nil, nil, text)
+          row.icon:SetTexture(nil)
+          row.removeButton:Show()
+          row.removeButton:SetScript("OnClick", function() NN.Services:UnmarkOption(mark.kind, id) end)
+          row:SetScript("OnClick", function()
+            if WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:SetMapID(npc.map) end
+          end)
+          y = place(row, y)
+        end
       end
     end
   end

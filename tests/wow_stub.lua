@@ -194,7 +194,7 @@ function Region:EnableMouse(b) self.mouse = b end
 function Region:EnableMouseWheel() end
 function Region:SetHitRectInsets() end
 function Region:RegisterForDrag() end
-function Region:RegisterForClicks() end
+function Region:RegisterForClicks(...) self.clicks = { ... } end
 function Region:StartMoving() self.moving = true end
 function Region:StopMovingOrSizing() self.moving = false end
 function Region:IsMouseOver() return false end
