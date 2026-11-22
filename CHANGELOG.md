@@ -5,7 +5,7 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
-## 0.4.0 - unreleased
+## 0.4.0 - 2026-11-22
 
 - **Minimap button** with a quick menu: lock or unlock the panel, switch its style, show the info bar, snooze everything, wake all reminders, hide the panel, open the settings. Drag it around the minimap. Also in the game's AddOns drop-down.
 - **Icons only:** a new panel style that keeps the panel as small as the combat strip all the time. Point at an icon to read the reminder.
