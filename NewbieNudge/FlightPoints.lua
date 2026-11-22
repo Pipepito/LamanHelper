@@ -40,23 +40,49 @@ end
 
 -- Reads the open flight master's map. Points are only ever added: a point
 -- once known stays known.
+-- The modern call is tried first; when it gives no state (as the map list
+-- doesn't on Forever) the classic calls are read instead. The continent only
+-- counts as checked once something was recorded (the current point always is).
 function FlightPoints:Record()
   local known = db().known
+  local recorded = 0
   if C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID then
     local mapID = NN.Plain(GetTaxiMapID())
     for _, node in ipairs((mapID and C_TaxiMap.GetAllTaxiNodes(mapID)) or {}) do
       local name, state = NN.Plain(node.name, "string"), NN.Plain(node.state)
-      if name and state and state ~= UNREACHABLE then known[name] = true end
-    end
-  elseif NumTaxiNodes and TaxiNodeName and TaxiNodeGetType then
-    for i = 1, NN.Plain(NumTaxiNodes()) or 0 do
-      local name, kind = NN.Plain(TaxiNodeName(i), "string"), NN.Plain(TaxiNodeGetType(i), "string")
-      if name and KNOWN_TYPES[kind] then known[name] = true end
+      if name and state ~= nil then
+        recorded = recorded + 1
+        if state ~= UNREACHABLE then known[name] = true end
+      end
     end
   end
+  if recorded == 0 and NumTaxiNodes and TaxiNodeName and TaxiNodeGetType then
+    for i = 1, NN.Plain(NumTaxiNodes()) or 0 do
+      local name, kind = NN.Plain(TaxiNodeName(i), "string"), NN.Plain(TaxiNodeGetType(i), "string")
+      if name and kind then
+        recorded = recorded + 1
+        if KNOWN_TYPES[kind] then known[name] = true end
+      end
+    end
+  end
+  if recorded == 0 then return end
   local here = C_Map and C_Map.GetBestMapForUnit and NN.Plain(C_Map.GetBestMapForUnit("player"))
   local continent = FlightPoints.Continent(here) or (GetTaxiMapID and NN.Plain(GetTaxiMapID()))
   if continent then db().seen[continent] = true end
+end
+
+-- Whether flight points can be told discovered or not: the client reports a
+-- state, or a flight master's map has been read at least once.
+function FlightPoints:CanJudge()
+  if next(db().seen) then return true end
+  if C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap then
+    for _, map in ipairs({ 1414, 1415 }) do
+      for _, node in ipairs(C_TaxiMap.GetTaxiNodesForMap(map) or {}) do
+        if NN.Plain(node.state) ~= nil then return true end
+      end
+    end
+  end
+  return false
 end
 
 -- Whether a node from the world map's flight-point list is known: its own

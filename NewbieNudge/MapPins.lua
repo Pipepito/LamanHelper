@@ -144,6 +144,8 @@ local function onEnter(self)
   if self.kind == "flight" then
     if NN.Services:FlightKnown(self.npcID) then
       GameTooltip:AddLine(L.MAPPIN_FLIGHT_KNOWN, 0.3, 1, 0.3)
+    elseif not NN.FlightPoints:CanJudge() then
+      GameTooltip:AddLine(L.MAPPIN_FLIGHT_UNCHECKED, 0.8, 0.8, 0.8, true)
     else
       GameTooltip:AddLine(L.MAPPIN_FLIGHT_UNKNOWN, 1, 0.5, 0.2)
     end
@@ -242,7 +244,8 @@ local function place(npcID, kind, marked, rank, options, px, py)
   -- Same map strata, above every pin the map draws itself (the explored-area
   -- layer covered ours in game while still letting the mouse through).
   pin:SetFrameStrata(MapPins.Strata())
-  pin:SetFrameLevel(MapPins.TopLevel())
+  -- marks above city badges (+1), badges above the other pins
+  pin:SetFrameLevel(MapPins.TopLevel() + (marked and 2 or 0))
   -- The pin keeps its size whatever the zoom: scale 1/canvasScale. SetPoint
   -- offsets are in the pin's own scale, so they grow by canvasScale.
   local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and NN.Plain(WorldMapFrame.ScrollContainer:GetCanvasScale()) or 1
@@ -431,7 +434,7 @@ function MapPins:RefreshBadges(map)
       for i = #city.kinds + 1, #badge.icons do badge.icons[i]:Hide() end
       badge:SetSize(#city.kinds * (BADGE_ICON + BADGE_GAP) + BADGE_GAP, BADGE_ICON + BADGE_GAP * 2)
       badge:SetFrameStrata(self.Strata())
-      badge:SetFrameLevel(self.TopLevel())
+      badge:SetFrameLevel(self.TopLevel() + 1)
       badge:SetScale(1 / scale)
       local left, right, top, bottom = self.CityRect(cityMap, map)
       badge:ClearAllPoints()

@@ -46,4 +46,21 @@ return {
     local _, route = NewbieNudge.Services:TravelTime(5)
     assert_eq(route, { kind = "fly", from = "Near Field", to = "City Port" })
   end,
+  -- review: the modern call may carry no state either
+  modern_call_without_state_falls_back_to_classic = function()
+    barrens(); load_addon()
+    WOW.state.taxiMap = { mapID = 1414, nodes = { { name = "Crossroads, The Barrens" }, { name = "Orgrimmar, Durotar" } } }
+    WOW.state.taxiClassic = { { name = "Crossroads, The Barrens", type = "CURRENT" }, { name = "Orgrimmar, Durotar", type = "NONE" } }
+    WOW.FireEvent("TAXIMAP_OPENED")
+    assert_true(FP():IsKnown("Crossroads, The Barrens"))
+    assert_true(not FP():IsKnown("Orgrimmar, Durotar"))
+    assert_true(FP():Seen(1414))
+  end,
+  nothing_recorded_means_not_seen = function()
+    barrens(); load_addon()
+    WOW.state.taxiMap = { mapID = 1414, nodes = { { name = "Crossroads, The Barrens" } } }
+    WOW.state.taxiClassic = {}
+    WOW.FireEvent("TAXIMAP_OPENED")
+    assert_true(not FP():Seen(1414), "a continent with nothing recorded isn't judged")
+  end,
 }

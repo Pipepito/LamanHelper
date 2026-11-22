@@ -593,6 +593,8 @@ NN.RegisterLocale("enUS", {
   PROF_NAME_356 = "Fishing",
   MAPLIST_KIND_FOOD = "Food & drink",
   MAPLIST_KIND_FLIGHT = "Flight points",
+  MAPLIST_KIND_PROF_ALL = "Profession trainers (any)",
+  MAPPIN_FLIGHT_UNCHECKED = "Open any flight master's map once so NewbieNudge knows your flight points.",
   SERVICE_KIND_FLIGHT = "flight master",
   MAPPIN_FLIGHT_KNOWN = "Flight point discovered",
   MAPPIN_FLIGHT_UNKNOWN = "Not discovered yet: talk to this flight master",

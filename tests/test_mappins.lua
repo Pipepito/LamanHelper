@@ -369,4 +369,26 @@ return {
       if b:IsShown() then assert_true(b.mapID ~= 1431, "no badge for a neighbouring zone") end
     end
   end,
+  -- review fixes
+  marked_pins_sit_above_city_badges = function()
+    load()
+    NewbieNudge.Services:Mark("weapon", { 11867 }, true)
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local badge
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() then badge = b end end
+    assert_true(pinFor(11867):GetFrameLevel() > badge:GetFrameLevel())
+  end,
+  any_profession_mark_has_a_proper_label = function()
+    load()
+    assert_eq(NewbieNudge.MapList.KindLabel("prof_all"), L().MAPLIST_KIND_PROF_ALL)
+  end,
+  flight_tooltip_before_any_flight_map_was_read = function()
+    load()
+    for _, node in ipairs(WOW.state.taxiNodes[1414]) do node.state = nil end -- as on Forever
+    NewbieNudge.Services:Mark("flight", { 14 }, false)
+    WOW.ViewMap(1429)
+    WOW.Hover(pinFor(14))
+    assert_true(tContains(GameTooltip.lines, L().MAPPIN_FLIGHT_UNCHECKED))
+  end,
 }

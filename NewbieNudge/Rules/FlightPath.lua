@@ -69,7 +69,17 @@ NN:RegisterRule({
     else
       text = L.FLIGHT_PATH_ROW:format(zoneName, table.concat(shown, ", "))
     end
-    return { text = text, icon = FLIGHT_ICON, onClick = ToggleWorldMap, service = { kind = "flight" } }
+    -- the map button marks only this zone's flight masters still to discover
+    local service
+    if NN.Services then
+      local ids = {}
+      for _, id in ipairs(NN.Services:Candidates("flight")) do
+        local npc = NN.Services:Npc(id)
+        if npc and npc.map == mapID and not NN.Services:FlightKnown(id) then ids[#ids + 1] = id end
+      end
+      if #ids > 0 then service = { kind = "flight", npcIDs = ids } end
+    end
+    return { text = text, icon = FLIGHT_ICON, onClick = ToggleWorldMap, service = service }
   end,
   sample = function() return { { text = L.FLIGHT_PATH_ROW:format("Westfall", "Sentinel Hill"), icon = FLIGHT_ICON } } end,
 })

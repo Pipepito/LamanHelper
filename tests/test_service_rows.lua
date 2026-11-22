@@ -194,4 +194,16 @@ return {
     load_addon(); WOW.FireEvent("SKILL_LINES_CHANGED"); run_checks()
     assert_eq(results_of("professions")[1].service, { kind = "prof_all" })
   end,
+  -- review: the flight-path reminder marks only flight masters still to discover
+  flight_path_row_marks_only_undiscovered_flight_masters = function()
+    services(); load_addon()
+    WOW.state.mapInfo[1429] = { name = "Elwynn Forest", mapType = 3 }
+    WOW.state.taxiNodes[1429] = { { name = "Lonely Field", state = 2 } }
+    NewbieNudge.ServiceData.npcs[20] = { "Lonely Flyer", "Gryphon Master", 1429, 90, 90, "A" }
+    table.insert(NewbieNudge.ServiceData.kinds.flight, 20)
+    WOW.FireEvent("ZONE_CHANGED_NEW_AREA"); run_checks()
+    local r = results_of("flight_path")
+    assert_true(r[1], "flight path row")
+    assert_eq(r[1].service, { kind = "flight", npcIDs = { 20 } }) -- 14 stands at a discovered point
+  end,
 }

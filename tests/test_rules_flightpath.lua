@@ -65,6 +65,8 @@ return {
   row_marks_flight_masters = function()
     zone(1436, { { name = "Sentinel Hill", state = U } })
     run()
-    assert_eq(results_of("flight_path")[1].service, { kind = "flight" })
+    local service = results_of("flight_path")[1].service
+    assert_eq(service.kind, "flight")
+    assert_true(#service.npcIDs > 0, "the zone's undiscovered flight masters")
   end,
 }
