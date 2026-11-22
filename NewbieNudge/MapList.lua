@@ -288,8 +288,9 @@ function MapList:Place()
   else
     frame:SetPoint("BOTTOMRIGHT", WorldMapFrame or UIParent, "BOTTOMRIGHT", -8, 40)
   end
-  -- above the map and its pins (ours sit above the map's own pins)
+  -- above the map and its pins (pins are one strata above the map)
   frame:SetFrameStrata("DIALOG")
+  if NN.MapPins and NN.MapPins.Strata() == "DIALOG" then frame:SetFrameStrata("FULLSCREEN") end
 end
 
 function MapList:SetOpen(open)

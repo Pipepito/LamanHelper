@@ -119,7 +119,7 @@ return {
     load()
     NewbieNudge.Services:Mark("inn", 7, true)
     WOW.ViewMap(1429)
-    assert_nil(pinFor(7).strata)
+    -- (strata: see pins_draw_one_strata_above_the_map)
     assert_true(pinFor(7):GetFrameLevel() > WorldMapFrame.ScrollContainer.Child:GetFrameLevel())
   end,
   marking_from_a_map_pin_says_so_and_tracks = function()
@@ -258,5 +258,18 @@ return {
     local found
     for _, row in ipairs(NewbieNudge.MapList.rows) do if row.kindKey == "prof_all" then found = row end end
     assert_eq(found.label:GetText(), L().MAPLIST_KIND_PROF_ALL)
+  end,
+  -- Forever (snapshots 2026-11-22): the map is MEDIUM strata with no pins of
+  -- its own; pins at MEDIUM were hidden by the zone art, visible in cities.
+  -- With the pin strata one above the map's they showed (first screenshot).
+  pins_draw_one_strata_above_the_map = function()
+    load()
+    WorldMapFrame:SetFrameStrata("MEDIUM")
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    assert_eq(pinFor(7).strata, "HIGH")
+    WorldMapFrame:SetFrameStrata("HIGH")
+    NewbieNudge.MapPins:Refresh()
+    assert_eq(pinFor(7).strata, "DIALOG")
   end,
 }

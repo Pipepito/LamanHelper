@@ -156,6 +156,17 @@ end
 
 -- rank: the option's place in its mark (1 = quickest); numbered when the
 -- mark has more than one option; gold ring for the quickest, grey otherwise.
+-- One drawing strata above the map's own (MEDIUM -> HIGH): at the map's
+-- strata the zone art hid the pins on Forever (cities showed them).
+local STRATA_ORDER = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN", "FULLSCREEN_DIALOG", "TOOLTIP" }
+function MapPins.Strata()
+  local mapStrata = WorldMapFrame and WorldMapFrame.GetFrameStrata and WorldMapFrame:GetFrameStrata() or "MEDIUM"
+  for i, name in ipairs(STRATA_ORDER) do
+    if name == mapStrata then return STRATA_ORDER[math.min(i + 1, #STRATA_ORDER)] end
+  end
+  return "HIGH"
+end
+
 -- One level above the highest of the map's own pins (and at least the
 -- canvas + 500). Worked out once per Refresh.
 function MapPins.TopLevel()
@@ -198,6 +209,7 @@ local function place(npcID, kind, marked, rank, options)
   if marked then pin.ring:Show() else pin.ring:Hide() end
   -- Same map strata, above every pin the map draws itself (the explored-area
   -- layer covered ours in game while still letting the mouse through).
+  pin:SetFrameStrata(MapPins.Strata())
   pin:SetFrameLevel(MapPins.TopLevel())
   -- The pin keeps its size whatever the zoom: scale 1/canvasScale. SetPoint
   -- offsets are in the pin's own scale, so they grow by canvasScale.
