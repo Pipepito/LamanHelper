@@ -118,6 +118,14 @@ function Options:Build()
   barBox("gold", L.OPT_INFOBAR_GOLD)
   barBox("gear", L.OPT_INFOBAR_GEAR)
 
+  -- Minimap button
+  Options.AddHeader(layout, L.OPT_MINIMAP_HEADER)
+  Options.AddCheckbox(category, "NN_minimap_show", L.OPT_MINIMAP, L.OPT_MINIMAP_TT,
+    function() return not db.minimap.hide end,
+    function(value)
+      if NN.MinimapButton then NN.MinimapButton:SetShown(value and true or false) else db.minimap.hide = not value end
+    end)
+
   -- Reminders
   Options.AddHeader(layout, L.OPT_REMINDERS)
   for _, rule in ipairs(NN.rules) do

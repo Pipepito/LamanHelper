@@ -39,6 +39,7 @@ NN.defaults = {
   vendor = { sellJunk = true, repair = true },
   tooltipPrice = true,
   infobar = { enabled = true, bags = true, gold = true, gear = true },
+  minimap = { hide = false, angle = 225 },
 }
 
 -------------------------------------------------------------------------------
@@ -298,6 +299,18 @@ function NN:Snooze(name, minutes)
   self:Schedule()
 end
 
+-- Snoozes every rule that has a row on the panel right now; rules that are
+-- quiet stay awake, so a new problem still shows. Returns how many.
+function NN:SnoozeShowing(minutes)
+  local names, count = {}, 0
+  for _, row in ipairs(self:ActiveRows()) do
+    local name = row.rule.name
+    if not names[name] then names[name] = true; count = count + 1 end
+  end
+  for name in pairs(names) do self:Snooze(name, minutes) end
+  return count
+end
+
 function NN:ClearSnoozes()
   wipe(self.db.snoozed)
   self:MarkAllDirty()
@@ -455,6 +468,16 @@ function NN:HandleSlash(msg)
     if self.Dev then self.Dev:HandleCommand(arg) end
   elseif command == "dump" then
     if self.Dev then self.Dev:Dump(rawArg) end
+  elseif command == "minimap" then
+    if self.MinimapButton then self.MinimapButton:Toggle() end
+  elseif command == "style" then
+    local style = (self.db.panel.style == "icons") and "list" or "icons"
+    if self.Panel then self.Panel:SetStyle(style) else self.db.panel.style = style end
+    self:Say(style == "icons" and L.SLASH_STYLE_ICONS or L.SLASH_STYLE_LIST)
+  elseif command == "bar" then
+    self.db.infobar.enabled = not self.db.infobar.enabled
+    if self.Panel then self.Panel:Refresh(self:ActiveRows()) end
+    self:Say(self.db.infobar.enabled and L.SLASH_BAR_ON or L.SLASH_BAR_OFF)
   elseif command == "map" then
     if self.MapReveal then
       self.MapReveal:Toggle()

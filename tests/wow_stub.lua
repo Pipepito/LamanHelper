@@ -842,6 +842,30 @@ function Settings.SetOnValueChangedCallback() end
 function CreateSettingsButtonInitializer(name, text, fn, tooltip) return { kind = "button", name = name, text = text, fn = fn } end
 function CreateSettingsListSectionHeaderInitializer(name) return { kind = "header", name = name } end
 MinimapUtil = nil
+-- Minimap: 140 px wide, centred at (1000, 700) in screen pixels.
+Minimap = CreateFrame("Frame", "Minimap", UIParent)
+Minimap:SetSize(140, 140)
+function Minimap:GetCenter() return 1000, 700 end
+function GetCursorPosition() return S().cursorX or 0, S().cursorY or 0 end
+-- MenuUtil: runs the generator against a recording description (WOW.lastMenu).
+local function newMenuDescription()
+  local d = { items = {} }
+  local function add(kind, label) local it = { kind = kind, label = label }; d.items[#d.items + 1] = it; return it end
+  function d:CreateTitle(text) return add("title", text) end
+  function d:CreateDivider() return add("divider") end
+  function d:CreateButton(text, fn) local it = add("button", text); it.onClick = fn; return it end
+  function d:CreateCheckbox(text, isSelected, setSelected, data)
+    local it = add("checkbox", text); it.checked = isSelected(data); it.onClick = function() setSelected(data) end; return it
+  end
+  function d:CreateRadio(text, isSelected, setSelected, data)
+    local it = add("radio", text); it.checked = isSelected(data); it.onClick = function() setSelected(data) end; return it
+  end
+  return d
+end
+MenuUtil = { CreateContextMenu = function(owner, generator)
+  local d = newMenuDescription(); generator(owner, d); WOW.lastMenu = d; record("CreateContextMenu"); return d
+end }
+AddonCompartmentFrame = { RegisterAddon = function(self, info) WOW.compartment = info; record("RegisterAddon", info.text) end }
 
 -------------------------------------------------------------------------------
 -- CVars and console (Task 19)

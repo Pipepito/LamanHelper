@@ -86,4 +86,31 @@ return {
     NewbieNudge:HandleSlash("whatever")
     assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_HELP)
   end,
+  minimap_toggles_button = function()
+    load_addon()
+    NewbieNudge:HandleSlash("minimap")
+    assert_eq(NewbieNudge.db.minimap.hide, true)
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_MINIMAP_OFF)
+    NewbieNudge:HandleSlash("minimap")
+    assert_eq(NewbieNudge.db.minimap.hide, false)
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_MINIMAP_ON)
+  end,
+  style_toggles_list_and_icons = function()
+    load_addon()
+    NewbieNudge:HandleSlash("style")
+    assert_eq(NewbieNudge.db.panel.style, "icons")
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_STYLE_ICONS)
+    NewbieNudge:HandleSlash("style")
+    assert_eq(NewbieNudge.db.panel.style, "list")
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_STYLE_LIST)
+  end,
+  bar_toggles_info_bar = function()
+    load_addon()
+    NewbieNudge:HandleSlash("bar")
+    assert_eq(NewbieNudge.db.infobar.enabled, false)
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_BAR_OFF)
+    NewbieNudge:HandleSlash("bar")
+    assert_eq(NewbieNudge.db.infobar.enabled, true)
+    assert_eq(last(), L().CHAT_PREFIX .. L().SLASH_BAR_ON)
+  end,
 }
