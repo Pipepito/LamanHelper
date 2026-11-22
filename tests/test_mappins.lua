@@ -134,18 +134,19 @@ return {
     for _, c in ipairs(WOW.calls) do if c[1] == "OpenWorldMap" then after = after + 1 end end
     assert_eq(after, opened, "map already open: not reopened")
   end,
-  -- The tracking-border ring sits in the top-left of its texture: a 17 px
-  -- icon at (7, -6) inside a 53 px border (the minimap-button layout).
-  ring_is_centred_on_the_icon = function()
+  -- The tracking-border ring's opening is centred at (15.5, -14.5) of its
+  -- 53 px texture and about 21 px wide: the 20 px icon fills that opening.
+  ring_is_centred_on_the_icon_and_the_icon_fills_it = function()
     load()
     NewbieNudge.Services:Mark("inn", 7, true)
     WOW.ViewMap(1429)
     local pin = pinFor(7)
-    local k = 20 / 17
+    local k = 20 / 21
     assert_true(math.abs(pin.ring:GetWidth() - 53 * k) < 0.01, "ring size " .. pin.ring:GetWidth())
     local point, rel, relPoint, x, y = pin.ring:GetPoint(1)
     assert_eq({ point, relPoint }, { "TOPLEFT", "TOPLEFT" }); assert_true(rel == pin)
-    assert_true(math.abs(x + 7 * k) < 0.01 and math.abs(y - 6 * k) < 0.01, x .. "," .. y)
+    -- the ring's opening centre lands on the icon centre (10, -10)
+    assert_true(math.abs(x + 15.5 * k - 10) < 0.01 and math.abs(y - 14.5 * k + 10) < 0.01, x .. "," .. y)
   end,
   icon_is_round = function()
     load()
@@ -154,5 +155,23 @@ return {
     local mask = pinFor(7).icon.mask
     assert_true(mask, "icon masked")
     assert_eq(mask.texture, "Interface\\CharacterFrame\\TempPortraitAlphaMask")
+  end,
+  class_trainers_show_the_class_icon = function()
+    load()
+    NewbieNudge.Services:Mark("trainer_MAGE", 8, true)
+    WOW.ViewMap(1429)
+    local icon = pinFor(8).icon
+    assert_eq(icon.texture, "Interface\\TargetingFrame\\UI-Classes-Circles")
+    assert_eq(icon.texCoord, { 0.25, 0.49609375, 0, 0.25 })
+  end,
+  other_pins_reset_the_texture_coords = function()
+    load()
+    NewbieNudge.Services:Mark("trainer_MAGE", 8, true)
+    WOW.ViewMap(1429)
+    NewbieNudge.Services:ClearMarks()
+    NewbieNudge.Services:Mark("inn", 7, true) -- reuses the same pooled pin
+    local icon = pinFor(7).icon
+    assert_eq(icon.texture, 134414)
+    assert_eq(icon.texCoord, { 0, 1, 0, 1 })
   end,
 }

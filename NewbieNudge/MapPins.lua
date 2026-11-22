@@ -9,12 +9,30 @@ local MapPins = { pins = {}, used = 0 }
 NN.MapPins = MapPins
 
 local MARK_SIZE, PIN_SIZE = 20, 14
+local RING_OPENING = 21
 local ICONS = { repair = 136241, inn = 134414, supplies = 133950, weapon = 135324 }
 local TRAINER_ICON, PROF_ICON = 136243, 136240
 
+local CLASS_ICONS = "Interface\\TargetingFrame\\UI-Classes-Circles"
+-- Same values as the client's CLASS_ICON_TCOORDS, used when it is missing.
+local CLASS_COORDS = {
+  WARRIOR = { 0, 0.25, 0, 0.25 }, MAGE = { 0.25, 0.49609375, 0, 0.25 },
+  ROGUE = { 0.49609375, 0.7421875, 0, 0.25 }, DRUID = { 0.7421875, 0.98828125, 0, 0.25 },
+  HUNTER = { 0, 0.25, 0.25, 0.5 }, SHAMAN = { 0.25, 0.49609375, 0.25, 0.5 },
+  PRIEST = { 0.49609375, 0.7421875, 0.25, 0.5 }, WARLOCK = { 0.7421875, 0.98828125, 0.25, 0.5 },
+  PALADIN = { 0, 0.25, 0.5, 0.75 },
+}
+
+-- Texture and texture coordinates for a kind's pin; class trainers get the
+-- round class icon.
 local function iconFor(kind)
   if ICONS[kind] then return ICONS[kind] end
-  if kind:find("^trainer_") then return TRAINER_ICON end
+  local class = kind:match("^trainer_(%u+)$")
+  if class then
+    local coords = (CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[class]) or CLASS_COORDS[class]
+    if coords then return CLASS_ICONS, coords end
+    return TRAINER_ICON
+  end
   return PROF_ICON
 end
 
@@ -97,13 +115,16 @@ local function place(npcID, kind, marked)
   local size = marked and MARK_SIZE or PIN_SIZE
   pin.npcID, pin.kind, pin.marked = npcID, kind, marked
   pin:SetSize(size, size)
-  pin.icon:SetTexture(iconFor(kind))
-  -- The border's ring sits in the top-left of its texture: minimap buttons
-  -- put a 17 px icon at (7, -6) inside the 53 px border. Same proportions.
-  local k = size / 17
+  local texture, coords = iconFor(kind)
+  pin.icon:SetTexture(texture)
+  if coords then pin.icon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]) else pin.icon:SetTexCoord(0, 1, 0, 1) end
+  -- The border's ring sits in the top-left of its 53 px texture: its opening
+  -- is centred at (15.5, -14.5) and about RING_OPENING px wide. Scale it so
+  -- the opening matches the icon and put that centre on the icon's centre.
+  local k = size / RING_OPENING
   pin.ring:SetSize(53 * k, 53 * k)
   pin.ring:ClearAllPoints()
-  pin.ring:SetPoint("TOPLEFT", pin, "TOPLEFT", -7 * k, 6 * k)
+  pin.ring:SetPoint("TOPLEFT", pin, "TOPLEFT", size / 2 - 15.5 * k, -size / 2 + 14.5 * k)
   if marked then pin.ring:Show() else pin.ring:Hide() end
   -- Same map strata, above the canvas and Blizzard's own pins.
   pin:SetFrameLevel((child:GetFrameLevel() or 1) + 500)
