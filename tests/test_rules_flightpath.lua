@@ -38,4 +38,28 @@ return {
     _G.C_TaxiMap = nil; WOW.state.instanceType = "none"; wipe(NewbieNudge.appliesCache)
     assert_true(not NewbieNudge:Applies(NewbieNudge.ruleByName.flight_path))
   end,
+  -- Forever: no state on map nodes; judged from the remembered flight points
+  no_state_and_no_flight_map_seen_is_silent = function()
+    zone(1436, { { name = "Sentinel Hill" } })
+    WOW.state.mapInfo[1436].parentMapID = 1415; WOW.state.mapInfo[1415] = { name = "Eastern Kingdoms", mapType = 2 }
+    run()
+    assert_eq(#results_of("flight_path"), 0)
+  end,
+  no_state_unknown_point_after_a_flight_map_was_seen = function()
+    zone(1436, { { name = "Sentinel Hill" }, { name = "Moonbrook" } })
+    WOW.state.mapInfo[1436].parentMapID = 1415; WOW.state.mapInfo[1415] = { name = "Eastern Kingdoms", mapType = 2 }
+    load_addon()
+    WOW.state.taxiMap = { mapID = 1415, nodes = { { name = "Moonbrook", state = 0 }, { name = "Sentinel Hill", state = 2 } } }
+    WOW.FireEvent("TAXIMAP_OPENED"); WOW.FireEvent("TAXIMAP_CLOSED"); run_checks()
+    assert_eq(results_of("flight_path")[1].text, L().FLIGHT_PATH_ROW:format("Westfall", "Sentinel Hill"))
+  end,
+  other_factions_points_are_skipped = function()
+    WOW.state.faction = "Horde"
+    zone(1436, { { name = "Sentinel Hill", faction = 2 } })
+    WOW.state.mapInfo[1436].parentMapID = 1415; WOW.state.mapInfo[1415] = { name = "Eastern Kingdoms", mapType = 2 }
+    load_addon()
+    WOW.state.taxiMap = { mapID = 1415, nodes = {} }
+    WOW.FireEvent("TAXIMAP_OPENED"); WOW.FireEvent("TAXIMAP_CLOSED"); run_checks()
+    assert_eq(#results_of("flight_path"), 0)
+  end,
 }

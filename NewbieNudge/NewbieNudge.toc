@@ -22,6 +22,7 @@ Highlight.lua
 Panel.lua
 InfoBar.lua
 Minimap.lua
+FlightPoints.lua
 Services.lua
 MapPins.lua
 MapList.lua

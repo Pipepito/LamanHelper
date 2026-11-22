@@ -8,6 +8,10 @@ local FLIGHT_ICON = 132161
 local MAX_NAMES = 2
 local UNREACHABLE = (Enum and Enum.FlightPathState and Enum.FlightPathState.Unreachable) or 2
 local CONTINENT = (Enum and Enum.UIMapType and Enum.UIMapType.Continent) or 2
+-- node.faction (Enum.FlightPathFaction): Horde 1, Alliance 2; the other
+-- faction's flight masters are never "to unlock".
+local FPF = Enum and Enum.FlightPathFaction
+local OTHER_FACTION = { Horde = (FPF and FPF.Alliance) or 2, Alliance = (FPF and FPF.Horde) or 1 }
 
 local function apiAvailable()
   return C_TaxiMap ~= nil and C_TaxiMap.GetTaxiNodesForMap ~= nil and C_Map ~= nil and C_Map.GetBestMapForUnit ~= nil
@@ -40,8 +44,17 @@ NN:RegisterRule({
     local mapID, zoneName = currentZone()
     if not mapID then return nil end
     local names = {}
+    -- Forever gives no state on these nodes: then judge from the flight
+    -- points remembered at flight masters, once one was seen on this continent.
+    local judged = NN.FlightPoints:Seen(NN.FlightPoints.Continent(mapID))
+    local enemy = OTHER_FACTION[NN.Plain(UnitFactionGroup("player"), "string") or ""]
     for _, node in ipairs(C_TaxiMap.GetTaxiNodesForMap(mapID) or {}) do
-      if NN.Plain(node.state) == UNREACHABLE then
+      local state = NN.Plain(node.state)
+      local unknown
+      if state ~= nil then unknown = state == UNREACHABLE
+      else unknown = judged and not NN.FlightPoints:NodeKnown(node) end
+      if unknown and enemy and NN.Plain(node.faction) == enemy then unknown = false end
+      if unknown then
         local name = NN.Plain(node.name, "string")
         if name then names[#names + 1] = name end
       end

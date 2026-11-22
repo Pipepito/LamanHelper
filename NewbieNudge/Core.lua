@@ -47,6 +47,7 @@ NN.defaults = {
   infobar = { enabled = true, bags = true, gold = true, gear = true },
   minimap = { hide = false, angle = 225 },
   marks = {},
+  flights = { known = {}, seen = {} },
   services = { showAll = false, kinds = {}, options = 4 },
 }
 

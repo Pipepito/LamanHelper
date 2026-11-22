@@ -436,6 +436,13 @@ function GetZoneText() return S().zone end
 Enum.FlightPathState = { Current = 0, Reachable = 1, Unreachable = 2 }
 C_TaxiMap = {}
 function C_TaxiMap.GetTaxiNodesForMap(mapID) return S().taxiNodes[mapID] or {} end
+-- The flight master's map (only while it is open): S().taxiMap = { mapID =, nodes = { { name, state } } }
+function C_TaxiMap.GetAllTaxiNodes(mapID) local t = S().taxiMap; return (t and t.mapID == mapID) and t.nodes or {} end
+function GetTaxiMapID() return S().taxiMap and S().taxiMap.mapID end
+-- Classic calls: S().taxiClassic = { { name, type = "CURRENT"|"REACHABLE"|"DISTANT"|"NONE" } }
+function NumTaxiNodes() return #(S().taxiClassic or {}) end
+function TaxiNodeName(i) return S().taxiClassic[i].name end
+function TaxiNodeGetType(i) return S().taxiClassic[i].type end
 C_GossipInfo = {}
 function C_GossipInfo.GetOptions() return S().gossipOptions end
 function ToggleWorldMap() record("ToggleWorldMap") end

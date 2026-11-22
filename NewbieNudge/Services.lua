@@ -97,11 +97,13 @@ function Services:FlightMasters()
   if not (C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap) then return out end
   for _, map in ipairs(CONTINENT_MAPS) do
     for _, node in ipairs(C_TaxiMap.GetTaxiNodesForMap(map) or {}) do
-      local state, pos = NN.Plain(node.state), node.position
-      if state and state ~= UNREACHABLE and type(pos) == "table" then
+      local pos = node.position
+      if NN.FlightPoints:NodeKnown(node) and type(pos) == "table" then
         local x, y
         if pos.GetXY then x, y = pos:GetXY() else x, y = pos.x, pos.y end
-        local c, wx, wy = worldPos(map, NN.Plain(x) or 0, NN.Plain(y) or 0)
+        x, y = NN.Plain(x), NN.Plain(y)
+        local c, wx, wy
+        if x and y then c, wx, wy = worldPos(map, x, y) end
         if c and wx and wy then
           out[#out + 1] = { name = NN.Plain(node.name, "string") or "?", continent = c, x = wx, y = wy }
         end
