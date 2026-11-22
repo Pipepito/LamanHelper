@@ -199,4 +199,10 @@ return {
     NewbieNudge.db.services.levelFilter = false
     assert_true(tContains(S():Candidates("repair"), 4), "every zone once off")
   end,
+  old_supplies_settings_move_to_the_new_kinds = function()
+    load(function() _G.NewbieNudgeDB = { services = { kinds = { supplies = false } }, map = { openMarks = { supplies = true } } } end)
+    local kinds = NewbieNudge.db.services.kinds
+    assert_eq({ kinds.food, kinds.goods, kinds.trade, kinds.supplies }, { false, false, false, nil })
+    assert_eq(NewbieNudge.db.map.openMarks.food, true); assert_nil(NewbieNudge.db.map.openMarks.supplies)
+  end,
 }

@@ -429,4 +429,24 @@ return {
     local point = NewbieNudge.MapPins.badges[1]:GetPoint(1)
     assert_eq(point, "CENTER")
   end,
+  -- small review items
+  the_map_button_stays_above_pins = function()
+    load()
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    assert_eq(NewbieNudgeMapButton:GetFrameStrata(), pinFor(7):GetFrameStrata())
+    assert_true(NewbieNudgeMapButton:GetFrameLevel() > pinFor(7):GetFrameLevel())
+  end,
+  zooming_only_rescales_the_pins = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local calls = 0
+    local original = NewbieNudge.Services.Candidates
+    NewbieNudge.Services.Candidates = function(...) calls = calls + 1; return original(...) end
+    WOW.state.canvasScale = 2
+    WorldMapFrame:OnCanvasScaleChanged()
+    assert_eq(calls, 0, "no NPC lookups while zooming")
+    assert_eq(pinFor(1):GetScale(), 0.5)
+  end,
 }

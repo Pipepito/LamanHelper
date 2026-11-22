@@ -374,4 +374,14 @@ end
 -- Drop marks whose NPC left the data (a data refresh between sessions).
 NN:AfterLogin(function()
   NN.db.marks = Services:Marks()
+  -- "supplies" (food & general goods) became food, goods and trade
+  local kinds, open = NN.db.services.kinds, NN.db.map and NN.db.map.openMarks
+  if kinds.supplies ~= nil then
+    for _, k in ipairs({ "food", "goods", "trade" }) do if kinds[k] == nil then kinds[k] = kinds.supplies end end
+    kinds.supplies = nil
+  end
+  if open and open.supplies ~= nil then
+    if open.food == nil then open.food = open.supplies end
+    open.supplies = nil
+  end
 end)

@@ -253,7 +253,7 @@ NN.RegisterLocale("enUS", {
   TRAINER_SPELLS_TITLE = "New spells for your level",
   TRAINER_SPELLS_HELP = "Spells and ranks your level allows that you haven't learned: the ones your class trainer teaches, and class spells that come from a class quest instead (your class trainer starts it).",
   TRAINER_SPELLS_ROW = "%d spells or ranks for your level you haven't learned. Visit your class trainer.",
-  TRAINER_SPELLS_ROW_QUEST = "Class quest (level %d): %s. Your class trainer starts it.",
+  TRAINER_SPELLS_ROW_QUEST = "Class quest (level %d): %s. Ask your class trainer where it starts.",
   TRAINER_SPELLS_ROW_QUEST_MORE = "+%d more class quest spells waiting.",
 
   -- Profession rank

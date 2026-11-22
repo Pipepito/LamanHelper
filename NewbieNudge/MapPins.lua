@@ -253,6 +253,7 @@ local function place(npcID, kind, marked, rank, options, px, py)
   pin:SetScale(1 / scale)
   pin:ClearAllPoints()
   local x, y = px or npc.x / 100, py or npc.y / 100
+  pin.fx, pin.fy, pin.anchor = x, y, "CENTER"
   pin:SetPoint("CENTER", child, "TOPLEFT", x * child:GetWidth() * scale, -y * child:GetHeight() * scale)
   pin:Show()
 end
@@ -293,6 +294,31 @@ function MapPins:Refresh()
   end
   for i = self.used + 1, #self.pins do self.pins[i]:Hide() end
   self:RefreshBadges(map)
+  -- the map's NewbieNudge button stays above our pins and badges
+  local button = NN.MapReveal and NN.MapReveal.button
+  if button then
+    button:SetFrameStrata(self.Strata())
+    button:SetFrameLevel(self.TopLevel() + 20)
+  end
+end
+
+-- A zoom only changes the canvas scale: rescale and re-anchor the frames
+-- already shown instead of looking every NPC up again.
+function MapPins:Rescale()
+  local child = canvas()
+  if not child then return end
+  local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and NN.Plain(WorldMapFrame.ScrollContainer:GetCanvasScale()) or 1
+  if not scale or scale <= 0 then scale = 1 end
+  local w, h = child:GetWidth() * scale, child:GetHeight() * scale
+  local function apply(frame)
+    if frame:IsShown() and frame.fx then
+      frame:SetScale(1 / scale)
+      frame:ClearAllPoints()
+      frame:SetPoint(frame.anchor or "CENTER", child, "TOPLEFT", frame.fx * w, -frame.fy * h)
+    end
+  end
+  for _, pin in ipairs(self.pins) do apply(pin) end
+  for _, badge in ipairs(self.badges) do apply(badge) end
 end
 
 -------------------------------------------------------------------------------
@@ -446,13 +472,15 @@ function MapPins:RefreshBadges(map)
       badge:ClearAllPoints()
       if left >= 0 and top >= 0 and right <= 1 and bottom <= 1 then
         -- city fully on the map: badge on the city
-        badge:SetPoint("CENTER", child, "TOPLEFT", (left + right) / 2 * w, -(top + bottom) / 2 * h)
+        badge.fx, badge.fy, badge.anchor = (left + right) / 2, (top + bottom) / 2, "CENTER"
+        badge:SetPoint("CENTER", child, "TOPLEFT", badge.fx * w, -badge.fy * h)
       else
         -- city cut by the map edge (Orgrimmar on Durotar): just below the
         -- part on the map, centred across it, kept on the map
         local l, r = math.max(0, left), math.min(1, right)
         local below = math.min(math.max(0, bottom) + 0.01, 0.95)
-        badge:SetPoint("TOP", child, "TOPLEFT", (l + r) / 2 * w, -below * h)
+        badge.fx, badge.fy, badge.anchor = (l + r) / 2, below, "TOP"
+        badge:SetPoint("TOP", child, "TOPLEFT", badge.fx * w, -badge.fy * h)
       end
       badge:Show()
     end
@@ -474,7 +502,7 @@ function MapPins:Hook()
   if self.hooked or not WorldMapFrame then return end
   self.hooked = true
   if WorldMapFrame.OnMapChanged then hooksecurefunc(WorldMapFrame, "OnMapChanged", function() MapPins:Refresh() end) end
-  if WorldMapFrame.OnCanvasScaleChanged then hooksecurefunc(WorldMapFrame, "OnCanvasScaleChanged", function() MapPins:Refresh() end) end
+  if WorldMapFrame.OnCanvasScaleChanged then hooksecurefunc(WorldMapFrame, "OnCanvasScaleChanged", function() MapPins:Rescale() end) end
   WorldMapFrame:HookScript("OnShow", function() MapPins:Refresh() end)
 end
 

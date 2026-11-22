@@ -205,6 +205,9 @@ return {
     load(herbalist); ML():Toggle()
     local header
     for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "professions" then header = row end end
+    assert_eq(header.label:GetText(), L().MAPLIST_SECTION_PROF:format(0, 12), "services off: none shown")
+    NewbieNudge.MapPins:SetShowAll(true)
+    for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "professions" then header = row end end
     assert_eq(header.label:GetText(), L().MAPLIST_SECTION_PROF:format(1, 12))
   end,
   -- owner 2026-11-22: the list was too big; sections fold
@@ -255,5 +258,22 @@ return {
     load()
     WOW.settings["NN_services_levelFilter"].setter(false)
     assert_eq(NewbieNudge.db.services.levelFilter, false)
+  end,
+  -- small review items
+  list_never_taller_than_the_room_above_its_button = function()
+    load(); ML():Toggle()
+    local S = NewbieNudge.Services
+    S:Mark("repair", { 1, 2, 5, 6 }, true); S:Mark("inn", { 7 }, true); S:Mark("food", { 10 }, true)
+    S:Mark("trainer_MAGE", { 8 }, true); S:Mark("weapon", { 11867, 9 }, true); S:Mark("prof_182", { 11 }, true)
+    openAll()
+    WorldMapFrame.ScrollContainer:SetSize(1002, 300)
+    ML():Refresh()
+    assert_true(ML().frame:GetHeight() <= 300 - 44, "height " .. ML().frame:GetHeight())
+  end,
+  profession_count_is_zero_while_services_are_off = function()
+    load(herbalist); ML():Toggle()
+    local header
+    for _, row in ipairs(rows("sectionKey")) do if row.sectionKey == "professions" then header = row end end
+    assert_eq(header.label:GetText(), L().MAPLIST_SECTION_PROF:format(0, 12))
   end,
 }

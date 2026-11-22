@@ -269,7 +269,7 @@ function MapList:Refresh()
 
   -- Profession trainers (n of 12)
   local shown = 0
-  for _, kind in ipairs(professions) do if NN.MapPins.KindShown(kind) then shown = shown + 1 end end
+  for _, kind in ipairs(professions) do if kindOn(kind) then shown = shown + 1 end end
   y = sectionRow("professions", L.MAPLIST_SECTION_PROF:format(shown, #professions))
   if sections.professions then
     y = place(self.myProfessions, y + 2) + 2
@@ -332,7 +332,9 @@ function MapList:Refresh()
   local top, bottom = PAD + 20, ROW_H + 6 + PAD
   local mapHeight = (WorldMapFrame and WorldMapFrame.ScrollContainer and WorldMapFrame.ScrollContainer:GetHeight()) or 600
   if not mapHeight or mapHeight <= 0 then mapHeight = 600 end
-  local visible = math.max(ROW_H * 3, math.min(y, mapHeight - top - bottom - 20))
+  -- the list sits on top of the map button (about 36 px up from the map's
+  -- bottom): leave that, and a little room at the top
+  local visible = math.max(ROW_H * 3, math.min(y, mapHeight - top - bottom - 44))
   content:SetSize(WIDTH - PAD * 2, y)
   scroll:ClearAllPoints()
   scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -top)

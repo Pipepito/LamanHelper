@@ -69,4 +69,16 @@ return {
     assert_eq(service.kind, "flight")
     assert_true(#service.npcIDs > 0, "the zone's undiscovered flight masters")
   end,
+  -- Forever may give no faction on map nodes: the flight master in the
+  -- NPC data at the same spot tells whose it is
+  other_factions_point_skipped_without_a_faction_field = function()
+    WOW.state.faction = "Horde"
+    zone(1436, { { name = "Sentinel Hill", position = { x = 0.5, y = 0.5 } } })
+    WOW.state.mapInfo[1436].parentMapID = 1415; WOW.state.mapInfo[1415] = { name = "Eastern Kingdoms", mapType = 2 }
+    load_addon()
+    NewbieNudge.ServiceData = { npcs = { [523] = { "Thor", "Gryphon Master", 1436, 50.5, 49.5, "A" } }, kinds = { flight = { 523 } } }
+    WOW.state.taxiMap = { mapID = 1415, nodes = { { name = "Grom'gol", state = 0 } } }
+    WOW.FireEvent("TAXIMAP_OPENED"); WOW.FireEvent("TAXIMAP_CLOSED"); run_checks()
+    assert_eq(#results_of("flight_path"), 0)
+  end,
 }

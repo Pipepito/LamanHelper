@@ -32,6 +32,27 @@ local function currentZone()
   return nil
 end
 
+-- Whether the flight master at a map node is friendly to the player, judged
+-- from the NPC data (true when no flight master is found close by).
+local function FriendlyFlightPoint(mapID, node)
+  local data, pos = NN.ServiceData, node.position
+  if not (data and data.kinds.flight and type(pos) == "table") then return true end
+  local x, y
+  if pos.GetXY then x, y = pos:GetXY() else x, y = pos.x, pos.y end
+  x, y = NN.Plain(x), NN.Plain(y)
+  if not (x and y) then return true end
+  local f = NN.Plain(UnitFactionGroup("player"), "string")
+  local letter = (f == "Alliance" and "A") or (f == "Horde" and "H")
+  if not letter then return true end
+  for _, id in ipairs(data.kinds.flight) do
+    local n = data.npcs[id]
+    if n and n[3] == mapID and math.abs(n[4] / 100 - x) < 0.03 and math.abs(n[5] / 100 - y) < 0.03 then
+      return n[6]:find(letter, 1, true) ~= nil
+    end
+  end
+  return true
+end
+
 NN:RegisterRule({
   name = "flight_path",
   group = "travel",
@@ -54,6 +75,9 @@ NN:RegisterRule({
       if state ~= nil then unknown = state == UNREACHABLE
       else unknown = judged and not NN.FlightPoints:NodeKnown(node) end
       if unknown and enemy and NN.Plain(node.faction) == enemy then unknown = false end
+      -- no faction on the node (Forever): the flight master standing there in
+      -- the NPC data says whose point it is
+      if unknown and NN.Plain(node.faction) == nil and not FriendlyFlightPoint(mapID, node) then unknown = false end
       if unknown then
         local name = NN.Plain(node.name, "string")
         if name then names[#names + 1] = name end
