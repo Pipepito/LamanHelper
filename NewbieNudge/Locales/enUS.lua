@@ -570,6 +570,7 @@ NN.RegisterLocale("enUS", {
   MAPLIST_NONE = "(none)",
   MAPLIST_KIND_REPAIR = "Repair vendors",
   MAPLIST_KIND_INN = "Inns",
+  MAPLIST_KIND_PROF_ALL = "All profession trainers",
   MAPLIST_KIND_FOOD = "Food & drink",
   MAPLIST_KIND_GOODS = "General goods (and ammo)",
   MAPLIST_KIND_TRADE = "Trade supplies",

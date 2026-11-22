@@ -45,7 +45,8 @@ NN:RegisterRule({
     local count = NN.PrimaryProfessionCount()
     if count == nil then return nil end
     if count == 0 then
-      return { text = L.PROFESSIONS_ROW, icon = PROF_ICON, onClick = openSkills, highlight = "character" }
+      return { text = L.PROFESSIONS_ROW, icon = PROF_ICON, onClick = openSkills, highlight = "character",
+        service = { kind = "prof_all" } }
     end
     return nil
   end,

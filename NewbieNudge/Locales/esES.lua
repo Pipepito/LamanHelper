@@ -569,6 +569,7 @@ NN.RegisterLocale("esES", {
   MAPLIST_NONE = "(ninguna)",
   MAPLIST_KIND_REPAIR = "Vendedores que reparan",
   MAPLIST_KIND_INN = "Posadas",
+  MAPLIST_KIND_PROF_ALL = "Todos los instructores de profesión",
   MAPLIST_KIND_FOOD = "Comida y bebida",
   MAPLIST_KIND_GOODS = "Víveres (y munición)",
   MAPLIST_KIND_TRADE = "Suministros comerciales",

@@ -86,6 +86,7 @@ function MapPins.ShowAllKinds()
       end
     end
   end
+  kinds[#kinds + 1] = "prof_all" -- trainers of every profession, to pick one
   return kinds
 end
 

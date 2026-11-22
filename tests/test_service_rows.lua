@@ -189,4 +189,9 @@ return {
     assert_true(r[1], "ammo row")
     assert_eq(r[1].service, { kind = "goods" })
   end,
+  no_profession_row_marks_any_profession_trainer = function()
+    WOW.state.professions = {}
+    load_addon(); WOW.FireEvent("SKILL_LINES_CHANGED"); run_checks()
+    assert_eq(results_of("professions")[1].service, { kind = "prof_all" })
+  end,
 }

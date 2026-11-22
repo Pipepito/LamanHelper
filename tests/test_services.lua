@@ -181,4 +181,9 @@ return {
     assert_eq(S():Closest("goods"), 12)
     assert_eq(S():Closest("trade"), 13)
   end,
+  all_profession_trainers_kind = function()
+    load()
+    assert_true(tContains(S():Candidates("prof_all"), 11), "every profession's trainers")
+    assert_eq(S():Closest("prof_all"), 11)
+  end,
 }

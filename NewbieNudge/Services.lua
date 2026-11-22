@@ -26,7 +26,7 @@ end
 
 function Services:KindLabel(kind)
   if kind:find("^trainer_") then return L.SERVICE_KIND_TRAINER end
-  if kind:find("^prof_") then return L.SERVICE_KIND_PROF end
+  if kind:find("^prof_") then return L.SERVICE_KIND_PROF end -- prof_all too
   return L["SERVICE_KIND_" .. kind:upper()] or kind
 end
 
@@ -41,6 +41,22 @@ local function levelAllows(map, level)
   return zone.min <= level + LEVEL_MARGIN
 end
 
+-- NPC ids of a kind; "prof_all" is every profession's trainers together.
+function Services:KindNpcs(kind)
+  if kind ~= "prof_all" then return data().kinds[kind] or {} end
+  if not self.allProfs then
+    local ids, seen = {}, {}
+    for name, list in pairs(data().kinds) do
+      if name:find("^prof_%d+$") then
+        for _, id in ipairs(list) do if not seen[id] then seen[id] = true; ids[#ids + 1] = id end end
+      end
+    end
+    table.sort(ids)
+    self.allProfs = ids
+  end
+  return self.allProfs
+end
+
 -- NPCs of a kind the player can use: friendly, and not in a zone far above
 -- their level. npcIDs (optional) restricts the choice (weapon-master rows).
 function Services:Candidates(kind, npcIDs)
@@ -48,7 +64,7 @@ function Services:Candidates(kind, npcIDs)
   local level = NN.Plain(UnitLevel("player")) or 1
   local out = {}
   if not letter then return out end
-  for _, id in ipairs(npcIDs or data().kinds[kind] or {}) do
+  for _, id in ipairs(npcIDs or Services:KindNpcs(kind)) do
     local n = data().npcs[id]
     if n and n[6]:find(letter, 1, true) and levelAllows(n[3], level) then out[#out + 1] = id end
   end

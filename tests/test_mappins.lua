@@ -251,4 +251,12 @@ return {
     assert_true(tContains(kinds, "food")); assert_true(tContains(kinds, "goods")); assert_true(tContains(kinds, "trade"))
     assert_true(not tContains(kinds, "supplies"))
   end,
+  show_all_offers_every_profession_trainer = function()
+    load()
+    assert_true(tContains(NewbieNudge.MapPins.ShowAllKinds(), "prof_all"))
+    NewbieNudge.MapList:Toggle()
+    local found
+    for _, row in ipairs(NewbieNudge.MapList.rows) do if row.kindKey == "prof_all" then found = row end end
+    assert_eq(found.label:GetText(), L().MAPLIST_KIND_PROF_ALL)
+  end,
 }
