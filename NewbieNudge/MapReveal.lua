@@ -168,7 +168,9 @@ function MapReveal:EnsureButton()
   button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
   button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   button:SetScript("OnClick", function(_, mouseButton)
-    if mouseButton == "RightButton" then MapReveal:Toggle() else MapReveal:OpenSettings() end
+    if mouseButton == "RightButton" then MapReveal:Toggle()
+    elseif NN.MapList then NN.MapList:Toggle()
+    else MapReveal:OpenSettings() end
   end)
   button:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")

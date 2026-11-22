@@ -38,7 +38,7 @@ NN.defaults = {
   snoozeMinutes = 60,
   errors = {},
   seen = { rules = {}, dungeons = {}, legacy = false },
-  map = { reveal = true, brightness = 0.6, desaturate = true },
+  map = { reveal = true, brightness = 0.6, desaturate = true, listOpen = false },
   bagfull = { enabled = true, maxQuality = 2, onLoot = true, point = "LEFT", x = 40, y = 0 },
   controller = { boost = true, scale = 1.25, hints = true },
   talentBadges = true,
@@ -47,7 +47,7 @@ NN.defaults = {
   infobar = { enabled = true, bags = true, gold = true, gear = true },
   minimap = { hide = false, angle = 225 },
   marks = {},
-  services = { showAll = false },
+  services = { showAll = false, kinds = {} },
 }
 
 -------------------------------------------------------------------------------

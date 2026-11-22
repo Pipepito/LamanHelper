@@ -179,6 +179,9 @@ function Region:GetObjectType() return self.kind end
 function Region:IsObjectType(k) return self.kind == k end
 function Region:SetDrawLayer(l) self.layer = l end
 function Region:SetFrameStrata(s) self.strata = s end
+function Region:Enable() self.enabled = true end
+function Region:Disable() self.enabled = false end
+function Region:IsEnabled() return self.enabled ~= false end
 function Region:GetFrameStrata() return self.strata or "MEDIUM" end
 function Region:SetFrameLevel(l) self.level = l end
 function Region:GetFrameLevel() return self.level or 1 end
@@ -798,6 +801,7 @@ function WorldMapFrame.ScrollContainer:GetCanvasScale() return S().canvasScale o
 function WorldMapFrame:GetMapID() return S().worldMapID end
 function WorldMapFrame:OnMapChanged() end
 function WorldMapFrame:OnCanvasScaleChanged() end
+function WorldMapFrame:SetMapID(id) S().worldMapID = id; record("SetMapID", id); self:OnMapChanged() end
 function WOW.ViewMap(mapID) S().worldMapID = mapID; WorldMapFrame:Show(); WorldMapFrame:OnMapChanged() end
 function WorldMapFrame:EnumeratePinsByTemplate(template)
   local i = 0

@@ -110,6 +110,15 @@ trainer, the weapon masters and your profession trainers on the map you are
 looking at; click one to mark it. NPC positions come from QuestieDB's WoW
 Forever database (`tools/import_questie_npcs.py`).
 
+The NewbieNudge icon on the world map (bottom right) opens a list beside it:
+the unexplored-areas switch, one switch per kind of service to show on the
+map (with its icon), and your marks — click one to jump to its zone, or ✕ to
+remove it. Right-click the icon to toggle the unexplored areas.
+
+In the icons-only style, Options → NewbieNudge sets how many icons go on a
+line (1 makes a column), whether they fill rows or columns, the icon size and
+the gap between them.
+
 ## Info bar
 
 A row on top of the panel: bag space (used/total and free; orange below 6

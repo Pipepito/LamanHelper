@@ -66,6 +66,8 @@ local function canvas()
   return WorldMapFrame and WorldMapFrame.ScrollContainer and WorldMapFrame.ScrollContainer.Child
 end
 
+MapPins.IconFor = function(kind) return iconFor(kind) end
+
 -------------------------------------------------------------------------------
 -- Kinds shown by "show nearby services"
 -------------------------------------------------------------------------------
@@ -178,7 +180,9 @@ function MapPins:Refresh()
     end
     if NN.db.services.showAll then
       for _, kind in ipairs(self.ShowAllKinds()) do
-        for _, id in ipairs(NN.Services:Candidates(kind)) do
+        -- kinds switched off in the map list are skipped
+        local ids = (NN.db.services.kinds[kind] == false) and {} or NN.Services:Candidates(kind)
+        for _, id in ipairs(ids) do
           local npc = NN.Services:Npc(id)
           if npc.map == map and not drawn[id] then
             place(id, kind, false)
@@ -194,6 +198,7 @@ end
 function MapPins:SetShowAll(on)
   NN.db.services.showAll = on and true or false
   self:Refresh()
+  if NN.MapList then NN.MapList:Refresh() end
 end
 
 -------------------------------------------------------------------------------
