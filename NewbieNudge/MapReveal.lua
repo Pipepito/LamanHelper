@@ -215,6 +215,9 @@ NN.Options.RegisterPage("map", "OPT_MAP", function(category, layout)
     function(value)
       if NN.MapPins then NN.MapPins:SetShowAll(value and true or false) else NN.db.services.showAll = value and true or false end
     end)
+  Options.AddCheckbox(category, "NN_services_levelFilter", L.OPT_SERVICES_LEVEL, L.OPT_SERVICES_LEVEL_TT,
+    function() return NN.db.services.levelFilter ~= false end,
+    function(value) NN.db.services.levelFilter = value and true or false; if NN.MapPins then NN.MapPins:Refresh() end end)
   Options.AddSlider(category, "NN_services_options", L.OPT_SERVICES_OPTIONS, L.OPT_SERVICES_OPTIONS_TT, 1, 5, 1,
     function() return NN.db.services.options or 4 end,
     function(value) NN.db.services.options = value end)

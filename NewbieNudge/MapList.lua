@@ -11,6 +11,7 @@ local WIDTH, PAD, ROW_H, ICON = 230, 8, 18, 14
 local CHECK_ON = "Interface\\Buttons\\UI-CheckBox-Check"
 local CHECK_BOX = "Interface\\Buttons\\UI-CheckBox-Up"
 local REVEAL_ICON = "Interface\\Icons\\INV_Misc_Map_01"
+local LEVEL_ICON = "Interface\\Icons\\INV_Misc_Note_02"
 local PLUS, MINUS = "Interface\\Buttons\\UI-PlusButton-Up", "Interface\\Buttons\\UI-MinusButton-Up"
 
 -------------------------------------------------------------------------------
@@ -121,6 +122,7 @@ local function acquireRow()
     row.removeButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     MapList.rows[MapList.used] = row
   end
+  row.isLevelFilter = nil
   row.isReveal, row.kindKey, row.npcID, row.markKind, row.checked, row.isHeading, row.sectionKey = nil, nil, nil, nil, nil, nil, nil
   row.icon:SetTexCoord(0, 1, 0, 1)
   row:Show()
@@ -203,6 +205,17 @@ function MapList:Refresh()
     MapList:Refresh()
   end)
   y = place(reveal, y)
+
+  local levelRow = acquireRow()
+  levelRow.isLevelFilter = true
+  layoutRow(levelRow, true, NN.db.services.levelFilter ~= false, LEVEL_ICON, nil, L.MAPLIST_LEVEL_FILTER)
+  levelRow.removeButton:Hide()
+  levelRow:SetScript("OnClick", function()
+    NN.db.services.levelFilter = NN.db.services.levelFilter == false
+    NN.MapPins:Refresh()
+    MapList:Refresh()
+  end)
+  y = place(levelRow, y)
 
   local sections, openMarks = NN.db.map.sections, NN.db.map.openMarks
 

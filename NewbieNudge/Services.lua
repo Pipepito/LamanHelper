@@ -67,7 +67,8 @@ function Services:Candidates(kind, npcIDs)
   if not letter then return out end
   for _, id in ipairs(npcIDs or Services:KindNpcs(kind)) do
     local n = data().npcs[id]
-    if n and n[6]:find(letter, 1, true) and levelAllows(n[3], level) then out[#out + 1] = id end
+    local levelOk = NN.db.services.levelFilter == false or levelAllows(n and n[3], level)
+    if n and n[6]:find(letter, 1, true) and levelOk then out[#out + 1] = id end
   end
   return out
 end

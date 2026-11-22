@@ -191,4 +191,12 @@ return {
     S():MarkClosest("flight", nil, true)
     assert_eq(WOW.state.tracking[6].active, true)
   end,
+  level_filter_can_be_switched_off = function()
+    load()
+    WOW.state.level = 20
+    assert_eq(NewbieNudge.db.services.levelFilter, true, "on by default")
+    assert_true(not tContains(S():Candidates("repair"), 4))
+    NewbieNudge.db.services.levelFilter = false
+    assert_true(tContains(S():Candidates("repair"), 4), "every zone once off")
+  end,
 }

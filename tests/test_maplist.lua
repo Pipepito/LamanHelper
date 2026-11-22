@@ -241,4 +241,19 @@ return {
     assert_true(ML().myProfessions.mouse, "mouse enabled")
     assert_eq(ML().myProfessions.clicks, { "LeftButtonUp" })
   end,
+  level_filter_row_under_unexplored_areas = function()
+    load(); ML():Toggle()
+    local row = ML().rows[2]
+    assert_true(row.isLevelFilter)
+    assert_eq(row.label:GetText(), L().MAPLIST_LEVEL_FILTER)
+    assert_eq(row.checked, true)
+    WOW.Click(row, "LeftButton")
+    assert_eq(NewbieNudge.db.services.levelFilter, false)
+    assert_eq(ML().rows[2].checked, false)
+  end,
+  level_filter_setting_on_the_map_page = function()
+    load()
+    WOW.settings["NN_services_levelFilter"].setter(false)
+    assert_eq(NewbieNudge.db.services.levelFilter, false)
+  end,
 }

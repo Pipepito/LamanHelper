@@ -49,7 +49,7 @@ NN.defaults = {
   minimap = { hide = false, angle = 225 },
   marks = {},
   flights = { known = {}, seen = {} },
-  services = { showAll = false, kinds = {}, options = 4 },
+  services = { showAll = false, kinds = {}, options = 4, levelFilter = true },
 }
 
 -------------------------------------------------------------------------------
