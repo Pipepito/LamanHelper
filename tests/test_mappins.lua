@@ -99,4 +99,39 @@ return {
     NewbieNudge.MapPins:SetShowAll(true)
     assert_eq(NewbieNudge.db.services.showAll, true)
   end,
+  -- Review fixes
+  pins_follow_the_canvas_scale_and_zoom = function()
+    load()
+    WOW.state.canvasScale = 2
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    local pin = pinFor(7)
+    assert_eq(pin:GetScale(), 0.5)
+    local _, _, _, x = pin:GetPoint(1)
+    assert_true(math.abs(x - 437.7 * 2) < 0.001, "offset in the pin's own scale: " .. x)
+    WOW.state.canvasScale = 4
+    WorldMapFrame:OnCanvasScaleChanged()
+    _, _, _, x = pinFor(7):GetPoint(1)
+    assert_true(math.abs(x - 437.7 * 4) < 0.001, "redrawn on zoom: " .. x)
+  end,
+  pins_keep_the_map_strata_above_its_canvas = function()
+    load()
+    NewbieNudge.Services:Mark("inn", 7, true)
+    WOW.ViewMap(1429)
+    assert_nil(pinFor(7).strata)
+    assert_true(pinFor(7):GetFrameLevel() > WorldMapFrame.ScrollContainer.Child:GetFrameLevel())
+  end,
+  marking_from_a_map_pin_says_so_and_tracks = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local opened = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "OpenWorldMap" then opened = opened + 1 end end
+    WOW.Click(pinFor(2), "LeftButton")
+    assert_true(WOW.printed[#WOW.printed]:find(L().SERVICES_MARKED:format("Far Smith", "Armorer", "Elwynn Forest"), 1, true))
+    assert_eq(WOW.state.tracking[2].active, true)
+    local after = 0
+    for _, c in ipairs(WOW.calls) do if c[1] == "OpenWorldMap" then after = after + 1 end end
+    assert_eq(after, opened, "map already open: not reopened")
+  end,
 }

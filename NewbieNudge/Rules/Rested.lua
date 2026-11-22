@@ -24,6 +24,8 @@ local function onMenuHide()
   NN:Schedule()
 end
 
+-- The row only exists while the game menu is open, so its inn mark is kept
+-- (service.keep) instead of going away with the row.
 NN:RegisterRule({
   name = "rested",
   group = "travel",
@@ -37,7 +39,7 @@ NN:RegisterRule({
   end,
   check = function()
     if NN.restedPrompt and not IsResting() then
-      return { text = L.RESTED_ROW, icon = RESTED_ICON, service = { kind = "inn" } }
+      return { text = L.RESTED_ROW, icon = RESTED_ICON, service = { kind = "inn", keep = true } }
     end
     return nil
   end,

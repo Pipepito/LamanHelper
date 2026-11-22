@@ -121,12 +121,21 @@ function Services:MarkOf(kind)
   return nil
 end
 
-function Services:IsMarked(kind) return self:MarkOf(kind) ~= nil end
+-- npcIDs (optional): only a mark on one of these NPCs counts (each
+-- weapon-master row names its own trainers).
+function Services:IsMarked(kind, npcIDs)
+  local mark = self:MarkOf(kind)
+  if not mark then return false end
+  if not npcIDs then return true end
+  for _, id in ipairs(npcIDs) do if id == mark.npcID then return true end end
+  return false
+end
 
-function Services:Mark(kind, npcID, fromRow)
+-- rule: the reminder the mark came from; its mark goes when that reminder does.
+function Services:Mark(kind, npcID, fromRow, rule)
   local marks = {}
   for _, m in ipairs(NN.db.marks) do if m.kind ~= kind then marks[#marks + 1] = m end end
-  marks[#marks + 1] = { kind = kind, npcID = npcID, fromRow = fromRow and true or false }
+  marks[#marks + 1] = { kind = kind, npcID = npcID, fromRow = fromRow and true or false, rule = rule }
   NN.db.marks = marks
   changed()
 end
@@ -145,10 +154,23 @@ end
 
 -- Marks made from a reminder row go away with the reminder (repair done,
 -- trainer visited). activeKinds: set of kinds still on the panel.
+-- A mark tied to a rule is only judged once that rule has really been
+-- checked this session (not right after login, not while it can't tell),
+-- and not while the rule is snoozed or off; nothing is judged in combat or
+-- instances, where rules are frozen.
+local function shouldPrune(mark, activeKinds)
+  if not mark.fromRow or activeKinds[mark.kind] then return false end
+  if not mark.rule then return true end
+  local rule = NN.ruleByName[mark.rule]
+  if not rule then return true end
+  return (NN.checked and NN.checked[mark.rule]) and NN:IsRuleActive(rule) or false
+end
+
 function Services:PruneRowMarks(activeKinds)
+  if NN:IsRestricted() then return end
   local marks, removed = {}, false
   for _, m in ipairs(NN.db.marks) do
-    if m.fromRow and not activeKinds[m.kind] then removed = true else marks[#marks + 1] = m end
+    if shouldPrune(m, activeKinds) then removed = true else marks[#marks + 1] = m end
   end
   if removed then NN.db.marks = marks; changed() end
 end
@@ -173,18 +195,24 @@ Services.ZoneName = zoneName
 
 -- Marks the closest NPC of the kind, says where, opens the world map there
 -- and turns on the matching minimap tracking. Returns the npcID or nil.
-function Services:MarkClosest(kind, npcIDs, fromRow)
+-- Marks one NPC and tells the player: a chat line, the minimap tracking,
+-- and (openMap) the world map on its zone.
+function Services:MarkNpc(kind, id, fromRow, rule, openMap)
+  self:Mark(kind, id, fromRow, rule)
+  local npc = self:Npc(id)
+  NN:Say(L.SERVICES_MARKED:format(npc.name, npc.title, zoneName(npc.map)))
+  turnOnTracking(kind)
+  if openMap and OpenWorldMap then OpenWorldMap(npc.map) end
+end
+
+function Services:MarkClosest(kind, npcIDs, fromRow, rule)
   local id, reason = self:Closest(kind, npcIDs)
   if not id then
     if reason == "position" then NN:Say(L.SERVICES_NO_POSITION)
     else NN:Say(L.SERVICES_NONE:format(self:KindLabel(kind))) end
     return nil
   end
-  self:Mark(kind, id, fromRow)
-  local npc = self:Npc(id)
-  NN:Say(L.SERVICES_MARKED:format(npc.name, npc.title, zoneName(npc.map)))
-  turnOnTracking(kind)
-  if OpenWorldMap then OpenWorldMap(npc.map) end
+  self:MarkNpc(kind, id, fromRow, rule, true)
   return id
 end
 

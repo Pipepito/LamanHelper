@@ -58,7 +58,7 @@ NN:RegisterRule({
   end,
   check = function()
     local known = knownSkills()
-    if not known then return nil end
+    if not known then return NN.UNKNOWN end
     local level = NN.Plain(UnitLevel("player")) or 0
     local missing = {}
     for _, id in ipairs(data().classes[playerClass()] or {}) do

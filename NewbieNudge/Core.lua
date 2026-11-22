@@ -9,6 +9,7 @@ NN.ruleByName = {}
 NN.results = {}      -- [name] = array of result tables (always an array)
 NN.ruleState = {}    -- [name] = { disabled = bool, dirty = bool }
 NN.appliesCache = {} -- [name] = bool
+NN.checked = {}      -- [name] = true once a rule's check gave a real answer this session
 NN.rulesByEvent = {} -- [event] = { rule, ... }
 NN.UNKNOWN = setmetatable({}, { __tostring = function() return "NewbieNudge.UNKNOWN" end })
 NN.MAX_ROWS = 10
@@ -377,6 +378,7 @@ function NN:RunChecks()
           -- unreadable right now: keep previous results
         else
           self.results[rule.name] = normalise(res)
+          self.checked[rule.name] = true -- a real answer this session
         end
         state.dirty = false
       end

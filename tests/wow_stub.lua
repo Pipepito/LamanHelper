@@ -796,6 +796,7 @@ WorldMapFrame.ScrollContainer.Child:SetSize(1000, 667)
 function WorldMapFrame.ScrollContainer:GetCanvasScale() return S().canvasScale or 1 end
 function WorldMapFrame:GetMapID() return S().worldMapID end
 function WorldMapFrame:OnMapChanged() end
+function WorldMapFrame:OnCanvasScaleChanged() end
 function WOW.ViewMap(mapID) S().worldMapID = mapID; WorldMapFrame:Show(); WorldMapFrame:OnMapChanged() end
 function WorldMapFrame:EnumeratePinsByTemplate(template)
   local i = 0

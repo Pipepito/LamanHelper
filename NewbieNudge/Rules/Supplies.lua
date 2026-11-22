@@ -49,7 +49,7 @@ NN:RegisterRule({
   events = { "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED" },
   applies = function() return (NN.Plain(UnitLevel("player")) or 0) >= 5 end,
   check = function()
-    if not NN.bagsLoaded then return nil end
+    if not NN.bagsLoaded then return NN.UNKNOWN end
     local results = {}
     if countConsumables(FOOD_DRINK) == 0 then
       results[#results + 1] = { text = L.SUPPLIES_ROW_FOOD, icon = SUPPLY_ICON, onClick = ToggleAllBags, highlight = "bags", service = { kind = "supplies" } }

@@ -35,6 +35,7 @@ Where it differs, fix the rule and `tests/wow_stub.lua` together and add a test.
 | `/dump MINIMAP_TRACKING_REPAIR, MINIMAP_TRACKING_INNKEEPER, MINIMAP_TRACKING_VENDOR_FOOD` | map marks: minimap tracking (v4) | three names matching the tracking menu ("Repair", "Innkeeper", "Food & Drink"); `nil` falls back to the English names |
 | `/dump C_Map.GetWorldPosFromMapPos(1453, CreateVector2D(0.5, 0.5))` | map marks: distance (v4) | a continent number and a position |
 | `/dump WorldMapFrame.ScrollContainer.Child:GetSize()` | map pins (v4) | two numbers |
+| `/dump WorldMapFrame:GetFrameStrata(), WorldMapFrame.ScrollContainer.Child:GetFrameLevel(), type(WorldMapFrame.OnCanvasScaleChanged)` | map pins layering and zoom (v4) | a strata name, a number, `function`; pins must show above the map art, on the small and the maximised map, and stay on their NPC when zooming |
 
 ### Materials bag (v2, rule `materials_bag`)
 

@@ -62,7 +62,7 @@ local function onClick(self, button)
   if self.marked then
     if button == "RightButton" then NN.Services:Unmark(self.kind) end
   elseif button == "LeftButton" then
-    NN.Services:Mark(self.kind, self.npcID, false)
+    NN.Services:MarkNpc(self.kind, self.npcID, false, nil, false) -- the map is already open
   end
 end
 
@@ -71,7 +71,6 @@ local function acquire()
   local pin = MapPins.pins[MapPins.used]
   if not pin then
     pin = CreateFrame("Button", nil, canvas())
-    pin:SetFrameStrata("HIGH")
     pin.icon = pin:CreateTexture(nil, "ARTWORK")
     pin.icon:SetAllPoints()
     pin.ring = pin:CreateTexture(nil, "OVERLAY")
@@ -97,10 +96,15 @@ local function place(npcID, kind, marked)
   pin.icon:SetTexture(iconFor(kind))
   pin.ring:SetSize(size * 1.7, size * 1.7)
   if marked then pin.ring:Show() else pin.ring:Hide() end
-  local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and WorldMapFrame.ScrollContainer:GetCanvasScale() or 1
-  pin:SetScale(1 / (NN.Plain(scale) or 1))
+  -- Same map strata, above the canvas and Blizzard's own pins.
+  pin:SetFrameLevel((child:GetFrameLevel() or 1) + 500)
+  -- The pin keeps its size whatever the zoom: scale 1/canvasScale. SetPoint
+  -- offsets are in the pin's own scale, so they grow by canvasScale.
+  local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and NN.Plain(WorldMapFrame.ScrollContainer:GetCanvasScale()) or 1
+  if not scale or scale <= 0 then scale = 1 end
+  pin:SetScale(1 / scale)
   pin:ClearAllPoints()
-  pin:SetPoint("CENTER", child, "TOPLEFT", npc.x / 100 * child:GetWidth(), -(npc.y / 100) * child:GetHeight())
+  pin:SetPoint("CENTER", child, "TOPLEFT", npc.x / 100 * child:GetWidth() * scale, -(npc.y / 100) * child:GetHeight() * scale)
   pin:Show()
 end
 
@@ -144,6 +148,7 @@ function MapPins:Hook()
   if self.hooked or not WorldMapFrame then return end
   self.hooked = true
   if WorldMapFrame.OnMapChanged then hooksecurefunc(WorldMapFrame, "OnMapChanged", function() MapPins:Refresh() end) end
+  if WorldMapFrame.OnCanvasScaleChanged then hooksecurefunc(WorldMapFrame, "OnCanvasScaleChanged", function() MapPins:Refresh() end) end
   WorldMapFrame:HookScript("OnShow", function() MapPins:Refresh() end)
 end
 

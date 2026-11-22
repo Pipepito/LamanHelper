@@ -85,12 +85,13 @@ local function showTooltip(owner, data, anchor)
 end
 
 -- Marks the closest NPC for the row's service, or removes that mark.
-function Panel.ToggleServiceMark(service)
+-- service.keep: the mark stays after the row goes (rows that only show briefly).
+function Panel.ToggleServiceMark(service, ruleName)
   if not (service and NN.Services) then return end
-  if NN.Services:IsMarked(service.kind) then
+  if NN.Services:IsMarked(service.kind, service.npcIDs) then
     NN.Services:Unmark(service.kind)
   else
-    NN.Services:MarkClosest(service.kind, service.npcIDs, true)
+    NN.Services:MarkClosest(service.kind, service.npcIDs, not service.keep, ruleName)
   end
 end
 
@@ -98,7 +99,7 @@ local function onClick(button, mouseButton)
   local data = button.data
   if not data then return end
   if mouseButton == "LeftButton" and IsControlKeyDown and IsControlKeyDown() and data.result.service then
-    Panel.ToggleServiceMark(data.result.service)
+    Panel.ToggleServiceMark(data.result.service, data.rule.name)
   elseif mouseButton == "LeftButton" then
     if data.result.onClick then pcall(data.result.onClick) end
   elseif mouseButton == "RightButton" then
@@ -166,7 +167,7 @@ local function newRow(index)
   pin:RegisterForClicks("LeftButtonUp")
   pin:SetScript("OnClick", function(self)
     local data = row.data
-    if data then Panel.ToggleServiceMark(data.result.service) end
+    if data then Panel.ToggleServiceMark(data.result.service, data.rule.name) end
   end)
   pin:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -183,7 +184,7 @@ local function fillRow(row, text, icon, alpha, data)
   local service = data and data.result.service
   local pin = row.pinButton
   if service and NN.Services then
-    pin.marked = NN.Services:IsMarked(service.kind)
+    pin.marked = NN.Services:IsMarked(service.kind, service.npcIDs)
     if pin.marked then pin.icon:SetVertexColor(1, 0.82, 0) else pin.icon:SetVertexColor(1, 1, 1) end
     pin:Show()
     row.text:SetWidth(TEXT_WIDTH - PIN_BUTTON - 2)

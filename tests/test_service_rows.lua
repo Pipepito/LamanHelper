@@ -41,7 +41,7 @@ return {
   rested_row_marks_inn = function()
     load_addon(); run_checks()
     WOW.ShowGameMenu(true); run_checks()
-    assert_eq(results_of("rested")[1].service, { kind = "inn" })
+    assert_eq(results_of("rested")[1].service, { kind = "inn", keep = true })
   end,
   profession_trainer_row_marks_that_trainer = function()
     WOW.state.level = 22; WOW.state.professions = { prof1 = 1, prof2 = 2 }
@@ -136,5 +136,48 @@ return {
     assert_eq(WOW.printed[#WOW.printed], L().CHAT_PREFIX .. L().SLASH_SERVICES_ON)
     NewbieNudge:HandleSlash("services")
     assert_eq(WOW.printed[#WOW.printed], L().CHAT_PREFIX .. L().SLASH_SERVICES_OFF)
+  end,
+  -- Review fixes
+  rested_inn_mark_survives_the_menu_closing = function()
+    services(); load_addon(); run_checks()
+    WOW.ShowGameMenu(true); run_checks()
+    WOW.Click(rowWith(L().RESTED_ROW).pinButton, "LeftButton")
+    assert_true(NewbieNudge.Services:IsMarked("inn"))
+    WOW.ShowGameMenu(false); run_checks(); run_checks()
+    assert_true(NewbieNudge.Services:IsMarked("inn"), "kept after the menu closes")
+  end,
+  row_marks_survive_a_reload_before_the_first_real_check = function()
+    services()
+    _G.NewbieNudgeDB = { marks = { { kind = "supplies", npcID = 10, fromRow = true, rule = "supplies" } } }
+    WOW.state.level = 5
+    load_addon(); run_checks() -- bags not loaded yet: supplies can't tell
+    assert_true(NewbieNudge.Services:IsMarked("supplies"))
+  end,
+  no_pruning_while_restricted = function()
+    services(); load_addon()
+    local result = { { text = "with", service = { kind = "repair" } } }
+    NewbieNudge:RegisterRule({ name = "a", title = "T", help = "H", events = {}, combat = true,
+      applies = function() return true end, check = function() return result end })
+    NewbieNudge:MarkAllDirty(); NewbieNudge:Schedule(); run_checks()
+    WOW.Click(rowWith("with").pinButton, "LeftButton")
+    WOW.state.instanceType = "party"; result = nil
+    NewbieNudge:MarkAllDirty(); NewbieNudge:Schedule(); run_checks()
+    assert_true(NewbieNudge.Services:IsMarked("repair"))
+  end,
+  snoozing_a_row_keeps_its_mark = function()
+    services(); load_addon()
+    rule("a", { { text = "with", service = { kind = "repair" } } })
+    WOW.Click(rowWith("with").pinButton, "LeftButton")
+    WOW.Click(rowWith("with"), "RightButton")
+    run_checks()
+    assert_true(NewbieNudge.Services:IsMarked("repair"))
+  end,
+  weapon_rows_mark_their_own_trainer = function()
+    services(); load_addon()
+    rule("a", { { text = "far", service = { kind = "weapon", npcIDs = { 9 } } }, { text = "near", service = { kind = "weapon", npcIDs = { 11867 } } } })
+    WOW.Click(rowWith("far").pinButton, "LeftButton")
+    assert_true(rowWith("far").pinButton.marked); assert_true(not rowWith("near").pinButton.marked, "other city not shown as marked")
+    WOW.Click(rowWith("near").pinButton, "LeftButton")
+    assert_eq(NewbieNudge.Services:MarkOf("weapon").npcID, 11867, "marks the other city instead of unmarking")
   end,
 }
