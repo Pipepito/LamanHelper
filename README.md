@@ -43,6 +43,7 @@ Then start the game or type `/reload`.
 | `/nudge minimap` | Show or hide the minimap button. |
 | `/nudge style` | Switch the panel between the full list and icons only. |
 | `/nudge bar` | Turn the info bar on top of the panel on or off. |
+| `/nudge services` | Show or hide nearby services (repair, inns, trainers…) on the world map. |
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
 | `/nudge show` | Bring the panel back after hiding it with the key binding. |
@@ -88,6 +89,26 @@ reminder, hide or show the panel, open the settings. Drag it around the
 minimap edge to move it. `/nudge minimap` or Options → NewbieNudge hides it;
 the same menu is also in the game's AddOns drop-down by the minimap when the
 client has one.
+
+## Map marks
+
+Reminders that send you to an NPC (damaged gear, new spells, weapon skills,
+no food, logging out outside an inn, the next profession rank) get a small
+map-pin button at the end of the row; in the icons-only style, Ctrl+click the
+icon. It marks the closest suitable NPC on the world map: friendly to your
+faction, never in a zone more than 3 levels above you, and on your continent
+first. The map opens there and a chat line says who and where. Marking a
+repair vendor, innkeeper or food vendor also turns on the game's own minimap
+tracking for it. Several marks can be up at once (one per kind); right-click
+a pin, click the row's button again, or use "Remove all map marks" in the
+minimap menu to remove them. A mark made from a reminder goes away with the
+reminder.
+
+"Show services on the world map" (minimap menu, Options → Map and minimap,
+or `/nudge services`) shows every repair vendor, inn, food vendor, your class
+trainer, the weapon masters and your profession trainers on the map you are
+looking at; click one to mark it. NPC positions come from QuestieDB's WoW
+Forever database (`tools/import_questie_npcs.py`).
 
 ## Info bar
 
@@ -232,6 +253,9 @@ python tools/import_handbook.py --ref main
 ```powershell
 python tools/import_icy_talents.py
 ```
+```powershell
+python tools/import_questie_npcs.py
+```
 
 ## Credits and licence
 
@@ -243,5 +267,8 @@ NewbieNudge is released under the GNU General Public License v3.0 (see
   (Arcaneology / ArcaneStudio, GPL-3.0), which in turn builds its trainer
   and profession data on [Questie](https://github.com/Questie/Questie) and
   QuestieDB (GPL-3.0). The generated files name the upstream commit.
+- Service NPC positions (repair, inns, food vendors, trainers) come from
+  [QuestieDB](https://github.com/Questie/QuestieDB)'s WoW Forever data
+  (GPL-3.0); the generated file names the upstream commit.
 - Talent build identifiers (node and spell IDs per talent) come from
   Icy Veins' public talent data; only identifiers are kept.

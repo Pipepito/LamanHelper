@@ -37,7 +37,7 @@ NN:RegisterRule({
   end,
   check = function()
     if NN.restedPrompt and not IsResting() then
-      return { text = L.RESTED_ROW, icon = RESTED_ICON }
+      return { text = L.RESTED_ROW, icon = RESTED_ICON, service = { kind = "inn" } }
     end
     return nil
   end,

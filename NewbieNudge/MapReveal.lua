@@ -208,6 +208,11 @@ NN.Options.RegisterPage("map", "OPT_MAP", function(category, layout)
   Options.AddCheckbox(category, "NN_map_desaturate", L.OPT_MAP_DESATURATE, nil,
     function() return NN.db.map.desaturate end,
     function(value) NN.db.map.desaturate = value and true or false; MapReveal:Refresh() end)
+  Options.AddCheckbox(category, "NN_services_showAll", L.OPT_SERVICES, L.OPT_SERVICES_TT,
+    function() return NN.db.services.showAll end,
+    function(value)
+      if NN.MapPins then NN.MapPins:SetShowAll(value and true or false) else NN.db.services.showAll = value and true or false end
+    end)
   if NN.GameSettings then
     Options.AddGameSettingsHeader(layout)
     NN.GameSettings:AddPageControls(category, layout, "map")

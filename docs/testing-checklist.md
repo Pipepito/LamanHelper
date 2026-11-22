@@ -32,6 +32,9 @@ Where it differs, fix the rule and `tests/wow_stub.lua` together and add a test.
 | `/dump type(MenuUtil), type(MenuUtil and MenuUtil.CreateContextMenu), type(EasyMenu)` | minimap menu (v4) | `table function …`; if `nil`, the EasyMenu fallback is used |
 | `/dump type(AddonCompartmentFrame), type(GetMinimapShape)` | AddOns drop-down, square minimap (v4) | `table`/`nil`, `function`/`nil` |
 | `/dump type(PickupBagFromSlot), type(PutItemInBag)` | materials bag move (v4) | `function function` |
+| `/dump MINIMAP_TRACKING_REPAIR, MINIMAP_TRACKING_INNKEEPER, MINIMAP_TRACKING_VENDOR_FOOD` | map marks: minimap tracking (v4) | three names matching the tracking menu ("Repair", "Innkeeper", "Food & Drink"); `nil` falls back to the English names |
+| `/dump C_Map.GetWorldPosFromMapPos(1453, CreateVector2D(0.5, 0.5))` | map marks: distance (v4) | a continent number and a position |
+| `/dump WorldMapFrame.ScrollContainer.Child:GetSize()` | map pins (v4) | two numbers |
 
 ### Materials bag (v2, rule `materials_bag`)
 
@@ -143,3 +146,5 @@ bag. Bag inventory slots are 31–34.
 - **Weapon skills to learn:** at level 10+, the row names the city and weapon master for each weapon your class hasn't learned (your faction only); learn one and it drops off; polearms only from 20.
 - **Gathering tracking:** an herbalist or miner with tracking off sees the row; clicking it turns tracking on.
 - **Options:** the AddOns list shows NewbieNudge, Reminders, Bags and vendors, Map and minimap, Combat and action bars, Names and health bars, Quests and interface, Camera, (Controller), Talent build, Developer. Every page opens; no setting appears on two pages; "Apply recommended game settings" on the main page still works; the world-map icon opens Map and minimap.
+- **Map marks:** damage your gear (or wait for a "damaged gear" row): the row has a pin button; click it → the world map opens on the closest repair vendor's zone with a gold-ringed pin, chat names them, minimap "Repair" tracking turns on. Hover the pin: name, title, zone. Right-click it: gone. Mark an inn and a repair vendor: both show. Repair your gear: the repair mark goes by itself. A level-15 character never gets a pin in a level-30+ zone. Weapon-skill row → the pin goes to that row's weapon master. Icons-only style: Ctrl+click an icon marks. In a dungeon: the button says it can't tell where you are.
+- **Show services:** minimap menu "Show services on the world map" → open your zone's map: repair vendors, inns, food vendors, your class trainer, weapon masters, your profession trainers (your faction only); click one → it becomes a gold mark. Turn it off: only marks stay. Pins stay the right size when zooming the map.

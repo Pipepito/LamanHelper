@@ -73,7 +73,8 @@ NN:RegisterRule({
   check = function()
     local count = NN.TrainableSpells()
     if count > 0 then
-      return { text = L.TRAINER_SPELLS_ROW:format(count), icon = SPELL_ICON, onClick = openSpellbook, highlight = "spellbook" }
+      return { text = L.TRAINER_SPELLS_ROW:format(count), icon = SPELL_ICON, onClick = openSpellbook, highlight = "spellbook",
+        service = { kind = "trainer_" .. tostring(NN.classFile) } }
     end
     return nil
   end,

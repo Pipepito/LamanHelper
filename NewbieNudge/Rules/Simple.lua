@@ -30,9 +30,9 @@ NN:RegisterRule({
       end
     end
     if broken then
-      return { text = L.DURABILITY_ROW_BROKEN, icon = 136241, onClick = openPaperDoll, highlight = "character" }
+      return { text = L.DURABILITY_ROW_BROKEN, icon = 136241, onClick = openPaperDoll, highlight = "character", service = { kind = "repair" } }
     elseif low then
-      return { text = L.DURABILITY_ROW_LOW, icon = 136241, onClick = openPaperDoll, highlight = "character" }
+      return { text = L.DURABILITY_ROW_LOW, icon = 136241, onClick = openPaperDoll, highlight = "character", service = { kind = "repair" } }
     end
     return nil
   end,

@@ -66,7 +66,7 @@ NN:RegisterRule({
     end
     local results, listed = {}, {}
     for _, city in ipairs(data().cities[faction()] or {}) do
-      local weapons, trainers = {}, {}
+      local weapons, trainers, ids = {}, {}, {}
       for _, trainer in ipairs(city.trainers) do
         local teaches = false
         for _, id in ipairs(trainer.skills) do
@@ -75,7 +75,7 @@ NN:RegisterRule({
             teaches = true
           end
         end
-        if teaches then trainers[#trainers + 1] = trainer.name end
+        if teaches then trainers[#trainers + 1] = trainer.name; ids[#ids + 1] = trainer.id end
       end
       if #weapons > 0 then
         local names = {}
@@ -84,6 +84,7 @@ NN:RegisterRule({
           text = L.WEAPON_TRAINERS_ROW:format(table.concat(names, ", "), cityName(city),
             table.concat(trainers, " " .. L.WEAPON_TRAINERS_OR .. " ")),
           icon = SKILL_ICON,
+          service = { kind = "weapon", npcIDs = ids },
         }
       end
     end

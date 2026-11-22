@@ -95,6 +95,13 @@ function MinimapButton:MenuEntries()
     db.infobar.enabled = not db.infobar.enabled
     refresh()
   end })
+  local function servicesOn() return db.services.showAll and true or false end
+  add({ kind = "checkbox", label = L.MENU_SERVICES, checked = servicesOn(), isChecked = servicesOn, onClick = function()
+    if NN.MapPins then NN.MapPins:SetShowAll(not db.services.showAll) else db.services.showAll = not db.services.showAll end
+  end })
+  if NN.Services and #NN.Services:Marks() > 0 then
+    add({ kind = "button", label = L.MENU_CLEAR_MARKS, onClick = function() NN.Services:ClearMarks() end })
+  end
   add({ kind = "divider" })
   if #NN:ActiveRows() > 0 then
     add({ kind = "button", label = snoozeLabel(), onClick = function()

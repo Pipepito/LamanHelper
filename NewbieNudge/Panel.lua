@@ -7,6 +7,7 @@ NN.Panel = Panel
 
 local WIDTH, PAD, ROW_H, ROW_H2, ICON, TITLE_H = 260, 6, 24, 36, 20, 18
 local STRIP_GAP, BAR_GAP = 4, 2
+local PIN_BUTTON = 16
 Panel.STRIP_PER_LINE = 8
 
 -- Strip icon size: bigger while a controller is in use and the boost is on.
@@ -78,14 +79,27 @@ local function showTooltip(owner, data, anchor)
   else
     GameTooltip:AddLine(L.ROW_HINT_SNOOZE:format(NN.db and NN.db.snoozeMinutes or 60), 0.8, 0.8, 0.8, true)
   end
+  if data.result.service and NN.Services then GameTooltip:AddLine(L.ROW_HINT_MARK, 0.8, 0.8, 0.8, true) end
   if data.stale then GameTooltip:AddLine(L.ROW_STALE, 0.6, 0.6, 0.6) end
   GameTooltip:Show()
+end
+
+-- Marks the closest NPC for the row's service, or removes that mark.
+function Panel.ToggleServiceMark(service)
+  if not (service and NN.Services) then return end
+  if NN.Services:IsMarked(service.kind) then
+    NN.Services:Unmark(service.kind)
+  else
+    NN.Services:MarkClosest(service.kind, service.npcIDs, true)
+  end
 end
 
 local function onClick(button, mouseButton)
   local data = button.data
   if not data then return end
-  if mouseButton == "LeftButton" then
+  if mouseButton == "LeftButton" and IsControlKeyDown and IsControlKeyDown() and data.result.service then
+    Panel.ToggleServiceMark(data.result.service)
+  elseif mouseButton == "LeftButton" then
     if data.result.onClick then pcall(data.result.onClick) end
   elseif mouseButton == "RightButton" then
     NN:Snooze(data.rule.name, IsShiftKeyDown() and 0 or NN.db.snoozeMinutes)
@@ -141,16 +155,49 @@ local function newRow(index)
   row.text:SetWordWrap(true)
   row.text:SetMaxLines(2)
   bindClickable(row)
+  -- map-pin button for rows that name a service (repair, trainer, inn, ...)
+  local pin = CreateFrame("Button", nil, row)
+  pin:SetSize(PIN_BUTTON, PIN_BUTTON)
+  pin:SetPoint("RIGHT", row, "RIGHT", -1, 0)
+  pin.icon = pin:CreateTexture(nil, "ARTWORK")
+  pin.icon:SetAllPoints()
+  pin.icon:SetTexture("Interface\\Minimap\\Tracking\\None")
+  pin:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+  pin:RegisterForClicks("LeftButtonUp")
+  pin:SetScript("OnClick", function(self)
+    local data = row.data
+    if data then Panel.ToggleServiceMark(data.result.service) end
+  end)
+  pin:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText(self.marked and L.ROW_PIN_UNMARK or L.ROW_PIN_MARK)
+    GameTooltip:Show()
+  end)
+  pin:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  pin:Hide()
+  row.pinButton = pin
   return row
 end
 
 local function fillRow(row, text, icon, alpha, data)
+  local service = data and data.result.service
+  local pin = row.pinButton
+  if service and NN.Services then
+    pin.marked = NN.Services:IsMarked(service.kind)
+    if pin.marked then pin.icon:SetVertexColor(1, 0.82, 0) else pin.icon:SetVertexColor(1, 1, 1) end
+    pin:Show()
+    row.text:SetWidth(TEXT_WIDTH - PIN_BUTTON - 2)
+  else
+    pin.marked = false
+    pin:Hide()
+    row.text:SetWidth(TEXT_WIDTH)
+  end
   row.text:SetText(text)
   row.icon:SetTexture(icon or 134400)
   row:SetAlpha(alpha)
   row.data = data
   local measure = row.text.GetUnboundedStringWidth or row.text.GetStringWidth
-  local height = (measure(row.text) > TEXT_WIDTH) and ROW_H2 or ROW_H
+  local height = (measure(row.text) > row.text:GetWidth()) and ROW_H2 or ROW_H
   row:SetHeight(height)
   row:Show()
   return height

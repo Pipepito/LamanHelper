@@ -383,6 +383,13 @@ function NN:RunChecks()
     end
   end
   local rows = self:ActiveRows()
+  if self.Services and not self.testMode then
+    local active = {}
+    for _, row in ipairs(rows) do
+      if row.result.service then active[row.result.service.kind] = true end
+    end
+    self.Services:PruneRowMarks(active)
+  end
   if self.Panel then self.Panel:Refresh(rows) end
   if self.Highlight then self.Highlight:Apply(rows) end
 end
@@ -481,6 +488,9 @@ function NN:HandleSlash(msg)
     local style = (self.db.panel.style == "icons") and "list" or "icons"
     if self.Panel then self.Panel:SetStyle(style) else self.db.panel.style = style end
     self:Say(style == "icons" and L.SLASH_STYLE_ICONS or L.SLASH_STYLE_LIST)
+  elseif command == "services" then
+    if self.MapPins then self.MapPins:SetShowAll(not self.db.services.showAll) else self.db.services.showAll = not self.db.services.showAll end
+    self:Say(self.db.services.showAll and L.SLASH_SERVICES_ON or L.SLASH_SERVICES_OFF)
   elseif command == "bar" then
     self.db.infobar.enabled = not self.db.infobar.enabled
     if self.Panel then self.Panel:Refresh(self:ActiveRows()) end

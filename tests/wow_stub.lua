@@ -332,7 +332,7 @@ function WOW.Click(frame, button) frame:Fire("OnClick", button or "LeftButton", 
 function WOW.Hover(frame) frame:Fire("OnEnter") end
 function WOW.Unhover(frame) frame:Fire("OnLeave") end
 function IsShiftKeyDown() return S().shiftDown end
-function IsControlKeyDown() return false end
+function IsControlKeyDown() return S().ctrlDown or false end
 function IsAltKeyDown() return false end
 
 -------------------------------------------------------------------------------

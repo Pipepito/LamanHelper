@@ -147,7 +147,10 @@ function MapPins:Hook()
   WorldMapFrame:HookScript("OnShow", function() MapPins:Refresh() end)
 end
 
-NN.Services:OnChange(function() MapPins:Refresh() end)
+NN.Services:OnChange(function()
+  MapPins:Refresh()
+  if NN.Panel and NN.Panel.currentRows then NN.Panel:Refresh(NN.Panel.currentRows) end
+end)
 NN:AfterLogin(function() MapPins:Hook() end)
 
 local loader = CreateFrame("Frame")

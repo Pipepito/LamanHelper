@@ -5,6 +5,7 @@
 -- 43 swords, 44 axes, 45 bows, 46 guns, 54 maces, 55 two-handed swords,
 -- 136 staves, 160 two-handed maces, 172 two-handed axes, 173 daggers,
 -- 176 thrown, 226 crossbows, 229 polearms, 473 fist weapons.
+-- Trainer ids are QuestieDB NPC ids (Data/Services.lua).
 -- Wands (228) are built in for mages, priests and warlocks: no trainer.
 local _, NN = ...
 
@@ -19,21 +20,21 @@ NN.WeaponTrainers = {
   cities = {
     Alliance = {
       { mapID = 1453, name = "Stormwind City", trainers = {
-        { name = "Woo Ping", skills = { 43, 55, 173, 136, 226, 229 } } } },
+        { name = "Woo Ping", id = 11867, skills = { 43, 55, 173, 136, 226, 229 } } } },
       { mapID = 1455, name = "Ironforge", trainers = {
-        { name = "Buliwyf Stonehand", skills = { 44, 172, 54, 160, 473, 46 } },
-        { name = "Bixi Wobblebonk", skills = { 226, 173, 176 } } } },
+        { name = "Buliwyf Stonehand", id = 11865, skills = { 44, 172, 54, 160, 473, 46 } },
+        { name = "Bixi Wobblebonk", id = 13084, skills = { 226, 173, 176 } } } },
       { mapID = 1457, name = "Darnassus", trainers = {
-        { name = "Ilyenia Moonfire", skills = { 45, 173, 473, 136, 176 } } } },
+        { name = "Ilyenia Moonfire", id = 11866, skills = { 45, 173, 473, 136, 176 } } } },
     },
     Horde = {
       { mapID = 1454, name = "Orgrimmar", trainers = {
-        { name = "Sayoc", skills = { 45, 173, 473, 44, 136, 176, 172 } },
-        { name = "Hanashi", skills = { 45, 44, 136, 176, 172 } } } },
+        { name = "Sayoc", id = 11868, skills = { 45, 173, 473, 44, 136, 176, 172 } },
+        { name = "Hanashi", id = 2704, skills = { 45, 44, 136, 176, 172 } } } },
       { mapID = 1456, name = "Thunder Bluff", trainers = {
-        { name = "Ansekhwa", skills = { 46, 54, 136, 160 } } } },
+        { name = "Ansekhwa", id = 11869, skills = { 46, 54, 136, 160 } } } },
       { mapID = 1458, name = "Undercity", trainers = {
-        { name = "Archibald", skills = { 226, 173, 43, 229, 55 } } } },
+        { name = "Archibald", id = 11870, skills = { 226, 173, 43, 229, 55 } } } },
     },
   },
   -- class file token -> weapon skill line IDs it can learn (wands left out)
