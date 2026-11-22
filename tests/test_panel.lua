@@ -21,6 +21,7 @@ end
 return {
   hidden_when_no_rows = function()
     load_addon()
+    NewbieNudge.db.infobar.enabled = false -- the info bar alone keeps the panel up
     show({})
     assert_true(not NewbieNudgePanel:IsShown())
   end,
@@ -48,6 +49,7 @@ return {
   end,
   right_click_snoozes_for_db_minutes = function()
     load_addon()
+    NewbieNudge.db.infobar.enabled = false
     NewbieNudge.db.snoozeMinutes = 45
     show({ { text = "one" } })
     WOW.Click(NewbieNudge.Panel.rows[1], "RightButton")
@@ -176,6 +178,7 @@ return {
   end,
   strip_wraps_after_eight = function()
     load_addon()
+    NewbieNudge.db.infobar.enabled = false -- measure the strip alone
     NewbieNudge.Panel:SetStyle("icons")
     local results = {}
     for i = 1, 10 do results[i] = { text = "r" .. i } end

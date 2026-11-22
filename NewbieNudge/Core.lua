@@ -38,6 +38,7 @@ NN.defaults = {
   talentBadges = true,
   vendor = { sellJunk = true, repair = true },
   tooltipPrice = true,
+  infobar = { enabled = true, bags = true, gold = true, gear = true },
 }
 
 -------------------------------------------------------------------------------

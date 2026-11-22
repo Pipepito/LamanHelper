@@ -106,6 +106,18 @@ function Options:Build()
   Options.AddButton(layout, L.OPT_RESET_SNOOZE, L.OPT_BUTTON_DO, function() NN:ClearSnoozes() end)
   Options.AddButton(layout, L.OPT_RESET_POS, L.OPT_BUTTON_DO, function() if NN.Panel then NN.Panel:ResetPosition() end end)
 
+  -- Info bar
+  Options.AddHeader(layout, L.OPT_INFOBAR_HEADER)
+  local function barBox(key, label, tooltip)
+    Options.AddCheckbox(category, "NN_infobar_" .. key, label, tooltip,
+      function() return db.infobar[key] end,
+      function(value) db.infobar[key] = value and true or false; if NN.Panel then NN.Panel:Refresh(NN:ActiveRows()) end end)
+  end
+  barBox("enabled", L.OPT_INFOBAR, L.OPT_INFOBAR_TT)
+  barBox("bags", L.OPT_INFOBAR_BAGS)
+  barBox("gold", L.OPT_INFOBAR_GOLD)
+  barBox("gear", L.OPT_INFOBAR_GEAR)
+
   -- Reminders
   Options.AddHeader(layout, L.OPT_REMINDERS)
   for _, rule in ipairs(NN.rules) do

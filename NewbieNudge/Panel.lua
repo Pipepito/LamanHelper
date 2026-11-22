@@ -6,7 +6,7 @@ local Panel = { rows = {}, stripIcons = {}, combat = false, currentRows = {}, st
 NN.Panel = Panel
 
 local WIDTH, PAD, ROW_H, ROW_H2, ICON, TITLE_H = 260, 6, 24, 36, 20, 18
-local STRIP_GAP = 4
+local STRIP_GAP, BAR_GAP = 4, 2
 Panel.STRIP_PER_LINE = 8
 
 -- Strip icon size: bigger while a controller is in use and the boost is on.
@@ -100,6 +100,26 @@ local function bindClickable(button, anchor)
 end
 
 -------------------------------------------------------------------------------
+-- Header: title (when unlocked) and info bar
+-------------------------------------------------------------------------------
+
+-- Places the title and the info bar; returns the height they take above the
+-- content, the bar's width (0 when hidden) and whether the bar is shown.
+function Panel:LayoutHeader(maxBarWidth)
+  local titleHeight = title:IsShown() and TITLE_H or 0
+  local bar = NN.InfoBar
+  if bar and bar:IsActive() then
+    local width = bar:Refresh(maxBarWidth)
+    bar.frame:ClearAllPoints()
+    bar.frame:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + titleHeight))
+    bar.frame:Show()
+    return titleHeight + bar.HEIGHT + BAR_GAP, width, true
+  end
+  if bar then bar.frame:Hide() end
+  return titleHeight, 0, false
+end
+
+-------------------------------------------------------------------------------
 -- Rows (list mode)
 -------------------------------------------------------------------------------
 
@@ -158,14 +178,14 @@ function Panel:RefreshList(rows)
     total = total + height
   end
   for i = needed + 1, #self.rows do self.rows[i]:Hide(); self.rows[i].data = nil end
-  local titleHeight = title:IsShown() and TITLE_H or 0
+  local header, _, barShown = self:LayoutHeader(WIDTH - PAD * 2)
   list:ClearAllPoints()
-  list:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + titleHeight))
-  list:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -(PAD + titleHeight))
+  list:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + header))
+  list:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -(PAD + header))
   list:SetHeight(total)
   frame:SetWidth(WIDTH)
-  frame:SetHeight(total + PAD * 2 + titleHeight)
-  if count == 0 then frame:Hide() else frame:Show() end
+  frame:SetHeight(total + PAD * 2 + header)
+  if count == 0 and not barShown then frame:Hide() else frame:Show() end
 end
 
 -------------------------------------------------------------------------------
@@ -220,14 +240,14 @@ function Panel:RefreshStrip(rows)
   local cols = math.min(#rows, perLine)
   local lines = math.max(1, math.ceil(#rows / perLine))
   local width = math.max(1, cols * step - STRIP_GAP)
-  local height = lines * step - STRIP_GAP
-  local titleHeight = title:IsShown() and TITLE_H or 0
+  local height = (#rows > 0) and (lines * step - STRIP_GAP) or 0
+  local header, barWidth, barShown = self:LayoutHeader(nil)
   strip:ClearAllPoints()
-  strip:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + titleHeight))
-  strip:SetSize(width, height)
-  frame:SetWidth(width + PAD * 2)
-  frame:SetHeight(height + PAD * 2 + titleHeight)
-  if #rows == 0 then frame:Hide() else frame:Show() end
+  strip:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(PAD + header))
+  strip:SetSize(width, math.max(1, height))
+  frame:SetWidth(math.max(width, barWidth) + PAD * 2)
+  frame:SetHeight(height + PAD * 2 + header)
+  if #rows == 0 and not barShown then frame:Hide() else frame:Show() end
 end
 
 -------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ Core.lua
 Spellbook.lua
 Highlight.lua
 Panel.lua
+InfoBar.lua
 Options.lua
 CVarSection.lua
 Camera.lua
