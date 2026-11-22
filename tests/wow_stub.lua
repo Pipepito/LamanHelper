@@ -453,7 +453,8 @@ function HasPetUI() return S().pet.hasUI, S().pet.isHunterPet end
 function GetProfessions() local p = S().professions; return p.prof1, p.prof2, p.arch, p.fishing, p.cooking, p.firstAid end
 function GetProfessionInfo(index)
   local p = S().professionInfo[index]
-  if p then return p.name, p.icon or 136240, p.skill, p.maxSkill, 0, 0, p.skillLine or 0 end
+  -- the real client returns more after skillLine: skillModifier, specializationIndex, specializationOffset
+  if p then return p.name, p.icon or 136240, p.skill, p.maxSkill, 0, 0, p.skillLine or 0, 0, 3, 0 end
 end
 function GetSpellInfo(id) local i = S().spellInfo[id]; if i then return i.name, i.subtext, i.icon end end
 

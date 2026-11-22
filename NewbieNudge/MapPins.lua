@@ -83,7 +83,9 @@ function MapPins.PlayerProfessions()
     for _, index in pairs({ GetProfessions() }) do
       index = NN.Plain(index)
       if index then
-        local skillLine = NN.Plain(select(7, GetProfessionInfo(index)))
+        -- only the 7th value: the real client returns more after it, and a
+        -- second value would land in NN.Plain's "kind" argument
+        local skillLine = NN.Plain((select(7, GetProfessionInfo(index))))
         if skillLine and skillLine > 0 then set[skillLine] = true end
       end
     end
