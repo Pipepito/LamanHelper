@@ -294,8 +294,10 @@ local SECTIONS = {
     if not db then out[#out + 1] = "no services settings"; return end
     out[#out + 1] = ("showAll %s kinds %s"):format(tostring(db.showAll), Dev.Serialize(db.kinds))
     for _, m in ipairs(NN.db.marks or {}) do
+      local npcs = {}
+      for _, id in ipairs(m.npcs or { m.npcID }) do npcs[#npcs + 1] = tostring(id) end
       out[#out + 1] = ("mark %s npc %s fromRow %s rule %s"):format(tostring(m.kind),
-        tostring(m.npcID or Dev.Serialize(m.npcs)), tostring(m.fromRow), tostring(m.rule))
+        table.concat(npcs, ","), tostring(m.fromRow), tostring(m.rule))
     end
   end },
   { "map", function(out)

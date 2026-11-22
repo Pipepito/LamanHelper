@@ -192,10 +192,19 @@ function Services:OnChange(fn)
   self.listeners[#self.listeners + 1] = fn
 end
 
+-- A mark holds one or more options, best first: { kind, npcs = { id, ... },
+-- fromRow, rule }. Saved marks from before options ({ npcID }) load as one
+-- option; options whose NPC left the data are dropped. m.npcID is kept as a
+-- shortcut to the best option.
 function Services:Marks()
   local out = {}
   for _, m in ipairs(NN.db.marks) do
-    if data().npcs[m.npcID] then out[#out + 1] = m end
+    if not m.npcs then m.npcs = { m.npcID } end
+    local npcs = {}
+    for _, id in ipairs(m.npcs) do if data().npcs[id] then npcs[#npcs + 1] = id end end
+    m.npcs = npcs
+    m.npcID = npcs[1]
+    if npcs[1] then out[#out + 1] = m end
   end
   return out
 end
@@ -211,16 +220,31 @@ function Services:IsMarked(kind, npcIDs)
   local mark = self:MarkOf(kind)
   if not mark then return false end
   if not npcIDs then return true end
-  for _, id in ipairs(npcIDs) do if id == mark.npcID then return true end end
+  for _, id in ipairs(npcIDs) do
+    for _, option in ipairs(mark.npcs) do if id == option then return true end end
+  end
   return false
 end
 
 -- rule: the reminder the mark came from; its mark goes when that reminder does.
-function Services:Mark(kind, npcID, fromRow, rule)
+-- npcs: one npcID or a list of options, best first.
+function Services:Mark(kind, npcs, fromRow, rule)
+  if type(npcs) ~= "table" then npcs = { npcs } end
   local marks = {}
   for _, m in ipairs(NN.db.marks) do if m.kind ~= kind then marks[#marks + 1] = m end end
-  marks[#marks + 1] = { kind = kind, npcID = npcID, fromRow = fromRow and true or false, rule = rule }
+  marks[#marks + 1] = { kind = kind, npcs = npcs, fromRow = fromRow and true or false, rule = rule }
   NN.db.marks = marks
+  changed()
+end
+
+-- Drops one option; the mark goes with its last option.
+function Services:UnmarkOption(kind, npcID)
+  local mark = self:MarkOf(kind)
+  if not mark then return end
+  local npcs = {}
+  for _, id in ipairs(mark.npcs) do if id ~= npcID then npcs[#npcs + 1] = id end end
+  if #npcs == 0 then return self:Unmark(kind) end
+  mark.npcs, mark.npcID = npcs, npcs[1]
   changed()
 end
 
@@ -277,8 +301,6 @@ local function zoneName(map)
 end
 Services.ZoneName = zoneName
 
--- Marks the closest NPC of the kind, says where, opens the world map there
--- and turns on the matching minimap tracking. Returns the npcID or nil.
 -- Marks one NPC and tells the player: a chat line, the minimap tracking,
 -- and (openMap) the world map on its zone.
 function Services:MarkNpc(kind, id, fromRow, rule, openMap, route)
@@ -291,16 +313,27 @@ function Services:MarkNpc(kind, id, fromRow, rule, openMap, route)
   if openMap and OpenWorldMap then OpenWorldMap(npc.map) end
 end
 
+-- Marks the quickest options of a kind (db.services.options, default 4),
+-- says the best one and its route, opens the map there and turns on the
+-- matching minimap tracking. Returns the best npcID or nil.
 function Services:MarkClosest(kind, npcIDs, fromRow, rule)
-  local id, reason = self:Closest(kind, npcIDs)
-  local option = type(reason) == "table" and reason or nil
-  if not id then
+  local ranked, reason = self:Ranked(kind, npcIDs, NN.db.services.options or 4)
+  if not ranked[1] then
     if reason == "position" then NN:Say(L.SERVICES_NO_POSITION)
     else NN:Say(L.SERVICES_NONE:format(self:KindLabel(kind))) end
     return nil
   end
-  self:MarkNpc(kind, id, fromRow, rule, true, option and option.route)
-  return id
+  local ids = {}
+  for _, option in ipairs(ranked) do ids[#ids + 1] = option.id end
+  self:Mark(kind, ids, fromRow, rule)
+  local best = self:Npc(ids[1])
+  local text = L.SERVICES_MARKED:format(best.name, best.title, zoneName(best.map))
+  if ranked[1].route.kind == "fly" then text = text .. " " .. self:RouteText(ranked[1].route) end
+  if #ids > 1 then text = text .. " " .. L.SERVICES_MORE:format(#ids - 1) end
+  NN:Say(text)
+  turnOnTracking(kind)
+  if OpenWorldMap then OpenWorldMap(best.map) end
+  return ids[1]
 end
 
 -- Drop marks whose NPC left the data (a data refresh between sessions).

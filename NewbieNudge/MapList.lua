@@ -86,7 +86,7 @@ local function acquireRow()
     row.removeButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     MapList.rows[MapList.used] = row
   end
-  row.isReveal, row.kindKey, row.npcID, row.markKind, row.checked = nil, nil, nil, nil, nil
+  row.isReveal, row.kindKey, row.npcID, row.markKind, row.checked, row.isHeading = nil, nil, nil, nil, nil, nil
   row.icon:SetTexCoord(0, 1, 0, 1)
   row:Show()
   return row
@@ -194,17 +194,33 @@ function MapList:Refresh()
   else
     self.noneLabel:Hide()
     for _, mark in ipairs(marks) do
-      local npc = NN.Services:Npc(mark.npcID)
-      local row = acquireRow()
-      row.npcID, row.markKind = mark.npcID, mark.kind
+      -- heading: the kind; its ✕ removes the whole mark
+      local heading = acquireRow()
+      heading.markKind, heading.isHeading = mark.kind, true
       local texture, coords = NN.MapPins.IconFor(mark.kind)
-      layoutRow(row, false, nil, texture, coords, npc.name .. " · " .. NN.Services.ZoneName(npc.map))
-      row.removeButton:Show()
-      row.removeButton:SetScript("OnClick", function() NN.Services:Unmark(mark.kind) end)
-      row:SetScript("OnClick", function()
-        if WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:SetMapID(npc.map) end
-      end)
-      y = place(row, y)
+      layoutRow(heading, false, nil, texture, coords, MapList.KindLabel(mark.kind))
+      heading.removeButton:Show()
+      heading.removeButton:SetScript("OnClick", function() NN.Services:Unmark(mark.kind) end)
+      heading:SetScript("OnClick", nil)
+      y = place(heading, y)
+      -- one line per option, quickest first: "1. Jandi · Orgrimmar · ~3 min"
+      local flights = NN.Services:FlightMasters()
+      for rank, id in ipairs(mark.npcs) do
+        local npc = NN.Services:Npc(id)
+        local row = acquireRow()
+        row.npcID, row.markKind = id, mark.kind
+        local text = ("%d. %s · %s"):format(rank, npc.name, NN.Services.ZoneName(npc.map))
+        local time = NN.Services:TravelTime(id, flights)
+        if time and time < 359999 then text = text .. (" · ~%d min"):format(math.max(1, math.ceil(time / 60))) end
+        layoutRow(row, false, nil, nil, nil, text)
+        row.icon:SetTexture(nil)
+        row.removeButton:Show()
+        row.removeButton:SetScript("OnClick", function() NN.Services:UnmarkOption(mark.kind, id) end)
+        row:SetScript("OnClick", function()
+          if WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:SetMapID(npc.map) end
+        end)
+        y = place(row, y)
+      end
     end
   end
 

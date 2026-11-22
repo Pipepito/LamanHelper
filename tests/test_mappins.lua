@@ -72,9 +72,9 @@ return {
     NewbieNudge.MapPins:SetShowAll(true)
     WOW.ViewMap(1429)
     WOW.Hover(pinFor(7))
-    assert_eq(GameTooltip.lines[1], "Innkeeper Farley")
+    assert_eq(GameTooltip.lines[2], "Innkeeper Farley", "option line first, then the name")
     assert_true(tContains(GameTooltip.lines, "Innkeeper")); assert_true(tContains(GameTooltip.lines, "Elwynn Forest"))
-    assert_true(tContains(GameTooltip.lines, L().MAPPIN_REMOVE))
+    assert_true(tContains(GameTooltip.lines, L().MAPPIN_REMOVE_OPTION))
     WOW.Hover(pinFor(1))
     assert_true(tContains(GameTooltip.lines, L().MAPPIN_CLICK_MARK))
   end,
@@ -188,5 +188,36 @@ return {
     NewbieNudge.Services:Mark("prof_182", 11, true)
     WOW.ViewMap(1429)
     assert_eq(pinFor(11).icon.texture, "Interface\\Icons\\Trade_Herbalism")
+  end,
+  numbered_pins_gold_ring_first = function()
+    load()
+    NewbieNudge.Services:Mark("repair", { 1, 2 }, true)
+    WOW.ViewMap(1429)
+    local a, b = pinFor(1), pinFor(2)
+    assert_eq({ a.rank, b.rank }, { 1, 2 })
+    assert_eq(a.rankText:GetText(), "1"); assert_eq(b.rankText:GetText(), "2")
+    assert_eq(a.ring.vertexColor, { 1, 0.82, 0 })
+    assert_eq(b.ring.vertexColor, { 0.75, 0.75, 0.75 })
+  end,
+  single_option_has_no_number = function()
+    load()
+    NewbieNudge.Services:Mark("inn", { 7 }, true)
+    WOW.ViewMap(1429)
+    assert_true(not pinFor(7).rankText:IsShown())
+  end,
+  right_click_removes_just_that_option = function()
+    load()
+    NewbieNudge.Services:Mark("repair", { 1, 2 }, true)
+    WOW.ViewMap(1429)
+    WOW.Click(pinFor(2), "RightButton")
+    assert_eq(NewbieNudge.Services:MarkOf("repair").npcs, { 1 })
+  end,
+  option_tooltip_shows_rank_time_and_route = function()
+    load()
+    NewbieNudge.Services:Mark("repair", { 1, 2 }, true)
+    WOW.ViewMap(1429)
+    WOW.Hover(pinFor(1))
+    assert_eq(GameTooltip.lines[1], L().MAPPIN_OPTION:format(1, 1, L().SERVICES_ROUTE_FOOT))
+    assert_eq(GameTooltip.lines[2], "Near Smith")
   end,
 }

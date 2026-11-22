@@ -64,7 +64,7 @@ return {
     S():Mark("repair", 1, true); S():Mark("repair", 2, true); S():Mark("inn", 7, false)
     local marks = S():Marks()
     assert_eq(#marks, 2)
-    assert_eq(NewbieNudge.db.marks, { { kind = "repair", npcID = 2, fromRow = true }, { kind = "inn", npcID = 7, fromRow = false } })
+    assert_eq(NewbieNudge.db.marks, { { kind = "repair", npcs = { 2 }, npcID = 2, fromRow = true }, { kind = "inn", npcs = { 7 }, npcID = 7, fromRow = false } })
   end,
   unknown_npc_dropped_on_load = function()
     load(function() _G.NewbieNudgeDB = { marks = { { kind = "repair", npcID = 999, fromRow = true }, { kind = "inn", npcID = 7 } } } end)
@@ -138,5 +138,38 @@ return {
     load()
     S():MarkClosest("weapon", { 11867 }, true)
     assert_true(said(L().SERVICES_ROUTE_FLY:format("Near Field", "City Port")))
+  end,
+  -- v4 §4g: several options per mark
+  mark_closest_marks_up_to_n_options_one_per_map = function()
+    load()
+    S():MarkClosest("repair", nil, true)
+    assert_eq(S():MarkOf("repair").npcs, { 1, 5, 6 })
+    assert_eq(S():MarkOf("repair").npcID, 1, "best option first")
+    assert_true(said(L().SERVICES_MORE:format(2)))
+  end,
+  one_option_setting = function()
+    load()
+    NewbieNudge.db.services.options = 1
+    S():MarkClosest("repair", nil, true)
+    assert_eq(S():MarkOf("repair").npcs, { 1 })
+    assert_true(not said(L().SERVICES_MORE:format(0)))
+  end,
+  old_single_marks_load_as_one_option = function()
+    load(function() _G.NewbieNudgeDB = { marks = { { kind = "inn", npcID = 7, fromRow = true } } } end)
+    assert_eq(S():Marks()[1].npcs, { 7 })
+  end,
+  remove_one_option = function()
+    load()
+    S():Mark("repair", { 1, 5, 6 }, true)
+    S():UnmarkOption("repair", 5)
+    assert_eq(S():MarkOf("repair").npcs, { 1, 6 })
+    S():UnmarkOption("repair", 1); S():UnmarkOption("repair", 6)
+    assert_true(not S():IsMarked("repair"), "last option gone, mark gone")
+  end,
+  marked_check_against_a_rows_trainers = function()
+    load()
+    S():Mark("weapon", { 11867, 9 }, true)
+    assert_true(S():IsMarked("weapon", { 9 }))
+    assert_true(not S():IsMarked("weapon", { 12345 }))
   end,
 }

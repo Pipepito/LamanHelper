@@ -47,7 +47,7 @@ NN.defaults = {
   infobar = { enabled = true, bags = true, gold = true, gear = true },
   minimap = { hide = false, angle = 225 },
   marks = {},
-  services = { showAll = false, kinds = {} },
+  services = { showAll = false, kinds = {}, options = 4 },
 }
 
 -------------------------------------------------------------------------------

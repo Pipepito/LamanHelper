@@ -96,17 +96,29 @@ local function onEnter(self)
   local npc = NN.Services:Npc(self.npcID)
   if not npc then return end
   GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-  GameTooltip:SetText(npc.name)
+  if self.marked then
+    -- "2 · about 3 min · Fly from A to B." first, then who and where
+    local time, route = NN.Services:TravelTime(self.npcID)
+    if time then
+      local minutes = math.max(1, math.ceil(math.min(time, 359999) / 60))
+      GameTooltip:SetText(L.MAPPIN_OPTION:format(self.rank or 1, minutes, NN.Services:RouteText(route)))
+      GameTooltip:AddLine(npc.name, 1, 1, 1)
+    else
+      GameTooltip:SetText(npc.name)
+    end
+  else
+    GameTooltip:SetText(npc.name)
+  end
   if npc.title ~= "" then GameTooltip:AddLine(npc.title, 1, 0.82, 0) end
   GameTooltip:AddLine(NN.Services.ZoneName(npc.map), 1, 1, 1)
-  GameTooltip:AddLine(self.marked and L.MAPPIN_REMOVE or L.MAPPIN_CLICK_MARK, 0.8, 0.8, 0.8)
+  GameTooltip:AddLine(self.marked and L.MAPPIN_REMOVE_OPTION or L.MAPPIN_CLICK_MARK, 0.8, 0.8, 0.8)
   GameTooltip:Show()
 end
 
 local function onClick(self, button)
   GameTooltip:Hide()
   if self.marked then
-    if button == "RightButton" then NN.Services:Unmark(self.kind) end
+    if button == "RightButton" then NN.Services:UnmarkOption(self.kind, self.npcID) end
   elseif button == "LeftButton" then
     NN.Services:MarkNpc(self.kind, self.npcID, false, nil, false) -- the map is already open
   end
@@ -126,7 +138,8 @@ local function acquire()
     pin.icon:AddMaskTexture(mask)
     pin.ring = pin:CreateTexture(nil, "OVERLAY")
     pin.ring:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    pin.ring:SetVertexColor(1, 0.82, 0)
+    pin.rankText = pin:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
+    pin.rankText:SetPoint("BOTTOMRIGHT", pin, "BOTTOMRIGHT", 3, -3)
     pin:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     pin:SetScript("OnEnter", onEnter)
     pin:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -136,12 +149,20 @@ local function acquire()
   return pin
 end
 
-local function place(npcID, kind, marked)
+-- rank: the option's place in its mark (1 = quickest); numbered when the
+-- mark has more than one option; gold ring for the quickest, grey otherwise.
+local function place(npcID, kind, marked, rank, options)
   local npc = NN.Services:Npc(npcID)
   local child = canvas()
   local pin = acquire()
   local size = marked and MARK_SIZE or PIN_SIZE
-  pin.npcID, pin.kind, pin.marked = npcID, kind, marked
+  pin.npcID, pin.kind, pin.marked, pin.rank = npcID, kind, marked, rank
+  if marked and (options or 1) > 1 then
+    pin.rankText:SetText(tostring(rank)); pin.rankText:Show()
+  else
+    pin.rankText:Hide()
+  end
+  if rank == 1 then pin.ring:SetVertexColor(1, 0.82, 0) else pin.ring:SetVertexColor(0.75, 0.75, 0.75) end
   pin:SetSize(size, size)
   local texture, coords = iconFor(kind)
   pin.icon:SetTexture(texture)
@@ -172,10 +193,12 @@ function MapPins:Refresh()
   if map and canvas() and NN.db and NN.Services then
     local drawn = {}
     for _, mark in ipairs(NN.Services:Marks()) do
-      local npc = NN.Services:Npc(mark.npcID)
-      if npc.map == map and not drawn[mark.npcID] then
-        place(mark.npcID, mark.kind, true)
-        drawn[mark.npcID] = true
+      for rank, id in ipairs(mark.npcs) do
+        local npc = NN.Services:Npc(id)
+        if npc.map == map and not drawn[id] then
+          place(id, mark.kind, true, rank, #mark.npcs)
+          drawn[id] = true
+        end
       end
     end
     if NN.db.services.showAll then

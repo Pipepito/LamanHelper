@@ -83,7 +83,7 @@ return {
     assert_true(ML().noneLabel:IsShown())
     NewbieNudge.Services:Mark("inn", 7, true)
     local row = markRow(7)
-    assert_eq(row.label:GetText(), "Innkeeper Farley · Elwynn Forest")
+    assert_true(row.label:GetText():find("Innkeeper Farley · Elwynn Forest", 1, true), row.label:GetText())
     assert_true(not ML().noneLabel:IsShown())
     WOW.Click(row.removeButton, "LeftButton")
     assert_true(not NewbieNudge.Services:IsMarked("inn"))
@@ -109,5 +109,25 @@ return {
     load(function() _G.NewbieNudgeDB = { map = { listOpen = true } } end)
     WOW.ViewMap(1429)
     assert_true(ML().frame:IsShown())
+  end,
+  mark_heading_with_its_options = function()
+    load(); ML():Toggle()
+    NewbieNudge.Services:Mark("repair", { 1, 5 }, true)
+    local heading
+    for _, row in ipairs(rows("markKind")) do if row.isHeading then heading = row end end
+    assert_true(heading, "heading row")
+    assert_eq(heading.label:GetText(), ML().KindLabel("repair"))
+    assert_true(markRow(1).label:GetText():find("1. Near Smith · Elwynn Forest", 1, true), markRow(1).label:GetText())
+    assert_true(markRow(5).label:GetText():find("2. City Smith · Stormwind City", 1, true))
+    WOW.Click(markRow(5).removeButton, "LeftButton")
+    assert_eq(NewbieNudge.Services:MarkOf("repair").npcs, { 1 })
+    for _, row in ipairs(rows("markKind")) do if row.isHeading then heading = row end end
+    WOW.Click(heading.removeButton, "LeftButton")
+    assert_true(not NewbieNudge.Services:IsMarked("repair"))
+  end,
+  options_setting_on_the_map_page = function()
+    load()
+    WOW.settings["NN_services_options"].setter(2)
+    assert_eq(NewbieNudge.db.services.options, 2)
   end,
 }

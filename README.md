@@ -95,9 +95,13 @@ client has one.
 Reminders that send you to an NPC (damaged gear, new spells, weapon skills,
 no food, logging out outside an inn, the next profession rank) get a small
 map-pin button at the end of the row; in the icons-only style, Ctrl+click the
-icon. It marks the closest suitable NPC on the world map: friendly to your
-faction, never in a zone more than 3 levels above you, and on your continent
-first. The map opens there and a chat line says who and where. Marking a
+icon. It marks the quickest suitable NPCs to reach on the world map — up to
+4 places, one per zone or city, numbered 1 (gold ring) to 4: friendly to
+your faction, never in a zone more than 3 levels above you, and counting the
+flight paths you have discovered (a flight beats a long run). The map opens
+on the quickest one and a chat line says who, where and which flight to take.
+Hover a pin for its estimated time and route; "Options per mark" (Options →
+Map and minimap) sets how many places a mark shows. Marking a
 repair vendor, innkeeper or food vendor also turns on the game's own minimap
 tracking for it. Several marks can be up at once (one per kind); right-click
 a pin, click the row's button again, or use "Remove all map marks" in the

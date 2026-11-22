@@ -13,6 +13,7 @@ in `dist/` and are not tracked.
 - **Materials bag in a normal bag slot:** if a profession bag sits in one of your four bag slots while the materials slot is empty, a reminder offers to move it for you.
 - **Weapon skills to learn:** lists the weapons your class can use but hasn't learned, and the city of your faction whose weapon master teaches them (WoW Forever's trainers, including rogue axes and druid polearms).
 - **Map marks:** reminders that send you to an NPC (repair, class trainer, weapon master, food, inn, profession trainer) get a button that marks the closest one on the world map — for your faction, and never in a zone far above your level. Several marks at once; right-click a pin to remove it. Repair, inn and food marks also turn on the minimap tracking for them.
+- **Quickest, not nearest:** marks count the flight paths you have discovered, and show up to 4 options (one per zone or city, numbered, best first) so you can pick one on your way. "Options per mark" sets how many.
 - **Show services on the world map:** repair vendors, inns, food vendors and your trainers on the map you're looking at (minimap menu or `/nudge services`).
 - **NewbieNudge list on the world map:** click the NewbieNudge icon on the map for switches per kind of service and the list of your marks (jump to the zone, remove one, remove all).
 - **Icon layout:** icons per line, rows or columns, icon size and gap for the icons-only panel.
