@@ -445,6 +445,68 @@ squarer block, a vertical column, …).
   size and gap applied, frame size, defaults for an old database, options
   round-trip.
 
+## 4g. "Closest" counts flight paths you know
+
+Owner report (2026-11-22): standing near the Crossroads, the herbalism mark
+went to Sen'jin Village (nearest in a straight line) although Orgrimmar has a
+trainer and the player can fly Crossroads → Orgrimmar.
+
+- "Closest" becomes "quickest to reach", estimated in seconds:
+  - on foot: world distance ÷ 7 yards/s (running speed; mounts not counted,
+    builder's call: new players mostly run);
+  - by air: walk to a discovered flight master + flight + walk from the
+    landing flight master to the NPC. Flight time = straight distance
+    between the two flight masters × 1.3 (routes bend) ÷ 30 yards/s, plus 20 s
+    to get going.
+  - The quicker of the two counts. Another continent still loses to any
+    choice on the player's continent.
+- Flight masters: `C_TaxiMap.GetTaxiNodesForMap(continentMapID)` (Kalimdor
+  1414, Eastern Kingdoms 1415; continent of the player's map found by
+  walking up `parentMapID`), the same API the `flight_path` reminder already
+  uses in game. Only nodes in a discovered state (not
+  `Enum.FlightPathState.Unreachable`) count; positions are converted with
+  `C_Map.GetWorldPosFromMapPos(continentMapID, pos)`. Read when a mark is
+  made, not cached across sessions. If the API is missing or returns
+  nothing, "closest" stays the straight-line choice.
+- The mark's chat line names the route when flying wins: "Marked Jandi
+  (Herbalism Trainer) in Orgrimmar — fly from The Crossroads to Orgrimmar."
+  The pin tooltip and the map list show the same route line.
+- Level filter, faction filter and weapon rows' own trainers are unchanged.
+- Show-all pins are unaffected (they show every NPC on the map you view).
+- Tests: walking wins when near; flying wins with both flight masters
+  discovered (the Crossroads → Orgrimmar case); not when the landing one is
+  undiscovered; no taxi API → straight line; other continent still loses;
+  chat line names the route; route in tooltip.
+
+### Several options per mark (owner, 2026-11-22)
+
+So the player can choose: wait for the next area they are heading to, or
+fly now.
+
+- A mark holds up to `db.services.options` NPCs (option "Options per mark",
+  slider 1–5, default 4), ranked by estimated time (above). Same level and
+  faction filters; **at most one option per map** (zone or city) so the
+  options are different places; weapon rows rank only their own trainers.
+- Saved shape: `db.marks[i] = { kind, npcs = { id1, id2, ... }, fromRow,
+  rule }` (best first). Old single marks `{ kind, npcID }` load as
+  `npcs = { npcID }`.
+- Pins: every option gets a pin with its rank number (1–N) on it; option 1
+  has the gold ring, the others a silver ring (same ring, grey tint).
+  Tooltip: "N · about X min · <route>" (route: "on foot" or "fly from A to
+  B"), then name, title, zone, "Right-click: remove this option".
+- Right-click a pin removes that option (the others keep their numbers
+  until the next mark); the row button and "Remove all marks" remove the
+  whole mark.
+- Chat: the quickest option with its route, plus "N more options on your
+  map." when N > 0.
+- Map list "Your marks": one heading line per mark (kind icon + kind label,
+  ✕ removes the whole mark), and under it one line per option ("1. Jandi ·
+  Orgrimmar · ~3 min"), each with ✕; clicking an option shows its zone.
+- Tests: up to N options ranked by time; one per map; weapon rows limited
+  to their trainers; options setting 1 → single option; old saved marks
+  load; numbered pins with gold first; right-click removes one option; list
+  shows heading + options; chat "N more options".
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list

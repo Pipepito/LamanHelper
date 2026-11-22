@@ -88,3 +88,17 @@ Then: whole-branch review of Tasks 9–12 (fresh reviewer), fix Critical/Importa
 - [ ] Implement; strings `MAPLIST_TITLE`, `MAPLIST_SHOW`, `MAPLIST_MARKS`, `MAPLIST_NONE`, `MAPLIST_REVEAL`, `MAPLIST_KIND_REPAIR/INN/SUPPLIES/WEAPON`, `MAPLIST_KIND_TRAINER = "%s trainers"`, `MAPLIST_KIND_PROF = "%s trainers"`, `MAPLIST_REMOVE_ALL`, `MAPLIST_SETTINGS`, `MAPLIST_REMOVE_TT`, `MAP_BUTTON_TT` updated. Run → PASS, all suites green. Docs (README map section, CHANGELOG bullets, checklist lines). Commit.
 
 Then: review of Tasks 13–14 and the fixes since the last review; fix Critical/Important RED→GREEN.
+
+### Task 15: Quickest route (spec §4g)
+
+**Files:** `Services.lua`, fixture `tests/fixtures/services.lua` (+ taxi nodes on a continent map 1414 = continent 0, `mapWorld[1414]`), `tests/test_services.lua`, locales.
+
+**Interfaces:** `Services:FlightMasters() -> { { name, continent, x, y } }` (discovered only, world yards); `Services:TravelTime(npcID, from?) -> seconds, route` with `route = { kind = "foot" }` or `{ kind = "fly", from = name, to = name }` and other-continent targets + 1e9; `Services:Ranked(kind, npcIDs?, count) -> { { id, time, route }, ... }` (quickest first, one per map); `Closest` = first of `Ranked(…, 1)`. Constants: run 7 yd/s, flight 30 yd/s × 1.3 route factor, 20 s take-off.
+
+- [ ] Tests: walking wins when near; flying wins with both nodes known (player far from target, near node A; node B next to target); undiscovered landing node ignored; no `C_TaxiMap` → straight line; other continent loses; one result per map; `Ranked` order; chat line names the route `L.SERVICES_ROUTE_FLY:format(from, to)`. Run → FAIL; implement; PASS; commit.
+
+### Task 16: Several options per mark (spec §4g)
+
+**Files:** `Services.lua` (marks `{ kind, npcs = {…}, fromRow, rule }`, old `npcID` migrated; `MarkClosest` marks `Ranked(kind, npcIDs, db.services.options)`; `UnmarkOption(kind, npcID)`; `IsMarked(kind, npcIDs)` true when any option is in `npcIDs`), `MapPins.lua` (one pin per option, `pin.rank`, rank number fontstring, gold ring for rank 1, grey for others, tooltip `L.MAPPIN_OPTION:format(rank, minutes, routeText)`; right-click removes that option), `MapList.lua` (heading per mark + option lines with ✕), `Core.lua` default `services.options = 4`, Map page slider `NN_services_options` 1–5, Dev snapshot shows `npcs`, locales; tests updated across `test_services`, `test_mappins`, `test_maplist`, `test_service_rows`, `test_dev`.
+
+- [ ] Tests: N options ranked, one per map; setting 1 → one option; old saved mark loads as `npcs = { id }`; numbered pins, gold ring only on rank 1; right-click removes one option; list heading + options with ✕; chat `L.SERVICES_MORE:format(n)`. Run → FAIL; implement; PASS; docs (README, CHANGELOG, checklist); commit.
