@@ -119,8 +119,12 @@ function MinimapButton:MenuEntries()
   return entries
 end
 
+-- Pop-up menus go on the top layer: drawn under the quest tracker, the
+-- menu lost the mouse to it and closed (Forever, 2026-11-22).
+local TOP = "FULLSCREEN_DIALOG"
+
 local function openWithMenuUtil(owner, entries)
-  MenuUtil.CreateContextMenu(owner, function(_, root)
+  local menu = MenuUtil.CreateContextMenu(owner, function(_, root)
     for _, e in ipairs(entries) do
       if e.kind == "title" then root:CreateTitle(e.label)
       elseif e.kind == "divider" then root:CreateDivider()
@@ -130,6 +134,7 @@ local function openWithMenuUtil(owner, entries)
       end
     end
   end)
+  if menu and menu.SetFrameStrata then menu:SetFrameStrata(TOP) end
 end
 
 local function openWithEasyMenu(entries)
@@ -147,6 +152,7 @@ local function openWithEasyMenu(entries)
   MinimapButton.dropdown = MinimapButton.dropdown
     or CreateFrame("Frame", "NewbieNudgeMinimapMenu", UIParent, "UIDropDownMenuTemplate")
   EasyMenu(list, MinimapButton.dropdown, "cursor", 0, 0, "MENU")
+  if DropDownList1 and DropDownList1.SetFrameStrata then DropDownList1:SetFrameStrata(TOP) end
 end
 
 function MinimapButton:OpenMenu(owner)

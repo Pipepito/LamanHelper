@@ -177,4 +177,18 @@ return {
     assert_true(WOW.lastMenu, "menu opened")
     assert_true(WOW.lastMenuOwner ~= NewbieNudgeMinimapButton, "not anchored to the hidden button")
   end,
+  -- Forever: the menu closed when the mouse crossed the quest tracker below it.
+  menu_drawn_above_other_frames = function()
+    load_addon()
+    WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
+    assert_eq(WOW.lastMenuFrame.strata, "FULLSCREEN_DIALOG")
+  end,
+  fallback_menu_drawn_above_other_frames = function()
+    MenuUtil = nil
+    EasyMenu = function() end
+    DropDownList1 = CreateFrame("Frame", "DropDownList1", UIParent)
+    load_addon()
+    WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
+    assert_eq(DropDownList1.strata, "FULLSCREEN_DIALOG")
+  end,
 }

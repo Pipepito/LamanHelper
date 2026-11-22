@@ -897,7 +897,8 @@ local function newMenuDescription()
   return d
 end
 MenuUtil = { CreateContextMenu = function(owner, generator)
-  local d = newMenuDescription(); generator(owner, d); WOW.lastMenu = d; WOW.lastMenuOwner = owner; record("CreateContextMenu"); return d
+  local d = newMenuDescription(); generator(owner, d); WOW.lastMenu = d; WOW.lastMenuOwner = owner; record("CreateContextMenu")
+  WOW.lastMenuFrame = CreateFrame("Frame"); return WOW.lastMenuFrame
 end }
 AddonCompartmentFrame = { RegisterAddon = function(self, info) WOW.compartment = info; record("RegisterAddon", info.text) end }
 
