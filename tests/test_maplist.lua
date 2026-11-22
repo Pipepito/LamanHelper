@@ -62,14 +62,16 @@ return {
     assert_eq(NewbieNudge.db.services.showAll, true)
     assert_eq(kindRow("repair").checked, true)
     assert_eq(kindRow("inn").checked, false, "only the ticked kind (owner, 2026-11-22)")
-    WOW.Click(kindRow("repair"), "LeftButton")
+    WOW.Click(kindRow("inn"), "LeftButton") -- now repair and inn
+    WOW.Click(kindRow("repair"), "LeftButton") -- inn only
     assert_eq(NewbieNudge.db.services.kinds.repair, false)
     assert_eq(kindRow("repair").checked, false)
     WOW.ViewMap(1429)
+    local shown = 0
     for _, pin in ipairs(NewbieNudge.MapPins.pins) do
-      if pin:IsShown() then assert_true(pin.kind ~= "repair", "no repair pins") end
+      if pin:IsShown() then shown = shown + 1; assert_true(pin.kind ~= "repair", "no repair pins") end
     end
-    assert_true(#NewbieNudge.MapPins.pins > 0, "other kinds still drawn")
+    assert_true(shown > 0, "inn pins still drawn")
   end,
   rows_unchecked_while_services_are_off = function()
     load(); ML():Toggle()
