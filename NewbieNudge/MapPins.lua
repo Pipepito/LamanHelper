@@ -442,9 +442,18 @@ function MapPins:RefreshBadges(map)
       badge:SetFrameLevel(self.TopLevel() + 1)
       badge:SetScale(1 / scale)
       local left, right, top, bottom = self.CityRect(cityMap, map)
+      local w, h = child:GetWidth() * scale, child:GetHeight() * scale
       badge:ClearAllPoints()
-      badge:SetPoint("CENTER", child, "TOPLEFT", (left + right) / 2 * child:GetWidth() * scale,
-        -(top + bottom) / 2 * child:GetHeight() * scale)
+      if left >= 0 and top >= 0 and right <= 1 and bottom <= 1 then
+        -- city fully on the map: badge on the city
+        badge:SetPoint("CENTER", child, "TOPLEFT", (left + right) / 2 * w, -(top + bottom) / 2 * h)
+      else
+        -- city cut by the map edge (Orgrimmar on Durotar): just below the
+        -- part on the map, centred across it, kept on the map
+        local l, r = math.max(0, left), math.min(1, right)
+        local below = math.min(math.max(0, bottom) + 0.01, 0.95)
+        badge:SetPoint("TOP", child, "TOPLEFT", (l + r) / 2 * w, -below * h)
+      end
       badge:Show()
     end
   end

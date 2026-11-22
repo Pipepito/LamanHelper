@@ -405,4 +405,28 @@ return {
     for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() and b.mapID == 1461 then badge = b end end
     assert_true(badge, "badge for the town on the edge")
   end,
+  -- owner 2026-11-22 (screenshot): Orgrimmar's badge sat on the map title,
+  -- half off the map: a city cut by the edge gets its badge just below it
+  edge_city_badge_sits_below_the_city = function()
+    load()
+    WOW.state.mapWorld[1461] = { 0, 400, -100, 200, 200 } -- y -0.1..0.1 on Elwynn
+    WOW.state.mapInfo[1461] = { name = "Edge Town", parentMapID = 1414, mapType = 3 }
+    NewbieNudge.ServiceData.npcs[21] = { "Edge Flyer", "Gryphon Master", 1461, 50, 60, "A" }
+    table.insert(NewbieNudge.ServiceData.kinds.flight, 21)
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local badge
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() and b.mapID == 1461 then badge = b end end
+    local point, _, relPoint, x, y = badge:GetPoint(1)
+    assert_eq({ point, relPoint }, { "TOP", "TOPLEFT" })
+    assert_true(math.abs(x - 500) < 0.01, "centred across the visible part: " .. x)
+    assert_true(math.abs(y + (0.1 + 0.01) * 667) < 0.01, "just below the city: " .. y)
+  end,
+  inner_city_badge_stays_on_the_city = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local point = NewbieNudge.MapPins.badges[1]:GetPoint(1)
+    assert_eq(point, "CENTER")
+  end,
 }
