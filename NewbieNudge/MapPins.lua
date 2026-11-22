@@ -99,7 +99,10 @@ local function onEnter(self)
   if self.marked then
     -- "2 · about 3 min · Fly from A to B." first, then who and where
     local time, route = NN.Services:TravelTime(self.npcID)
-    if time then
+    if route and route.kind == "continent" then
+      GameTooltip:SetText(L.MAPPIN_OPTION_FAR:format(self.rank or 1, NN.Services:RouteText(route)))
+      GameTooltip:AddLine(npc.name, 1, 1, 1)
+    elseif time then
       local minutes = math.max(1, math.ceil(math.min(time, 359999) / 60))
       GameTooltip:SetText(L.MAPPIN_OPTION:format(self.rank or 1, minutes, NN.Services:RouteText(route)))
       GameTooltip:AddLine(npc.name, 1, 1, 1)

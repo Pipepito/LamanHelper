@@ -61,7 +61,7 @@ return {
     assert_eq(NewbieNudge.db.services.kinds.repair, true)
     assert_eq(NewbieNudge.db.services.showAll, true)
     assert_eq(kindRow("repair").checked, true)
-    assert_eq(kindRow("inn").checked, true, "other kinds follow the master switch")
+    assert_eq(kindRow("inn").checked, false, "only the ticked kind (owner, 2026-11-22)")
     WOW.Click(kindRow("repair"), "LeftButton")
     assert_eq(NewbieNudge.db.services.kinds.repair, false)
     assert_eq(kindRow("repair").checked, false)
@@ -129,5 +129,38 @@ return {
     load()
     WOW.settings["NN_services_options"].setter(2)
     assert_eq(NewbieNudge.db.services.options, 2)
+  end,
+  -- review fixes
+  ticking_one_kind_while_all_are_off_shows_only_that_kind = function()
+    load(); ML():Toggle()
+    WOW.Click(kindRow("inn"), "LeftButton")
+    assert_eq(kindRow("inn").checked, true)
+    assert_eq(kindRow("repair").checked, false, "the others stay off")
+    WOW.Click(kindRow("inn"), "LeftButton")
+    assert_eq(NewbieNudge.db.services.showAll, false, "last one off turns services off")
+  end,
+  long_lists_stay_inside_the_map_and_scroll = function()
+    load(); ML():Toggle()
+    WOW.state.taxiNodes = {}
+    local S = NewbieNudge.Services
+    S:Mark("repair", { 1, 2, 5, 6 }, true); S:Mark("inn", { 7 }, true); S:Mark("supplies", { 10 }, true)
+    S:Mark("trainer_MAGE", { 8 }, true); S:Mark("weapon", { 11867, 9 }, true); S:Mark("prof_182", { 11 }, true)
+    WorldMapFrame.ScrollContainer:SetSize(1002, 300)
+    ML():Refresh()
+    assert_true(ML().frame:GetHeight() <= 300, "height " .. ML().frame:GetHeight())
+    assert_true(ML().content:GetHeight() > ML().scroll:GetHeight(), "content taller than the visible part")
+    ML().scroll:Fire("OnMouseWheel", -1)
+    assert_true(ML().scroll:GetVerticalScroll() > 0, "wheel scrolls")
+  end,
+  labels_stay_on_one_line = function()
+    load(); ML():Toggle()
+    NewbieNudge.Services:Mark("inn", { 7 }, true)
+    assert_eq(markRow(7).label.maxLines, 1)
+  end,
+  option_remove_tooltip_names_an_option = function()
+    load(); ML():Toggle()
+    NewbieNudge.Services:Mark("inn", { 7 }, true)
+    WOW.Hover(markRow(7).removeButton)
+    assert_eq(GameTooltip.lines[1], L().MAPLIST_REMOVE_OPTION_TT)
   end,
 }

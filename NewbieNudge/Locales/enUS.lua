@@ -575,6 +575,9 @@ NN.RegisterLocale("enUS", {
   MAPLIST_REMOVE_ALL = "Remove all marks",
   MAPLIST_SETTINGS = "Settings…",
   MAPLIST_REMOVE_TT = "Remove this mark",
+  MAPLIST_REMOVE_OPTION_TT = "Remove this option",
+  SERVICES_ROUTE_CONTINENT = "on another continent",
+  MAPPIN_OPTION_FAR = "%d · %s",
   OPT_BUILD_BADGES = "Show the build on the talent window",
   OPT_BUILD_BADGES_TT = "On each talent the build uses: bottom-right, the points you have of the points the build puts there (green when done, yellow in progress); top-left, the level the build first takes it at, until you start it.",
 

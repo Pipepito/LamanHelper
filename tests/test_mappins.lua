@@ -237,4 +237,11 @@ return {
     NewbieNudge.MapList:Toggle()
     assert_eq(NewbieNudge.MapList.frame.strata, "DIALOG")
   end,
+  other_continent_option_says_so = function()
+    load()
+    NewbieNudge.Services:Mark("repair", { 1, 6 }, true)
+    WOW.ViewMap(1439)
+    WOW.Hover(pinFor(6))
+    assert_eq(GameTooltip.lines[1], L().MAPPIN_OPTION_FAR:format(2, L().SERVICES_ROUTE_CONTINENT))
+  end,
 }

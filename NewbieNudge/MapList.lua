@@ -28,6 +28,18 @@ frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -PAD)
 frame.title:SetText(L.MAPLIST_TITLE)
 
+-- The lines live in a scrolling area that never grows past the map.
+local scroll = CreateFrame("ScrollFrame", nil, frame)
+local content = CreateFrame("Frame", nil, scroll)
+scroll:SetScrollChild(content)
+scroll:EnableMouseWheel(true)
+scroll:SetScript("OnMouseWheel", function(self, delta)
+  local max = math.max(0, content:GetHeight() - self:GetHeight())
+  local value = math.min(max, math.max(0, (self:GetVerticalScroll() or 0) - delta * ROW_H * 2))
+  self:SetVerticalScroll(value)
+end)
+MapList.scroll, MapList.content = scroll, content
+
 local function newButton(label, onClick)
   local b = CreateFrame("Button", nil, frame)
   b:SetHeight(ROW_H)
@@ -46,11 +58,11 @@ MapList.removeAll = newButton(L.MAPLIST_REMOVE_ALL, function() NN.Services:Clear
 MapList.settings = newButton(L.MAPLIST_SETTINGS, function()
   if NN.MapReveal and NN.MapReveal.OpenSettings then NN.MapReveal:OpenSettings() end
 end)
-MapList.noneLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+MapList.noneLabel = content:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 MapList.noneLabel:SetText(L.MAPLIST_NONE)
 
 local function header(text)
-  local fs = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  local fs = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   fs:SetText(text)
   return fs
 end
@@ -65,7 +77,7 @@ local function acquireRow()
   MapList.used = MapList.used + 1
   local row = MapList.rows[MapList.used]
   if not row then
-    row = CreateFrame("Button", nil, frame)
+    row = CreateFrame("Button", nil, content)
     row:SetHeight(ROW_H)
     row:RegisterForClicks("LeftButtonUp")
     row.check = row:CreateTexture(nil, "ARTWORK")
@@ -75,13 +87,17 @@ local function acquireRow()
     row.icon:SetSize(ICON, ICON)
     row.label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     row.label:SetJustifyH("LEFT")
+    row.label:SetWordWrap(false)
+    row.label:SetMaxLines(1)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
     row.removeButton = CreateFrame("Button", nil, row)
     row.removeButton:SetSize(ICON, ICON)
     row.removeButton:SetPoint("RIGHT", row, "RIGHT", 0, 0)
     row.removeButton:SetNormalTexture("Interface\\Buttons\\UI-StopButton")
     row.removeButton:SetScript("OnEnter", function(self)
-      GameTooltip:SetOwner(self, "ANCHOR_RIGHT"); GameTooltip:SetText(L.MAPLIST_REMOVE_TT); GameTooltip:Show()
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:SetText(row.isHeading and L.MAPLIST_REMOVE_TT or L.MAPLIST_REMOVE_OPTION_TT)
+      GameTooltip:Show()
     end)
     row.removeButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     MapList.rows[MapList.used] = row
@@ -148,15 +164,15 @@ end
 
 local function place(widget, y, height)
   widget:ClearAllPoints()
-  widget:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
-  widget:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -y)
+  widget:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  widget:SetPoint("TOPRIGHT", content, "TOPRIGHT", 0, -y)
   return y + (height or ROW_H)
 end
 
 function MapList:Refresh()
   if not (NN.db and frame:IsShown()) then return end
   self.used = 0
-  local y = PAD + 18
+  local y = 0
 
   local reveal = acquireRow()
   reveal.isReveal = true
@@ -177,9 +193,16 @@ function MapList:Refresh()
     row.removeButton:Hide()
     row:SetScript("OnClick", function()
       local db = NN.db.services
-      local on = not kindOn(kind)
-      db.kinds[kind] = on
-      if on and not db.showAll then db.showAll = true end
+      if not db.showAll then
+        -- services were off: show just the kind that was ticked
+        db.showAll = true
+        for _, k in ipairs(NN.MapPins.ShowAllKinds()) do db.kinds[k] = (k == kind) end
+      else
+        db.kinds[kind] = not kindOn(kind)
+        local any = false
+        for _, k in ipairs(NN.MapPins.ShowAllKinds()) do if kindOn(k) then any = true end end
+        if not any then db.showAll = false end
+      end
       NN.MapPins:Refresh()
       MapList:Refresh()
     end)
@@ -211,7 +234,8 @@ function MapList:Refresh()
         row.npcID, row.markKind = id, mark.kind
         local text = ("%d. %s · %s"):format(rank, npc.name, NN.Services.ZoneName(npc.map))
         local time = NN.Services:TravelTime(id, flights)
-        if time and time < 359999 then text = text .. (" · ~%d min"):format(math.max(1, math.ceil(time / 60))) end
+        if time and time < 359999 then text = text .. (" · ~%d min"):format(math.max(1, math.ceil(time / 60)))
+        elseif time then text = text .. " · " .. L.SERVICES_ROUTE_CONTINENT end
         layoutRow(row, false, nil, nil, nil, text)
         row.icon:SetTexture(nil)
         row.removeButton:Show()
@@ -224,18 +248,31 @@ function MapList:Refresh()
     end
   end
 
+  for i = self.used + 1, #self.rows do self.rows[i]:Hide() end
+
+  -- the lines scroll inside the map's height; title above, buttons below
+  local top, bottom = PAD + 20, ROW_H + 6 + PAD
+  local mapHeight = (WorldMapFrame and WorldMapFrame.ScrollContainer and WorldMapFrame.ScrollContainer:GetHeight()) or 600
+  if not mapHeight or mapHeight <= 0 then mapHeight = 600 end
+  local visible = math.max(ROW_H * 3, math.min(y, mapHeight - top - bottom - 20))
+  content:SetSize(WIDTH - PAD * 2, y)
+  scroll:ClearAllPoints()
+  scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -top)
+  scroll:SetSize(WIDTH - PAD * 2, visible)
+  local max = math.max(0, y - visible)
+  if (scroll:GetVerticalScroll() or 0) > max then scroll:SetVerticalScroll(max) end
+
   if #marks > 0 then self.removeAll:Enable() else self.removeAll:Disable() end
+  self.removeAll:SetAlpha(#marks > 0 and 1 or 0.5)
   local half = (WIDTH - PAD * 3) / 2
+  local buttonsY = top + visible + 6
   self.removeAll:ClearAllPoints()
-  self.removeAll:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(y + 6))
+  self.removeAll:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -buttonsY)
   self.removeAll:SetWidth(half)
   self.settings:ClearAllPoints()
-  self.settings:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -(y + 6))
+  self.settings:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -buttonsY)
   self.settings:SetWidth(half)
-  y = y + 6 + ROW_H + PAD
-
-  for i = self.used + 1, #self.rows do self.rows[i]:Hide() end
-  frame:SetHeight(y)
+  frame:SetHeight(buttonsY + ROW_H + PAD)
 end
 
 -------------------------------------------------------------------------------

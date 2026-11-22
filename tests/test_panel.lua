@@ -276,4 +276,10 @@ return {
     NewbieNudge.Controller.Boost = function() return true end
     assert_eq(NewbieNudge.Panel.STRIP_ICON(), 40)
   end,
+  boosted_icon_size_is_whole_pixels = function()
+    load_addon()
+    NewbieNudge.db.panel.iconSize = 26
+    NewbieNudge.Controller.Boost = function() return true end
+    assert_eq(NewbieNudge.Panel.STRIP_ICON(), 35)
+  end,
 }

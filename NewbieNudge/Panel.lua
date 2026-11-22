@@ -14,7 +14,7 @@ Panel.STRIP_PER_LINE = 8
 -- is in use and the boost is on.
 function Panel.STRIP_ICON()
   local size = (NN.db and NN.db.panel.iconSize) or 24
-  if NN.Controller and NN.Controller:Boost() then return size * 32 / 24 end
+  if NN.Controller and NN.Controller:Boost() then return math.floor(size * 32 / 24 + 0.5) end
   return size
 end
 

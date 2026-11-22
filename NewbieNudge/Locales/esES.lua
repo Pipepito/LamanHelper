@@ -574,6 +574,9 @@ NN.RegisterLocale("esES", {
   MAPLIST_REMOVE_ALL = "Quitar todas las marcas",
   MAPLIST_SETTINGS = "Opciones…",
   MAPLIST_REMOVE_TT = "Quitar esta marca",
+  MAPLIST_REMOVE_OPTION_TT = "Quitar esta opción",
+  SERVICES_ROUTE_CONTINENT = "en otro continente",
+  MAPPIN_OPTION_FAR = "%d · %s",
   OPT_BUILD_BADGES = "Mostrar la build en la ventana de talentos",
   OPT_BUILD_BADGES_TT = "En cada talento que usa la build: abajo a la derecha, los puntos que tienes de los que la build pone ahí (verde al completar, amarillo en progreso); arriba a la izquierda, el nivel en que la build lo empieza, hasta que lo empieces.",
 

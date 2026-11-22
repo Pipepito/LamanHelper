@@ -122,7 +122,7 @@ function Services:TravelTime(npcID, flights)
   local n = data().npcs[npcID]
   local c, tx, ty = worldPos(n[3], n[4] / 100, n[5] / 100)
   if not (c and tx and ty) then return nil end
-  if c ~= continent then return OTHER_CONTINENT + distance(px, py, tx, ty), { kind = "foot" } end
+  if c ~= continent then return OTHER_CONTINENT + distance(px, py, tx, ty), { kind = "continent" } end
   local best, route = distance(px, py, tx, ty) / RUN_SPEED, { kind = "foot" }
   -- take off from the nearest discovered flight master, land at the best one
   local from, fromDist
@@ -178,6 +178,7 @@ end
 
 function Services:RouteText(route)
   if route and route.kind == "fly" then return L.SERVICES_ROUTE_FLY:format(route.from, route.to) end
+  if route and route.kind == "continent" then return L.SERVICES_ROUTE_CONTINENT end
   return L.SERVICES_ROUTE_FOOT
 end
 

@@ -802,6 +802,7 @@ WorldMapFrame.shown = false
 WorldMapFrame.pins = {}
 -- Canvas: 1000 x 667; S().worldMapID is the map being viewed.
 WorldMapFrame.ScrollContainer = CreateFrame("Frame", nil, WorldMapFrame)
+WorldMapFrame.ScrollContainer:SetSize(1002, 668)
 WorldMapFrame.ScrollContainer.Child = CreateFrame("Frame", nil, WorldMapFrame.ScrollContainer)
 WorldMapFrame.ScrollContainer.Child:SetSize(1000, 667)
 function WorldMapFrame.ScrollContainer:GetCanvasScale() return S().canvasScale or 1 end
@@ -972,6 +973,7 @@ function Region:SetMaxLetters(n) self.maxLetters = n end
 function Region:SetTextInsets() end
 function Region:EnableKeyboard() end
 function Region:SetScrollChild(c) self.scrollChild = c end
-function Region:SetVerticalScroll() end
+function Region:SetVerticalScroll(v) self.verticalScroll = v end
+function Region:GetVerticalScroll() return self.verticalScroll or 0 end
 function Region:GetVerticalScrollRange() return 0 end
 function Region:SetPropagateKeyboardInput() end
