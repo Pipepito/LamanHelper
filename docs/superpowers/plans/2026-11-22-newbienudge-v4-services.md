@@ -68,3 +68,23 @@
 - [ ] Implement; locale strings (enUS/esES): `SERVICES_MARKED = "Marked %s (%s) in %s."`, `SERVICES_NO_POSITION = "Can't tell where you are right now (try outside an instance)."`, `SERVICES_NONE = "No suitable %s found for your level and faction."`, `SERVICE_KIND_REPAIR/INN/SUPPLIES/WEAPON/TRAINER/PROF`, `MAPPIN_REMOVE = "Right-click: remove this mark"`, `MAPPIN_CLICK_MARK = "Click: mark it"`, `ROW_HINT_MARK = "Map button (or Ctrl+click): mark the closest on the world map"`, `MENU_SERVICES = "Show services on the world map"`, `MENU_CLEAR_MARKS = "Remove all map marks"`, `OPT_SERVICES = "Show nearby services on the world map"`, `OPT_SERVICES_TT`, `SLASH_SERVICES_ON/OFF`; `SLASH_HELP` gains `/nudge services`. Docs: README section "Map marks", CHANGELOG bullet, checklist lines + probes `/dump MINIMAP_TRACKING_REPAIR, MINIMAP_TRACKING_INNKEEPER, MINIMAP_TRACKING_VENDOR_FOOD` and `/dump C_Map.GetWorldPosFromMapPos(1453, CreateVector2D(0.5,0.5))`. Run → PASS, all suites green. Commit.
 
 Then: whole-branch review of Tasks 9–12 (fresh reviewer), fix Critical/Important with RED→GREEN tests.
+
+---
+
+## Addendum (2026-11-22): spec §4e and §4f
+
+### Task 13: Icon layout options (spec §4f)
+
+**Files:** `Core.lua` (defaults `panel.iconsPerLine = 8, iconFlow = "rows", iconSize = 24, iconGap = 4`), `Panel.lua` (`Panel.STRIP_ICON()` = iconSize × (32/24 when the controller boost is on); layout reads the four settings), `Options.lua` (under Panel style: sliders `NN_panel_iconsPerLine` 1–12 step 1, `NN_panel_iconSize` 16–40 step 2, `NN_panel_iconGap` 0–12 step 1; dropdown `NN_panel_iconFlow` rows/columns), locales; tests in `tests/test_panel.lua`, `tests/test_options.lua`.
+
+- [ ] Tests: defaults for an old database; rows with 3 per line (icon 4 at (0, −28), icon 3 at (56, 0), frame 3×28−4+12 square for 7 icons); columns with 3 per line (icon 2 at (0, −28), icon 4 at (28, 0)); size 30 / gap 0 (icon 2 at x 30, width 30); controller boost turns size 30 into 40; options round-trip and ranges. Run → FAIL.
+- [ ] Implement; strings `OPT_ICONS_PER_LINE = "Icons per line"`, `OPT_ICON_FLOW = "Direction"`, `OPT_ICON_FLOW_TT`, `OPT_ICON_FLOW_ROWS = "Rows (left to right)"`, `OPT_ICON_FLOW_COLUMNS = "Columns (top to bottom)"`, `OPT_ICON_SIZE = "Icon size"`, `OPT_ICON_GAP = "Gap between icons"`. Run → PASS. Commit.
+
+### Task 14: NewbieNudge list on the world map (spec §4e)
+
+**Files:** create `NewbieNudge/MapList.lua` (TOC after `MapPins.lua`; `NN.MapList` with `frame`, `Toggle()`, `Refresh()`, `rows`); modify `MapReveal.lua` (left-click → `NN.MapList:Toggle()`, tooltip text), `MapPins.lua` (export `MapPins.IconFor(kind) -> texture, coords`; show-all draws only kinds with `db.services.kinds[kind] ~= false`), `Core.lua` (defaults `services.kinds = {}`, `map.listOpen = false`), locales; stub `WorldMapFrame:SetMapID(id)` (sets `S().worldMapID`, calls `OnMapChanged`); tests `tests/test_maplist.lua`, update `tests/test_mapreveal.lua` (left-click now toggles the list).
+
+- [ ] Tests: left-click on the map icon shows the list, again hides it, `db.map.listOpen` follows; right-click still toggles reveal; rows: reveal checkbox, then one per kind of `MapPins.ShowAllKinds()` (label per kind; class trainer label uses the class name; profession lines use the profession name) with the pin icon; clicking a kind row flips `db.services.kinds[kind]` and sets `showAll = true`; a kind switched off draws no show-all pins; marks section lists each mark (name · zone) with a remove button that unmarks; clicking a mark line calls `WorldMapFrame:SetMapID(npc.map)`; "(none)" when no marks; "Remove all marks" clears; "Settings…" opens the Map page; list refreshes when a mark is added; opening the map with `listOpen = true` shows it. Run → FAIL.
+- [ ] Implement; strings `MAPLIST_TITLE`, `MAPLIST_SHOW`, `MAPLIST_MARKS`, `MAPLIST_NONE`, `MAPLIST_REVEAL`, `MAPLIST_KIND_REPAIR/INN/SUPPLIES/WEAPON`, `MAPLIST_KIND_TRAINER = "%s trainers"`, `MAPLIST_KIND_PROF = "%s trainers"`, `MAPLIST_REMOVE_ALL`, `MAPLIST_SETTINGS`, `MAPLIST_REMOVE_TT`, `MAP_BUTTON_TT` updated. Run → PASS, all suites green. Docs (README map section, CHANGELOG bullets, checklist lines). Commit.
+
+Then: review of Tasks 13–14 and the fixes since the last review; fix Critical/Important RED→GREEN.

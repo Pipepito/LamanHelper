@@ -379,6 +379,72 @@ other continent; marks saved/replaced/removed; pins shown only on their
 map; row buttons; minimap tracking turned on for repair and not for
 trainers; show-all pins; slash command; menu entries.
 
+## 4e. NewbieNudge list on the world map
+
+Owner request (2026-11-22). The NewbieNudge icon on the world map (bottom
+right, `MapReveal:EnsureButton`) now opens and closes a small list attached
+to the map, beside the icon. Left-click toggles the list (it used to open the
+Map settings); right-click still toggles the unexplored areas.
+
+```
+┌ NewbieNudge ─────────────────────┐
+│ [✓] map icon   Unexplored areas  │
+│ ── Show on the map ──            │
+│ [✓] icon  Repair vendors         │
+│ [ ] icon  Inns                   │
+│ [✓] icon  Food & general goods   │
+│ [✓] class icon  <Class> trainers │
+│ [ ] icon  Weapon masters         │
+│ [✓] prof icon  <Prof> trainers   │  (one line per profession you have)
+│ ── Your marks ──                 │
+│ icon  Gart Mistrunner · Mulgore ✕│
+│ [Remove all marks]  [Settings…]  │
+└──────────────────────────────────┘
+```
+
+- "Show on the map": one checkbox per service kind, with the pin's own
+  icon (MapPins' icon function, shared). Stored in
+  `db.services.kinds[kind] = true|false` (default: all true). Show-all pins
+  draw only kinds that are on. Any kind on means show-all is on: a checkbox
+  click sets `db.services.showAll = true`; the minimap menu's "Show services
+  on the world map" stays the all-on/all-off switch (`showAll`), and the
+  per-kind choices are kept while it is off.
+- "Your marks": one line per mark (icon, NPC name, zone name). Clicking the
+  line shows that zone on the map (`WorldMapFrame:SetMapID(map)`); ✕ removes
+  the mark. "(none)" when empty. "Remove all marks" button (disabled when
+  empty) and "Settings…" (opens the Map and minimap page).
+- The list refreshes when marks change, when the map changes, and on open;
+  `db.map.listOpen` remembers whether it was open.
+- Frame: a plain panel parented to `WorldMapFrame`, anchored to the right of
+  the map's NewbieNudge icon, above the map canvas (frame level above the
+  pins); rows are buttons with a checkbox texture, an icon and a label;
+  height grows with the rows. Hidden with the map.
+- Tests: toggling with the icon; per-kind checkbox filters show-all pins;
+  marks listed with remove; clicking a mark line sets the map; remembers
+  open state; profession lines follow the player's professions.
+
+## 4f. Icon layout for the icons-only style
+
+Owner request (2026-11-22): let players shape the icons-only panel (a
+squarer block, a vertical column, …).
+
+- Options page NewbieNudge → Panel, shown under "Panel style":
+  - "Icons per line" slider 1–12 (default 8) → `db.panel.iconsPerLine`.
+  - "Direction" dropdown: "Rows (left to right)" / "Columns (top to
+    bottom)" → `db.panel.iconFlow = "rows" | "columns"` (default rows).
+  - "Icon size" slider 16–40 (default 24) → `db.panel.iconSize`.
+  - "Gap between icons" slider 0–12 (default 4) → `db.panel.iconGap`.
+- Rows: icon i sits at column `(i-1) % n`, line `floor((i-1)/n)`. Columns:
+  line `(i-1) % n` from the top, column `floor((i-1)/n)`. Frame size follows
+  the used columns and lines. The combat strip uses the same layout. The
+  controller boost still multiplies the icon size (today: 24 → 32 becomes
+  size × 32/24).
+- The info bar sits above the icons as today; frame width =
+  max(icons width, bar width).
+- Tests: per-line count, both directions (positions of icons 1, n, n+1),
+  size and gap applied, frame size, defaults for an old database, options
+  round-trip.
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list
