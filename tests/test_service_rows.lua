@@ -36,7 +36,7 @@ return {
   supplies_food_row_only = function()
     WOW.state.level = 5
     load_addon(); load_bags(); run_checks()
-    assert_eq(results_of("supplies")[1].service, { kind = "supplies" })
+    assert_eq(results_of("supplies")[1].service, { kind = "food" })
   end,
   rested_row_marks_inn = function()
     load_addon(); run_checks()
@@ -148,10 +148,10 @@ return {
   end,
   row_marks_survive_a_reload_before_the_first_real_check = function()
     services()
-    _G.NewbieNudgeDB = { marks = { { kind = "supplies", npcID = 10, fromRow = true, rule = "supplies" } } }
+    _G.NewbieNudgeDB = { marks = { { kind = "food", npcID = 10, fromRow = true, rule = "supplies" } } }
     WOW.state.level = 5
     load_addon(); run_checks() -- bags not loaded yet: supplies can't tell
-    assert_true(NewbieNudge.Services:IsMarked("supplies"))
+    assert_true(NewbieNudge.Services:IsMarked("food"))
   end,
   no_pruning_while_restricted = function()
     services(); load_addon()
@@ -179,5 +179,14 @@ return {
     assert_true(rowWith("far").pinButton.marked); assert_true(not rowWith("near").pinButton.marked, "other city not shown as marked")
     WOW.Click(rowWith("near").pinButton, "LeftButton")
     assert_eq(NewbieNudge.Services:MarkOf("weapon").npcID, 11867, "marks the other city instead of unmarking")
+  end,
+  ammo_row_marks_general_goods = function()
+    WOW.state.usesAmmo = true; WOW.state.ammoCount = 0
+    WOW.state.inventory[18] = { itemID = 2504 }
+    WOW.state.itemInfo[2504] = { name = "Bow", classID = 2, subclassID = 2 }
+    load_addon(); run_checks()
+    local r = results_of("ammo")
+    assert_true(r[1], "ammo row")
+    assert_eq(r[1].service, { kind = "goods" })
   end,
 }

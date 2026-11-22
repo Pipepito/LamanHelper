@@ -6,7 +6,7 @@ new player looks for, and writes NewbieNudge/Data/Services.lua:
 
     NN.ServiceData = {
       npcs = { [npcID] = { name, title, uiMapID, x, y, faction }, ... },
-      kinds = { repair = { npcID, ... }, inn = {...}, supplies = {...},
+      kinds = { repair = { npcID, ... }, inn = {...}, food = {...}, goods = {...}, trade = {...},
                 weapon = {...}, trainer_MAGE = {...}, prof_182 = {...}, ... },
     }
 
@@ -42,7 +42,10 @@ FLAG_VENDOR, FLAG_TRAINER, FLAG_INNKEEPER, FLAG_REPAIR = 4, 16, 128, 16384
 # QuestieDB npcKeys
 NAME, SPAWNS, FRIENDLY, TITLE, FLAGS = 1, 7, 13, 14, 15
 
-SUPPLY_TITLES = {"Food & Drink", "General Goods", "General Supplies", "Baker", "Butcher"}
+# vendor kinds by words in the title ("General Goods Merchant", "Meat Vendor"...)
+GOODS_WORDS = ("General Goods", "General Supplies")
+TRADE_WORDS = ("Trade Goods", "Trade Supplies")
+FOOD_WORDS = ("Food", "Drink", "Baker", "Bread", "Butcher", "Meat", "Fruit", "Mushroom", "Cheese")
 CLASSES = ["Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman", "Warlock", "Warrior"]
 # profession skill line -> words that name its trainers ("Journeyman Alchemist", "Herbalist", "Physician")
 PROFESSIONS = [
@@ -90,8 +93,14 @@ def kinds_for(title, flags):
         out.append("repair")
     if flags & FLAG_INNKEEPER and title == "Innkeeper":
         out.append("inn")
-    if flags & FLAG_VENDOR and title in SUPPLY_TITLES:
-        out.append("supplies")
+    if flags & FLAG_VENDOR:
+        if any(w in title for w in TRADE_WORDS):
+            out.append("trade")
+        elif any(w in title for w in GOODS_WORDS):
+            out.append("goods")
+        # innkeepers sell food and drink too
+        if any(w in title for w in FOOD_WORDS) or (flags & FLAG_INNKEEPER and title == "Innkeeper"):
+            out.append("food")
     if flags & FLAG_TRAINER:
         if title == "Weapon Master":
             out.append("weapon")

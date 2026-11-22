@@ -45,8 +45,9 @@ return {
     local ids = {}
     for _, pin in ipairs(shown()) do ids[#ids + 1] = pin.npcID end
     table.sort(ids)
-    -- repair 1, 2 (3 is Horde), inn 7, mage trainer 8, baker 10, herbalism trainer 11
-    assert_eq(ids, { 1, 2, 7, 8, 10, 11 })
+    -- repair 1, 2 (3 is Horde), inn 7, mage trainer 8, baker 10, herbalism trainer 11,
+    -- general goods 12, trade supplies 13
+    assert_eq(ids, { 1, 2, 7, 8, 10, 11, 12, 13 })
     assert_eq(pinFor(1):GetWidth(), 14); assert_eq(pinFor(1).marked, false)
   end,
   a_marked_npc_is_drawn_once = function()
@@ -243,5 +244,11 @@ return {
     WOW.ViewMap(1439)
     WOW.Hover(pinFor(6))
     assert_eq(GameTooltip.lines[1], L().MAPPIN_OPTION_FAR:format(2, L().SERVICES_ROUTE_CONTINENT))
+  end,
+  show_all_has_food_goods_and_trade = function()
+    load()
+    local kinds = NewbieNudge.MapPins.ShowAllKinds()
+    assert_true(tContains(kinds, "food")); assert_true(tContains(kinds, "goods")); assert_true(tContains(kinds, "trade"))
+    assert_true(not tContains(kinds, "supplies"))
   end,
 }

@@ -145,7 +145,7 @@ return {
     load(); ML():Toggle()
     WOW.state.taxiNodes = {}
     local S = NewbieNudge.Services
-    S:Mark("repair", { 1, 2, 5, 6 }, true); S:Mark("inn", { 7 }, true); S:Mark("supplies", { 10 }, true)
+    S:Mark("repair", { 1, 2, 5, 6 }, true); S:Mark("inn", { 7 }, true); S:Mark("food", { 10 }, true)
     S:Mark("trainer_MAGE", { 8 }, true); S:Mark("weapon", { 11867, 9 }, true); S:Mark("prof_182", { 11 }, true)
     WorldMapFrame.ScrollContainer:SetSize(1002, 300)
     ML():Refresh()

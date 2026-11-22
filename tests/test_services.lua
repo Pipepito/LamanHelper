@@ -91,13 +91,13 @@ return {
     assert_true(S():IsMarked("inn"), "map-made mark kept")
     assert_true(S():IsMarked("trainer_MAGE"), "still-active row kept")
   end,
-  tracking_turned_on_for_repair_inn_and_supplies = function()
+  tracking_turned_on_for_repair_inn_and_food = function()
     load()
     S():MarkClosest("repair", nil, true)
     assert_eq(WOW.state.tracking[2].active, true)
     S():MarkClosest("inn", nil, true)
     assert_eq(WOW.state.tracking[3].active, true)
-    S():MarkClosest("supplies", nil, true)
+    S():MarkClosest("food", nil, true)
     assert_eq(WOW.state.tracking[4].active, true)
   end,
   no_tracking_for_trainers = function()
@@ -171,5 +171,14 @@ return {
     S():Mark("weapon", { 11867, 9 }, true)
     assert_true(S():IsMarked("weapon", { 9 }))
     assert_true(not S():IsMarked("weapon", { 12345 }))
+  end,
+  old_supplies_marks_load_as_food = function()
+    load(function() _G.NewbieNudgeDB = { marks = { { kind = "supplies", npcs = { 10 }, fromRow = true } } } end)
+    assert_true(S():IsMarked("food"))
+  end,
+  trade_and_goods_are_their_own_kinds = function()
+    load()
+    assert_eq(S():Closest("goods"), 12)
+    assert_eq(S():Closest("trade"), 13)
   end,
 }

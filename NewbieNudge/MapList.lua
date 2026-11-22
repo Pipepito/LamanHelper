@@ -145,7 +145,8 @@ local function professionName(skillLine)
 end
 
 local FIXED_LABELS = { repair = "MAPLIST_KIND_REPAIR", inn = "MAPLIST_KIND_INN",
-  supplies = "MAPLIST_KIND_SUPPLIES", weapon = "MAPLIST_KIND_WEAPON" }
+  food = "MAPLIST_KIND_FOOD", goods = "MAPLIST_KIND_GOODS", trade = "MAPLIST_KIND_TRADE",
+  weapon = "MAPLIST_KIND_WEAPON" }
 
 function MapList.KindLabel(kind)
   if FIXED_LABELS[kind] then return L[FIXED_LABELS[kind]] end

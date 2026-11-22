@@ -63,7 +63,7 @@ return {
     WOW.keepData = true; load_addon()
     local data = NewbieNudge.ServiceData
     assert_true(data and #data.kinds.repair > 100, "repair vendors")
-    for _, kind in ipairs({ "inn", "supplies", "weapon", "trainer_MAGE", "trainer_WARRIOR", "prof_182", "prof_129" }) do
+    for _, kind in ipairs({ "inn", "food", "goods", "trade", "weapon", "trainer_MAGE", "trainer_WARRIOR", "prof_182", "prof_129" }) do
       assert_true(data.kinds[kind] and #data.kinds[kind] > 0, kind)
     end
     assert_eq(#data.kinds.weapon, 8)

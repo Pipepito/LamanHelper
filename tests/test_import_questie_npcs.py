@@ -28,6 +28,11 @@ QuestieDB.npcData = [[return {
 [1010] = {'Goblin Guy',1,1,20,20,0,{[14]={{7.0,7.0}}},nil,14,nil,nil,29,"H","Master Goblin Engineer",19},
 [1011] = {'Doc',1,1,20,20,0,{[12]={{8.0,8.0}}},nil,12,nil,nil,12,"A","Physician",19},
 [1012] = {'Tess',1,1,20,20,0,{[14]={{9.0,9.0}}},nil,14,nil,nil,29,"H","Journeyman Tailor",19},
+[1013] = {'Trak',1,1,20,20,0,{[14]={{1.0,1.0}}},nil,14,nil,nil,29,"H","General Goods Merchant",6},
+[1014] = {'Felika',1,1,20,20,0,{[14]={{2.0,2.0}}},nil,14,nil,nil,29,"H","General Trade Goods Merchant",6},
+[1015] = {'Olvia',1,1,20,20,0,{[14]={{3.0,3.0}}},nil,14,nil,nil,29,"H","Meat Vendor",6},
+[1016] = {'Kaymard',1,1,20,20,0,{[14]={{4.0,4.0}}},nil,14,nil,nil,29,"H","Smokywood Pastures",7},
+[1017] = {'Shan',1,1,20,20,0,{[14]={{5.0,5.0}}},nil,14,nil,nil,29,"H","Fruit Vendor",4},
 }]]
 """
 
@@ -46,15 +51,22 @@ class Classify(unittest.TestCase):
     def setUp(self):
         self.out = iq.extract(NPC_DB, CONVERSION)
 
-    def test_innkeeper(self):
-        self.assertEqual(kinds_of(self.out, 295), ["inn"])
+    def test_innkeeper_also_sells_food(self):
+        self.assertEqual(kinds_of(self.out, 295), ["food", "inn"])
 
     def test_repair_flag(self):
         self.assertEqual(kinds_of(self.out, 1001), ["repair"])
 
-    def test_supplies_titles(self):
-        self.assertEqual(kinds_of(self.out, 1002), ["supplies"])
-        self.assertEqual(kinds_of(self.out, 1003), ["supplies"])
+    def test_general_goods_trade_and_food_are_separate(self):
+        self.assertEqual(kinds_of(self.out, 1002), ["goods"])       # General Goods
+        self.assertEqual(kinds_of(self.out, 1013), ["goods"])       # General Goods Merchant (Orgrimmar)
+        self.assertEqual(kinds_of(self.out, 1014), ["trade"])       # General Trade Goods Merchant
+        self.assertEqual(kinds_of(self.out, 1003), ["food"])        # Baker
+        self.assertEqual(kinds_of(self.out, 1015), ["food"])        # Meat Vendor
+        self.assertEqual(kinds_of(self.out, 1017), ["food"])        # Fruit Vendor
+
+    def test_seasonal_vendors_left_out(self):
+        self.assertEqual(kinds_of(self.out, 1016), [])
 
     def test_class_trainer(self):
         self.assertEqual(kinds_of(self.out, 1006), ["trainer_MAGE"])

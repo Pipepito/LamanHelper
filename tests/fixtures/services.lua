@@ -14,11 +14,13 @@ NN.ServiceData = {
     [8] = { "Jor", "Mage Trainer", 1429, 30, 30, "A" },
     [9] = { "Ilyenia Moonfire", "Weapon Master", 1457, 57, 46, "A" },
     [10] = { "Bread Guy", "Baker", 1429, 45, 65, "A" },
+    [12] = { "Goods Guy", "General Goods", 1429, 46, 64, "A" },
+    [13] = { "Cloth Lady", "Trade Supplies", 1429, 47, 63, "A" },
     [11] = { "Herb Lady", "Herbalist", 1429, 5, 5, "A" },
     [11867] = { "Woo Ping", "Weapon Master", 1453, 63.88, 69.09, "A" },
   },
   kinds = {
-    repair = { 1, 2, 3, 4, 5, 6 }, inn = { 7 }, supplies = { 10 }, trainer_MAGE = { 8 },
+    repair = { 1, 2, 3, 4, 5, 6 }, inn = { 7 }, food = { 10 }, goods = { 12 }, trade = { 13 }, trainer_MAGE = { 8 },
     weapon = { 11867, 9 }, prof_182 = { 11 },
   },
 }

@@ -13,7 +13,7 @@ local OTHER_CONTINENT = 1e12    -- added to the distance: same continent first
 local TRACKING = {
   repair = function() return MINIMAP_TRACKING_REPAIR or "Repair" end,
   inn = function() return MINIMAP_TRACKING_INNKEEPER or "Innkeeper" end,
-  supplies = function() return MINIMAP_TRACKING_VENDOR_FOOD or "Food & Drink" end,
+  food = function() return MINIMAP_TRACKING_VENDOR_FOOD or "Food & Drink" end,
 }
 
 local function data() return NN.ServiceData or { npcs = {}, kinds = {} } end
@@ -203,6 +203,7 @@ function Services:Marks()
   local out = {}
   for _, m in ipairs(NN.db.marks) do
     if not m.npcs then m.npcs = { m.npcID } end
+    if m.kind == "supplies" then m.kind = "food" end -- split into food / goods / trade
     local npcs = {}
     for _, id in ipairs(m.npcs) do if data().npcs[id] then npcs[#npcs + 1] = id end end
     m.npcs = npcs

@@ -13,7 +13,8 @@ local RING_OPENING = 21
 -- Named icon paths (a wrong file id draws nothing at all on the map).
 local ICONS = {
   repair = "Interface\\Icons\\Trade_BlackSmithing", inn = "Interface\\Icons\\INV_Misc_Rune_01",
-  supplies = "Interface\\Icons\\INV_Misc_Food_15", weapon = "Interface\\Icons\\INV_Sword_04",
+  food = "Interface\\Icons\\INV_Misc_Food_15", goods = "Interface\\Icons\\INV_Misc_Bag_10",
+  trade = "Interface\\Icons\\INV_Fabric_Linen_01", weapon = "Interface\\Icons\\INV_Sword_04",
 }
 local TRAINER_ICON, PROF_ICON = "Interface\\Icons\\INV_Misc_Book_09", "Interface\\Icons\\INV_Misc_Note_01"
 -- profession skill line -> icon, for professions the player doesn't have
@@ -73,7 +74,7 @@ MapPins.IconFor = function(kind) return iconFor(kind) end
 -------------------------------------------------------------------------------
 
 function MapPins.ShowAllKinds()
-  local kinds = { "repair", "inn", "supplies", "weapon" }
+  local kinds = { "repair", "inn", "food", "goods", "trade", "weapon" }
   local class = select(2, UnitClass("player"))
   if class then kinds[#kinds + 1] = "trainer_" .. class end
   if GetProfessions and GetProfessionInfo then

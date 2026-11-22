@@ -37,9 +37,9 @@ NN:RegisterRule({
     local count = NN.Plain(GetInventoryItemCount("player", INVSLOT_AMMO or 0))
     if count == nil then return NN.UNKNOWN end
     if count == 0 then
-      return { text = L.AMMO_ROW_NONE, icon = AMMO_ICON, onClick = openPaperDoll, highlight = "character" }
+      return { text = L.AMMO_ROW_NONE, icon = AMMO_ICON, onClick = openPaperDoll, highlight = "character", service = { kind = "goods" } }
     elseif count < LOW_THRESHOLD then
-      return { text = L.AMMO_ROW_LOW:format(count), icon = AMMO_ICON, onClick = openPaperDoll, highlight = "character" }
+      return { text = L.AMMO_ROW_LOW:format(count), icon = AMMO_ICON, onClick = openPaperDoll, highlight = "character", service = { kind = "goods" } }
     end
     return nil
   end,

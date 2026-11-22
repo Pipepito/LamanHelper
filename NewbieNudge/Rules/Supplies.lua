@@ -52,7 +52,7 @@ NN:RegisterRule({
     if not NN.bagsLoaded then return NN.UNKNOWN end
     local results = {}
     if countConsumables(FOOD_DRINK) == 0 then
-      results[#results + 1] = { text = L.SUPPLIES_ROW_FOOD, icon = SUPPLY_ICON, onClick = ToggleAllBags, highlight = "bags", service = { kind = "supplies" } }
+      results[#results + 1] = { text = L.SUPPLIES_ROW_FOOD, icon = SUPPLY_ICON, onClick = ToggleAllBags, highlight = "bags", service = { kind = "food" } }
     end
     if NN.KnowsFirstAid() and countConsumables(BANDAGE) == 0 then
       results[#results + 1] = { text = L.SUPPLIES_ROW_BANDAGE, icon = 133682, onClick = ToggleAllBags, highlight = "bags" }
