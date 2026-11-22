@@ -289,4 +289,54 @@ return {
     WOW.Hover(pinFor(15))
     assert_true(tContains(GameTooltip.lines, L().MAPPIN_FLIGHT_UNKNOWN))
   end,
+  -- city badges on zone maps (owner 2026-11-22)
+  city_badge_on_the_zone_map = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    local badges = {}
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do if b:IsShown() then badges[#badges + 1] = b end end
+    assert_eq(#badges, 1)
+    assert_eq(badges[1].mapID, 1453)
+    assert_eq(badges[1].kinds, { "trainer_MAGE", "weapon", "flight" })
+    local point, _, _, x, y = badges[1]:GetPoint(1)
+    assert_eq(point, "CENTER")
+    assert_true(math.abs(x - 300) < 0.01 and math.abs(y + 0.7 * 667) < 0.01, x .. "," .. y)
+  end,
+  no_badges_while_services_are_off = function()
+    load()
+    WOW.ViewMap(1429)
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do assert_true(not b:IsShown()) end
+  end,
+  badge_tooltip_names_who_is_there = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    WOW.Hover(NewbieNudge.MapPins.badges[1])
+    assert_eq(GameTooltip.lines[1], "Stormwind City")
+    assert_true(tContains(GameTooltip.lines, L().MAPLIST_KIND_WEAPON .. ": Woo Ping"), table.concat(GameTooltip.lines, " | "))
+  end,
+  badge_click_opens_the_city = function()
+    load()
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    WOW.Click(NewbieNudge.MapPins.badges[1], "LeftButton")
+    assert_eq(WOW.state.worldMapID, 1453)
+  end,
+  marked_option_in_a_city_shows_on_the_zone = function()
+    load()
+    NewbieNudge.Services:Mark("weapon", { 11867 }, true)
+    WOW.ViewMap(1429)
+    local pin = pinFor(11867)
+    assert_true(pin, "projected onto Elwynn")
+    local _, _, _, x = pin:GetPoint(1)
+    assert_true(math.abs(x - (0.2 + 0.6388 * 0.2) * 1000) < 0.01, tostring(x))
+  end,
+  no_rect_no_badges = function()
+    load()
+    C_Map.GetMapRectOnMap = nil
+    NewbieNudge.MapPins:SetShowAll(true)
+    WOW.ViewMap(1429)
+    for _, b in ipairs(NewbieNudge.MapPins.badges) do assert_true(not b:IsShown()) end
+  end,
 }

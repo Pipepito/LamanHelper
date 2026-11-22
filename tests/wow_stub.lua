@@ -765,6 +765,11 @@ function C_Map.GetPlayerMapPosition(mapID, unit)
   local p = S().playerPos
   if p and mapID == S().mapID then return CreateVector2D(p.x, p.y) end
 end
+-- S().mapRects["child:parent"] = { left, right, top, bottom } (0-1 on the parent)
+function C_Map.GetMapRectOnMap(child, parent)
+  local r = S().mapRects and S().mapRects[child .. ":" .. parent]
+  if r then return r[1], r[2], r[3], r[4] end
+end
 function C_Map.GetWorldPosFromMapPos(mapID, pos)
   local w = S().mapWorld and S().mapWorld[mapID]
   if not w then return nil end

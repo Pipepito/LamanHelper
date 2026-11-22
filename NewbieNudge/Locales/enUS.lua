@@ -108,6 +108,7 @@ NN.RegisterLocale("enUS", {
   SERVICE_KIND_TRAINER = "class trainer",
   SERVICE_KIND_PROF = "profession trainer",
   MAPPIN_CLICK_MARK = "Click: mark it",
+  MAPBADGE_CLICK = "Click: open this city's map",
   ROW_HINT_MARK = "Map button (or Ctrl+click): mark the closest one on the world map",
   ROW_PIN_MARK = "Mark the closest one on the world map",
   ROW_PIN_UNMARK = "Remove the mark from the world map",

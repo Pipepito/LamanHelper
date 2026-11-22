@@ -5,7 +5,7 @@
 local _, NN = ...
 local L = NN.L
 
-local MapPins = { pins = {}, used = 0 }
+local MapPins = { pins = {}, used = 0, badges = {}, badgesUsed = 0 }
 NN.MapPins = MapPins
 
 local MARK_SIZE, PIN_SIZE = 20, 14
@@ -213,7 +213,7 @@ function MapPins.TopLevel()
   return top
 end
 
-local function place(npcID, kind, marked, rank, options)
+local function place(npcID, kind, marked, rank, options, px, py)
   local npc = NN.Services:Npc(npcID)
   local child = canvas()
   local pin = acquire()
@@ -247,7 +247,8 @@ local function place(npcID, kind, marked, rank, options)
   if not scale or scale <= 0 then scale = 1 end
   pin:SetScale(1 / scale)
   pin:ClearAllPoints()
-  pin:SetPoint("CENTER", child, "TOPLEFT", npc.x / 100 * child:GetWidth() * scale, -(npc.y / 100) * child:GetHeight() * scale)
+  local x, y = px or npc.x / 100, py or npc.y / 100
+  pin:SetPoint("CENTER", child, "TOPLEFT", x * child:GetWidth() * scale, -y * child:GetHeight() * scale)
   pin:Show()
 end
 
@@ -260,9 +261,14 @@ function MapPins:Refresh()
     for _, mark in ipairs(NN.Services:Marks()) do
       for rank, id in ipairs(mark.npcs) do
         local npc = NN.Services:Npc(id)
-        if npc.map == map and not drawn[id] then
-          place(id, mark.kind, true, rank, #mark.npcs)
-          drawn[id] = true
+        if not drawn[id] then
+          if npc.map == map then
+            place(id, mark.kind, true, rank, #mark.npcs)
+            drawn[id] = true
+          else
+            local px, py = MapPins.Project(npc, map)
+            if px then place(id, mark.kind, true, rank, #mark.npcs, px, py); drawn[id] = true end
+          end
         end
       end
     end
@@ -281,6 +287,128 @@ function MapPins:Refresh()
     end
   end
   for i = self.used + 1, #self.pins do self.pins[i]:Hide() end
+  self:RefreshBadges(map)
+end
+
+-------------------------------------------------------------------------------
+-- City badges: on a zone map, the cities inside it show which of the
+-- player's trainers, weapon masters and flight points they hold.
+-------------------------------------------------------------------------------
+
+-- The rectangle of a city map on the viewed zone map, or nil.
+function MapPins.CityRect(cityMap, viewedMap)
+  if not (C_Map and C_Map.GetMapRectOnMap and C_Map.GetMapInfo) then return nil end
+  local info = C_Map.GetMapInfo(cityMap)
+  if not info or NN.Plain(info.parentMapID) ~= viewedMap then return nil end
+  local left, right, top, bottom = C_Map.GetMapRectOnMap(cityMap, viewedMap)
+  left, right, top, bottom = NN.Plain(left), NN.Plain(right), NN.Plain(top), NN.Plain(bottom)
+  if not (left and right and top and bottom) then return nil end
+  return left, right, top, bottom
+end
+
+-- An NPC's spot on the viewed zone map when it stands in a city inside it.
+function MapPins.Project(npc, viewedMap)
+  local left, right, top, bottom = MapPins.CityRect(npc.map, viewedMap)
+  if not left then return nil end
+  return left + npc.x / 100 * (right - left), top + npc.y / 100 * (bottom - top)
+end
+
+local BADGE_ICON, BADGE_GAP = 14, 2
+
+local function badgeEnter(self)
+  GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+  GameTooltip:SetText(NN.Services.ZoneName(self.mapID))
+  for _, line in ipairs(self.lines) do GameTooltip:AddLine(line, 1, 1, 1, true) end
+  GameTooltip:AddLine(L.MAPBADGE_CLICK, 0.8, 0.8, 0.8)
+  GameTooltip:Show()
+end
+
+local function acquireBadge()
+  MapPins.badgesUsed = MapPins.badgesUsed + 1
+  local badge = MapPins.badges[MapPins.badgesUsed]
+  if not badge then
+    badge = CreateFrame("Button", nil, canvas())
+    badge.bg = badge:CreateTexture(nil, "BACKGROUND")
+    badge.bg:SetAllPoints()
+    badge.bg:SetColorTexture(0, 0, 0, 0.6)
+    badge.icons = {}
+    badge:RegisterForClicks("LeftButtonUp")
+    badge:SetScript("OnEnter", badgeEnter)
+    badge:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    badge:SetScript("OnClick", function(self)
+      GameTooltip:Hide()
+      if WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:SetMapID(self.mapID) end
+    end)
+    MapPins.badges[MapPins.badgesUsed] = badge
+  end
+  return badge
+end
+
+function MapPins:RefreshBadges(map)
+  self.badgesUsed = 0
+  local child = canvas()
+  if map and child and NN.db and NN.db.services.showAll and NN.Services then
+    -- kinds a badge can show, in this order; professions share one icon
+    local class = select(2, UnitClass("player"))
+    local order = { class and ("trainer_" .. class) or nil, "weapon", "flight" }
+    local profs = {}
+    for _, kind in ipairs(self.ShowAllKinds()) do if kind:find("^prof_") then profs[#profs + 1] = kind end end
+    local cities, cityOrder = {}, {}
+    local function add(cityMap, iconKind, kind, name)
+      local city = cities[cityMap]
+      if not city then
+        city = { kinds = {}, has = {}, names = {}, nameOrder = {} }
+        cities[cityMap] = city
+        cityOrder[#cityOrder + 1] = cityMap
+      end
+      if not city.has[iconKind] then city.has[iconKind] = true; city.kinds[#city.kinds + 1] = iconKind end
+      if not city.names[kind] then city.names[kind] = {}; city.nameOrder[#city.nameOrder + 1] = kind end
+      table.insert(city.names[kind], name)
+    end
+    local function collect(kind, iconKind)
+      if not self.KindShown(kind) then return end
+      for _, id in ipairs(NN.Services:Candidates(kind)) do
+        local npc = NN.Services:Npc(id)
+        if npc.map ~= map and self.CityRect(npc.map, map) then add(npc.map, iconKind, kind, npc.name) end
+      end
+    end
+    for _, kind in ipairs(order) do collect(kind, kind) end
+    for _, kind in ipairs(profs) do collect(kind, "prof") end
+    local scale = WorldMapFrame.ScrollContainer.GetCanvasScale and NN.Plain(WorldMapFrame.ScrollContainer:GetCanvasScale()) or 1
+    if not scale or scale <= 0 then scale = 1 end
+    for _, cityMap in ipairs(cityOrder) do
+      local city = cities[cityMap]
+      local badge = acquireBadge()
+      badge.mapID, badge.kinds = cityMap, city.kinds
+      badge.lines = {}
+      for _, kind in ipairs(city.nameOrder) do
+        local label = (NN.MapList and NN.MapList.KindLabel(kind)) or kind
+        badge.lines[#badge.lines + 1] = label .. ": " .. table.concat(city.names[kind], ", ")
+      end
+      for i, kind in ipairs(city.kinds) do
+        local icon = badge.icons[i]
+        if not icon then icon = badge:CreateTexture(nil, "ARTWORK"); badge.icons[i] = icon end
+        local texture, coords = iconFor(kind == "prof" and "prof_0" or kind)
+        icon:SetTexture(texture)
+        if coords then icon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]) else icon:SetTexCoord(0, 1, 0, 1) end
+        icon:SetSize(BADGE_ICON, BADGE_ICON)
+        icon:ClearAllPoints()
+        icon:SetPoint("LEFT", badge, "LEFT", BADGE_GAP + (i - 1) * (BADGE_ICON + BADGE_GAP), 0)
+        icon:Show()
+      end
+      for i = #city.kinds + 1, #badge.icons do badge.icons[i]:Hide() end
+      badge:SetSize(#city.kinds * (BADGE_ICON + BADGE_GAP) + BADGE_GAP, BADGE_ICON + BADGE_GAP * 2)
+      badge:SetFrameStrata(self.Strata())
+      badge:SetFrameLevel(self.TopLevel())
+      badge:SetScale(1 / scale)
+      local left, right, top, bottom = self.CityRect(cityMap, map)
+      badge:ClearAllPoints()
+      badge:SetPoint("CENTER", child, "TOPLEFT", (left + right) / 2 * child:GetWidth() * scale,
+        -(top + bottom) / 2 * child:GetHeight() * scale)
+      badge:Show()
+    end
+  end
+  for i = self.badgesUsed + 1, #self.badges do self.badges[i]:Hide() end
 end
 
 function MapPins:SetShowAll(on)

@@ -18,11 +18,13 @@ NN.ServiceData = {
     [13] = { "Cloth Lady", "Trade Supplies", 1429, 47, 63, "A" },
     [14] = { "Field Flyer", "Gryphon Master", 1429, 42, 60, "A" },  -- at the "Near Field" flight point (known)
     [15] = { "Hill Flyer", "Gryphon Master", 1431, 50, 50, "A" },   -- at "Far Hill" (not discovered)
+    [16] = { "City Mage", "Mage Trainer", 1453, 40, 40, "A" },
+    [17] = { "City Gryphon", "Gryphon Master", 1453, 60, 60, "A" },
     [11] = { "Herb Lady", "Herbalist", 1429, 5, 5, "A" },
     [11867] = { "Woo Ping", "Weapon Master", 1453, 63.88, 69.09, "A" },
   },
   kinds = {
-    repair = { 1, 2, 3, 4, 5, 6 }, inn = { 7 }, food = { 10 }, goods = { 12 }, trade = { 13 }, flight = { 14, 15 }, trainer_MAGE = { 8 },
+    repair = { 1, 2, 3, 4, 5, 6 }, inn = { 7 }, food = { 10 }, goods = { 12 }, trade = { 13 }, flight = { 14, 15, 17 }, trainer_MAGE = { 8, 16 },
     weapon = { 11867, 9 }, prof_182 = { 11 },
   },
 }
@@ -34,7 +36,9 @@ WOW.state.mapWorld = {
   [1439] = { 1, 0, 0, 1000, 1000 }, [1457] = { 1, 3000, 0, 1000, 1000 },
 }
 WOW.state.mapInfo[1429] = { name = "Elwynn Forest" }
-WOW.state.mapInfo[1453] = { name = "Stormwind City" }
+WOW.state.mapInfo[1453] = { name = "Stormwind City", parentMapID = 1429 }
+-- Stormwind City sits inside Elwynn's map at x 0.2-0.4, y 0.6-0.8
+WOW.state.mapRects = { ["1453:1429"] = { 0.2, 0.4, 0.6, 0.8 } }
 WOW.state.mapInfo[1457] = { name = "Darnassus" }
 WOW.state.tracking = { { name = "Find Herbs" }, { name = "Repair" }, { name = "Innkeeper" }, { name = "Food & Drink" }, { name = "Class Trainer" }, { name = "Flight Master" } }
 MINIMAP_TRACKING_REPAIR, MINIMAP_TRACKING_INNKEEPER, MINIMAP_TRACKING_VENDOR_FOOD = "Repair", "Innkeeper", "Food & Drink"

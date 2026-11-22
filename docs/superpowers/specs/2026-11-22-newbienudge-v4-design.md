@@ -539,6 +539,32 @@ taught to the pet.
 - Tests: each split; quest spell known → gone; level gate; pet spells never
   in the trainer count; importer marks pet spells.
 
+## 4i. City badges on zone maps (owner, 2026-11-22)
+
+A player looking at Durotar can't see that Orgrimmar holds their class
+trainer, a weapon master, profession trainers and a flight point without
+opening the Orgrimmar map.
+
+- On a zone map, every city map inside it (a map whose `parentMapID` is the
+  viewed map and whose rectangle `C_Map.GetMapRectOnMap(city, zone)` is
+  known) gets a **badge**: a short row of small icons centred on the city,
+  one per kind present there: class trainer (class icon), weapon master,
+  profession trainers (one icon for "trainers of your shown professions"),
+  flight point, and gold-ringed icons for marked options inside the city.
+  Only kinds the map list has switched on count (marks always count);
+  repair / inn / food / goods / trade are left off the badge (every city
+  has them).
+- Hover: the city name, then one line per kind with the NPC names ("Weapon
+  master: Sayoc, Hanashi"). Click: the map shows the city
+  (`WorldMapFrame:SetMapID(city)`).
+- Marked options inside a city also show at their real spot on the zone
+  map (projected through the city's rectangle), with their rank number,
+  so the route is visible from the zone.
+- Pins of the city's own map are unchanged.
+- Tests: badge on the zone with the right kinds; none when no kind shows;
+  tooltip lines; click sets the city map; marked option projected to the
+  right place on the zone; no `GetMapRectOnMap` → no badges.
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list
