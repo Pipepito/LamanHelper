@@ -64,6 +64,7 @@ end)
 
 NN:RegisterRule({
   name = "hearth_bind",
+  group = "travel",
   title = L.HEARTH_BIND_TITLE,
   help = L.HEARTH_BIND_HELP,
   events = { "GOSSIP_SHOW", "GOSSIP_CLOSED" },

@@ -57,6 +57,7 @@ end
 
 NN:RegisterRule({
   name = "buffs",
+  group = "spells",
   title = L.BUFFS_TITLE,
   help = L.BUFFS_HELP,
   events = { "UNIT_AURA:player", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD", "ACTIONBAR_SLOT_CHANGED" },

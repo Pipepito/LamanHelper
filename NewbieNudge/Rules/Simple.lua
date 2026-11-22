@@ -9,6 +9,7 @@ local function openPaperDoll() ToggleCharacter("PaperDollFrame") end
 
 NN:RegisterRule({
   name = "durability",
+  group = "gear",
   title = L.DURABILITY_TITLE,
   help = L.DURABILITY_HELP,
   events = { "UPDATE_INVENTORY_DURABILITY", "PLAYER_EQUIPMENT_CHANGED" },
@@ -40,6 +41,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "hearthstone",
+  group = "travel",
   title = L.HEARTHSTONE_TITLE,
   help = L.HEARTHSTONE_HELP,
   events = { "BAG_UPDATE_DELAYED" },
@@ -61,6 +63,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "mail",
+  group = "travel",
   title = L.MAIL_TITLE,
   help = L.MAIL_HELP,
   events = { "UPDATE_PENDING_MAIL", "MAIL_INBOX_UPDATE", "MAIL_CLOSED", "PLAYER_ENTERING_WORLD" },
@@ -77,6 +80,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "quests",
+  group = "quests",
   title = L.QUESTS_TITLE,
   help = L.QUESTS_HELP,
   events = { "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_REMOVED" },

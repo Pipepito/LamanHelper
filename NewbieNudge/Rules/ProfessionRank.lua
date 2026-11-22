@@ -56,6 +56,7 @@ end
 
 NN:RegisterRule({
   name = "profession_rank",
+  group = "professions",
   title = L.PROFESSION_RANK_TITLE,
   help = L.PROFESSION_RANK_HELP,
   events = { "SKILL_LINES_CHANGED", "CHAT_MSG_SKILL", "PLAYER_LEVEL_UP" },

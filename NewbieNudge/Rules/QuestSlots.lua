@@ -74,6 +74,7 @@ end
 
 NN:RegisterRule({
   name = "quest_slots",
+  group = "quests",
   title = L.QUEST_SLOTS_TITLE,
   help = L.QUEST_SLOTS_HELP,
   events = { "BAG_UPDATE_DELAYED", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_TURNED_IN" },

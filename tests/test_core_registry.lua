@@ -58,4 +58,12 @@ return {
     assert_eq(NewbieNudge.classFile, "MAGE")
     assert_true(NewbieNudge.isForever)
   end,
+  missing_or_bad_group_becomes_other = function()
+    load_addon()
+    local base = { title = "T", help = "H", events = {}, applies = function() return true end, check = function() end }
+    local a = NewbieNudge:RegisterRule(setmetatable({ name = "no_group" }, { __index = base }))
+    local b = NewbieNudge:RegisterRule(setmetatable({ name = "bad_group", group = "nope" }, { __index = base }))
+    local c = NewbieNudge:RegisterRule(setmetatable({ name = "good_group", group = "quests" }, { __index = base }))
+    assert_eq(a.group, "other"); assert_eq(b.group, "other"); assert_eq(c.group, "quests")
+  end,
 }

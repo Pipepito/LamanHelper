@@ -36,6 +36,7 @@ end
 
 NN:RegisterRule({
   name = "professions",
+  group = "professions",
   title = L.PROFESSIONS_TITLE,
   help = L.PROFESSIONS_HELP,
   events = { "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD" },

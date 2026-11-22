@@ -9,6 +9,7 @@ local MAX_ITEMS = 3
 
 NN:RegisterRule({
   name = "quest_item",
+  group = "quests",
   title = L.QUEST_ITEM_TITLE,
   help = L.QUEST_ITEM_HELP,
   events = { "BAG_UPDATE_DELAYED", "QUEST_ACCEPTED", "QUEST_LOG_UPDATE" },

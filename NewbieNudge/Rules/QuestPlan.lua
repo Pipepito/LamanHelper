@@ -92,6 +92,7 @@ local EVENTS = { "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_T
 
 NN:RegisterRule({
   name = "quest_turnin",
+  group = "quests",
   title = L.QUEST_TURNIN_TITLE,
   help = L.QUEST_TURNIN_HELP,
   events = EVENTS,
@@ -109,6 +110,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "quest_soon",
+  group = "quests",
   title = L.QUEST_SOON_TITLE,
   help = L.QUEST_SOON_HELP,
   events = EVENTS,
@@ -126,6 +128,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "quest_grey",
+  group = "quests",
   title = L.QUEST_GREY_TITLE,
   help = L.QUEST_GREY_HELP,
   events = EVENTS,
@@ -143,6 +146,7 @@ NN:RegisterRule({
 
 NN:RegisterRule({
   name = "quest_group",
+  group = "quests",
   title = L.QUEST_GROUP_TITLE,
   help = L.QUEST_GROUP_HELP,
   events = EVENTS,

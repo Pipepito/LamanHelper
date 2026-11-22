@@ -32,6 +32,7 @@ end
 
 NN:RegisterRule({
   name = "demon",
+  group = "spells",
   title = L.DEMON_TITLE,
   help = L.DEMON_HELP,
   events = { "UNIT_PET:player", "PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD", "SPELLS_CHANGED", "PLAYER_LEVEL_UP" },

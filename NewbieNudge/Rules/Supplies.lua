@@ -43,6 +43,7 @@ end
 
 NN:RegisterRule({
   name = "supplies",
+  group = "gear",
   title = L.SUPPLIES_TITLE,
   help = L.SUPPLIES_HELP,
   events = { "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED" },

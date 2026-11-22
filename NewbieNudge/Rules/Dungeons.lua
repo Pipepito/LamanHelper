@@ -63,6 +63,7 @@ end
 
 NN:RegisterRule({
   name = "dungeon_ready",
+  group = "travel",
   title = L.DUNGEON_TITLE,
   help = L.DUNGEON_HELP,
   events = { "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA", "QUEST_TURNED_IN" },
@@ -116,6 +117,7 @@ end
 
 NN:RegisterRule({
   name = "zone_level",
+  group = "travel",
   title = L.ZONE_TITLE,
   help = L.ZONE_HELP,
   events = { "ZONE_CHANGED_NEW_AREA", "ZONE_CHANGED", "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD" },

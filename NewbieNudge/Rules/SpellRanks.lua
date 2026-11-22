@@ -21,6 +21,7 @@ end
 
 NN:RegisterRule({
   name = "spell_ranks",
+  group = "spells",
   title = L.SPELL_RANKS_TITLE,
   help = L.SPELL_RANKS_HELP,
   events = { "ACTIONBAR_SLOT_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD" },

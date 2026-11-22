@@ -75,6 +75,7 @@ end
 
 NN:RegisterRule({
   name = "bag_unequipped",
+  group = "gear",
   title = L.BAG_UNEQUIPPED_TITLE,
   help = L.BAG_UNEQUIPPED_HELP,
   events = { "BAG_UPDATE_DELAYED", "PLAYER_EQUIPMENT_CHANGED" },
@@ -119,6 +120,7 @@ end
 
 NN:RegisterRule({
   name = "bag_full",
+  group = "gear",
   title = L.BAG_FULL_TITLE,
   help = L.BAG_FULL_HELP,
   events = { "BAG_UPDATE_DELAYED" },

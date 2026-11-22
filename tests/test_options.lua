@@ -76,7 +76,6 @@ return {
     for _, c in ipairs(inits) do names[#names + 1] = c[2] .. ":" .. c[3] end
     assert_true(tContains(names, "button:" .. NewbieNudge.L.OPT_RESET_SNOOZE))
     assert_true(tContains(names, "button:" .. NewbieNudge.L.OPT_RESET_POS))
-    assert_true(tContains(names, "header:" .. NewbieNudge.L.OPT_REMINDERS))
   end,
   open_options_calls_open_to_category = function()
     withRules()
@@ -129,5 +128,46 @@ return {
     s.setter("icons")
     assert_eq(NewbieNudge.db.panel.style, "icons")
     assert_true(NewbieNudge.Panel:UsesStrip())
+  end,
+  -- v4: reminders on their own page, grouped.
+  every_real_rule_has_a_group = function()
+    load_addon()
+    local valid = { gear = true, spells = true, quests = true, professions = true, travel = true }
+    for _, rule in ipairs(NewbieNudge.rules) do assert_true(valid[rule.group], rule.name) end
+  end,
+  reminders_page_is_a_subcategory = function()
+    withRules()
+    local found = false
+    for _, c in ipairs(callsNamed("RegisterVerticalLayoutSubcategory")) do
+      if c[3] == NewbieNudge.L.OPT_REMINDERS then found = true end
+    end
+    assert_true(found)
+  end,
+  rule_checkboxes_not_on_main_page = function()
+    withRules()
+    local page, firstRule
+    for i, c in ipairs(WOW.calls) do
+      if c[1] == "RegisterVerticalLayoutSubcategory" and c[3] == NewbieNudge.L.OPT_REMINDERS then page = page or i end
+      if c[1] == "checkbox" and c[2]:find("^NN_rule_") then firstRule = firstRule or i end
+    end
+    assert_true(page and firstRule and firstRule > page)
+  end,
+  group_headers_in_order = function()
+    withRules()
+    local L = NewbieNudge.L
+    local inPage, headers = false, {}
+    for _, c in ipairs(WOW.calls) do
+      if c[1] == "RegisterVerticalLayoutSubcategory" then inPage = (c[3] == L.OPT_REMINDERS) end
+      if inPage and c[1] == "initializer" and c[2] == "header" then headers[#headers + 1] = c[3] end
+    end
+    assert_eq(headers, { L.OPT_GROUP_GEAR, L.OPT_GROUP_SPELLS, L.OPT_GROUP_QUESTS, L.OPT_GROUP_PROFESSIONS,
+      L.OPT_GROUP_TRAVEL, L.OPT_GROUP_OTHER })
+  end,
+  rules_in_priority_order_within_group = function()
+    withRules()
+    local order = {}
+    for i, c in ipairs(callsNamed("checkbox")) do order[c[2]] = i end
+    assert_true(order.NN_rule_durability < order.NN_rule_bag_unequipped)
+    assert_true(order.NN_rule_bag_full < order.NN_rule_ammo)
   end,
 }

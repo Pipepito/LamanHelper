@@ -23,6 +23,7 @@ end
 
 NN:RegisterRule({
   name = "ammo",
+  group = "gear",
   title = L.AMMO_TITLE,
   help = L.AMMO_HELP,
   events = { "UNIT_INVENTORY_CHANGED:player", "BAG_UPDATE_DELAYED", "PLAYER_EQUIPMENT_CHANGED" },

@@ -63,6 +63,7 @@ end
 
 NN:RegisterRule({
   name = "weapon_skill",
+  group = "spells",
   title = L.WEAPON_SKILL_TITLE,
   help = L.WEAPON_SKILL_HELP,
   events = { "SKILL_LINES_CHANGED", "PLAYER_EQUIPMENT_CHANGED", "CHAT_MSG_SKILL" },

@@ -89,10 +89,10 @@ return {
     assert_true(has(callsNamed("checkbox"), function(c) return c[2] == "NN_cvar_cameraKeepCharacterCentered" end))
     assert_true(has(callsNamed("checkbox"), function(c) return c[2] == "NN_cvar_cameraFoo" end))
     assert_eq(WOW.settings["NN_cvar_cameraDistanceMaxZoomFactor"].name, L().CAM_MAX_ZOOM)
-    -- camera section comes after the reminders section
+    -- camera section comes after the reminders page (its first group header)
     local order = {}
     for i, c in ipairs(inits) do if c[2] == "header" then order[c[3]] = i end end
-    assert_true(order[L().OPT_CAMERA] > order[L().OPT_REMINDERS])
+    assert_true(order[L().OPT_CAMERA] > order[L().OPT_GROUP_GEAR])
   end,
   no_other_header_when_nothing_discovered = function()
     cvars({ cameraDistanceMaxZoomFactor = { default = "1.9" } })

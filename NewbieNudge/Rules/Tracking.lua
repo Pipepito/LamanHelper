@@ -22,6 +22,7 @@ end
 
 NN:RegisterRule({
   name = "tracking",
+  group = "spells",
   title = L.TRACKING_TITLE,
   help = L.TRACKING_HELP,
   events = { "MINIMAP_UPDATE_TRACKING", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD" },

@@ -30,6 +30,7 @@ end
 
 NN:RegisterRule({
   name = "flight_path",
+  group = "travel",
   title = L.FLIGHT_PATH_TITLE,
   help = L.FLIGHT_PATH_HELP,
   events = { "ZONE_CHANGED_NEW_AREA", "TAXIMAP_OPENED", "TAXIMAP_CLOSED", "PLAYER_ENTERING_WORLD" },

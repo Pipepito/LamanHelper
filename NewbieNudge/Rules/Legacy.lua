@@ -37,6 +37,7 @@ NN:AfterLogin(ensureHook)
 
 NN:RegisterRule({
   name = "legacy",
+  group = "travel",
   title = L.LEGACY_TITLE,
   help = L.LEGACY_HELP,
   events = { "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD" },

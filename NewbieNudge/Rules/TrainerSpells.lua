@@ -65,6 +65,7 @@ end
 
 NN:RegisterRule({
   name = "trainer_spells",
+  group = "spells",
   title = L.TRAINER_SPELLS_TITLE,
   help = L.TRAINER_SPELLS_HELP,
   events = { "PLAYER_LEVEL_UP", "SPELLS_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE" },

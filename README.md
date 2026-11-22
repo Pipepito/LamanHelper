@@ -139,6 +139,7 @@ local _, NN = ...
 local L = NN.L
 NN:RegisterRule({
   name = "my_rule",            -- lowercase, used by /nudge and the options page
+  group = "gear",              -- options page group: gear | spells | quests | professions | travel
   title = L.MY_RULE_TITLE,     -- add the strings to every Locales file
   help = L.MY_RULE_HELP,
   events = { "SOME_EVENT" },   -- when to re-check; "UNIT_AURA:player" form is allowed

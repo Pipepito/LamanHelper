@@ -42,6 +42,7 @@ end
 
 NN:RegisterRule({
   name = "pet",
+  group = "spells",
   title = L.PET_TITLE,
   help = L.PET_HELP,
   events = { "UNIT_PET:player", "UNIT_HAPPINESS", "UNIT_PET_TRAINING_POINTS", "PET_UI_UPDATE",

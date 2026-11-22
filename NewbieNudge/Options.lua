@@ -79,6 +79,36 @@ function Options.RegisterPage(key, titleKey, build)
   Options.pages[#Options.pages + 1] = { key = key, titleKey = titleKey, build = build }
 end
 
+-- The Reminders page: one checkbox per rule under its group's header,
+-- groups in NN.RULE_GROUPS order, rules by NN.PRIORITY inside a group.
+function Options.BuildReminders(category, layout)
+  local db = NN.db
+  local priority = {}
+  for i, name in ipairs(NN.PRIORITY) do priority[name] = i end
+  local byGroup = {}
+  for i, rule in ipairs(NN.rules) do
+    local list = byGroup[rule.group] or {}
+    byGroup[rule.group] = list
+    list[#list + 1] = { rule = rule, order = priority[rule.name] or (1000 + i) }
+  end
+  for _, group in ipairs(NN.RULE_GROUPS) do
+    local list = byGroup[group]
+    if list then
+      table.sort(list, function(a, b) return a.order < b.order end)
+      Options.AddHeader(layout, L["OPT_GROUP_" .. group:upper()])
+      for _, entry in ipairs(list) do
+        local rule = entry.rule
+        local name = rule.name
+        local tooltip = rule.help
+        if not NN:Applies(rule) then tooltip = tooltip .. "\n\n|cff999999" .. L.OPT_NOT_RELEVANT .. "|r" end
+        Options.AddCheckbox(category, "NN_rule_" .. name, rule.title, tooltip,
+          function() return not db.disabled[name] end,
+          function(value) NN:SetRuleEnabled(name, value and true or false) end)
+      end
+    end
+  end
+end
+
 function Options:Build()
   if self.category or not Settings or not Settings.RegisterVerticalLayoutCategory then return end
   local category, layout = Settings.RegisterVerticalLayoutCategory(L.ADDON_TITLE)
@@ -126,22 +156,12 @@ function Options:Build()
       if NN.MinimapButton then NN.MinimapButton:SetShown(value and true or false) else db.minimap.hide = not value end
     end)
 
-  -- Reminders
-  Options.AddHeader(layout, L.OPT_REMINDERS)
-  for _, rule in ipairs(NN.rules) do
-    local name = rule.name
-    local tooltip = rule.help
-    if not NN:Applies(rule) then tooltip = tooltip .. "\n\n|cff999999" .. L.OPT_NOT_RELEVANT .. "|r" end
-    Options.AddCheckbox(category, "NN_rule_" .. name, rule.title, tooltip,
-      function() return not db.disabled[name] end,
-      function(value) NN:SetRuleEnabled(name, value and true or false) end)
-  end
-
   if NN.Camera and NN.Camera.AddToOptions and Settings.RegisterVerticalLayoutSubcategory then
     local cameraCategory, cameraLayout = Options.AddSubcategory(L.OPT_CAMERA)
     NN.Camera:AddToOptions(cameraCategory, cameraLayout)
   end
   if Settings.RegisterVerticalLayoutSubcategory then
+    Options.BuildReminders(Options.AddSubcategory(L.OPT_REMINDERS))
     for _, page in ipairs(Options.pages) do
       local title = L[page.titleKey]
       local pageCategory, pageLayout = Options.AddSubcategory(title)

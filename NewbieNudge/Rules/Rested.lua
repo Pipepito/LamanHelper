@@ -26,6 +26,7 @@ end
 
 NN:RegisterRule({
   name = "rested",
+  group = "travel",
   title = L.RESTED_TITLE,
   help = L.RESTED_HELP,
   events = { "PLAYER_UPDATE_RESTING" },

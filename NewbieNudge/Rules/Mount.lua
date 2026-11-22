@@ -24,6 +24,7 @@ end
 
 NN:RegisterRule({
   name = "mount",
+  group = "travel",
   title = L.MOUNT_TITLE,
   help = L.MOUNT_HELP,
   events = { "PLAYER_MONEY", "PLAYER_LEVEL_UP", "SKILL_LINES_CHANGED" },

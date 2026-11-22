@@ -64,6 +64,7 @@ end
 
 NN:RegisterRule({
   name = "materials_bag",
+  group = "gear",
   title = L.MATERIALS_BAG_TITLE,
   help = L.MATERIALS_BAG_HELP,
   events = { "BAG_UPDATE_DELAYED", "PLAYER_EQUIPMENT_CHANGED" },

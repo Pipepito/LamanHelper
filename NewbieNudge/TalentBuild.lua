@@ -155,6 +155,7 @@ local TALENT_ICON = 136116
 
 NN:RegisterRule({
   name = "talent_build",
+  group = "spells",
   title = L.BUILD_TITLE,
   help = L.BUILD_HELP,
   events = { "TRAIT_TREE_CURRENCY_INFO_UPDATED", "TRAIT_CONFIG_UPDATED", "TRAIT_NODE_CHANGED", "PLAYER_TALENT_UPDATE", "PLAYER_LEVEL_UP" },

@@ -65,6 +65,7 @@ end
 
 NN:RegisterRule({
   name = "gear_upgrade",
+  group = "gear",
   title = L.GEAR_UPGRADE_TITLE,
   help = L.GEAR_UPGRADE_HELP,
   events = { "BAG_UPDATE_DELAYED", "PLAYER_EQUIPMENT_CHANGED" },

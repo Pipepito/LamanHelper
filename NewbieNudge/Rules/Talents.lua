@@ -39,6 +39,7 @@ end
 
 NN:RegisterRule({
   name = "talents",
+  group = "spells",
   title = L.TALENTS_TITLE,
   help = L.TALENTS_HELP,
   events = { "TRAIT_TREE_CURRENCY_INFO_UPDATED", "TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE", "PLAYER_LEVEL_UP" },

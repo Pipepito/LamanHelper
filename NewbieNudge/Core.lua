@@ -20,6 +20,10 @@ NN.PRIORITY = {
   "professions", "profession_rank", "trainer_spells", "mount", "legacy", "flight_path", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
 NN.testMode = false
+-- Option-page groups for the Reminders page, in display order.
+NN.RULE_GROUPS = { "gear", "spells", "quests", "professions", "travel", "other" }
+local VALID_GROUP = {}
+for _, g in ipairs(NN.RULE_GROUPS) do VALID_GROUP[g] = true end
 
 NN.classFile = select(2, UnitClass("player"))
 NN.isForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
@@ -99,6 +103,7 @@ function NN:RegisterRule(rule)
   if type(rule.check) ~= "function" then invalid(rule, "check") end
   if rule.default == nil then rule.default = true end
   if rule.combat == nil then rule.combat = false end
+  if not VALID_GROUP[rule.group] then rule.group = "other" end
   self.rules[#self.rules + 1] = rule
   self.ruleByName[rule.name] = rule
   self.ruleState[rule.name] = { disabled = false, dirty = true }
