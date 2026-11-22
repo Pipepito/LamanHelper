@@ -292,6 +292,93 @@ teaches it, because not every city teaches every weapon.
   drop out; polearms hidden below 20; a level-9 character sees nothing; no
   skill API → silent; weapon names come from the client.
 
+## 4d. Service markers on the world map
+
+Owner request (2026-11-22, "include it in v4"): a new player should not have
+to hunt for the NPC that fixes their problem. Mark the closest suitable NPC
+on the **world map** from a button beside the reminder; several marks at
+once; marks can be removed; plus a "show nearby services" switch. **No
+minimap pins** (owner): marking a repair vendor, innkeeper or food vendor
+also switches on the game's own minimap tracking for that service; trainers
+get no minimap help.
+
+### Data (`tools/import_questie_npcs.py` → `Data/Services.lua`)
+- Source: QuestieDB `data/Forever/foreverNpcDB.lua` (GPL-3.0) plus its
+  `conversion.json` (area ID → uiMapID). Flags (cmangos classic, confirmed
+  in the data): vendor 4, trainer 16, innkeeper 128, repair 16384.
+- Kept, per NPC spawn whose zone converts to a uiMapID: `{ id, name, title,
+  map, x, y, faction }` (`faction` = "A", "H" or "AH" from
+  `friendlyToFaction`; NPCs friendly to neither are dropped).
+- Service kinds: `repair` (flag 16384), `inn` (flag 128 and title
+  "Innkeeper"), `supplies` (titles Food & Drink, General Goods, General
+  Supplies, Baker, Butcher), `trainer_<CLASS>` (title "<Class> Trainer" with
+  flag 16, mapped to the class file token), `weapon` (title "Weapon
+  Master"), `prof_<skillLineID>` (title "<Profession> Trainer" for the
+  primary and secondary professions the addon knows). Same deterministic
+  output and header style as `import_handbook.py`; unit tests on a small
+  fixture like `tests/test_import_handbook.py`.
+
+### Choosing "the closest" (`Services.lua`)
+- Candidates: NPCs of the kind, friendly to the player's faction.
+- **Level filter (owner):** skip NPCs in a zone whose minimum level
+  (`NN.Zones`) is above the player's level + 3. Cities and zones without a
+  level range are always allowed.
+- Distance: world positions via `C_Map.GetWorldPosFromMapPos` for the
+  player (`C_Map.GetBestMapForUnit` + `GetPlayerMapPosition`) and each
+  candidate; candidates on another continent count as farther than any on
+  the player's continent (so a night elf is still sent to Darnassus for
+  daggers, but a human goes to Stormwind first). When the player's position
+  is unreadable (instances), the button does nothing but say so.
+- Weapon-master rows already name their city: the mark goes to that row's
+  trainer(s), not to the globally closest.
+
+### Marks
+- `db.marks` (per character): a list of `{ kind, npcID }`, saved across
+  reloads. Several at once; marking the same kind again replaces that
+  kind's mark (one repair mark, one inn mark, …).
+- World map pins: a small frame pool on the world map canvas
+  (`WorldMapFrame.ScrollContainer.Child`, same approach as `MapReveal`),
+  shown when the map being viewed is the NPC's map. Marked pins: a gold
+  ring + the service icon, 20 px. Tooltip: NPC name, title, zone,
+  "Right-click: remove this mark". Right-click removes.
+- After marking, the world map opens on the NPC's zone (`OpenWorldMap(map)`)
+  so the player sees where it is; one chat line: "Marked <name> (<title>) in
+  <zone>."
+- Removing: right-click the pin; click the row's mark button again;
+  minimap menu "Remove all marks" (shown when any mark exists); a mark is
+  also removed automatically when its reminder row goes away (repair done,
+  trainer visited).
+- Minimap tracking: marking `repair`, `inn` or `supplies` turns on the
+  matching tracking type (Repair / Innkeeper / Food & Drink), matched by the
+  client's tracking names (`MINIMAP_TRACKING_*` globals, English fallback;
+  probe in the checklist). The addon never turns tracking off.
+
+### Buttons beside reminders
+- Rule results gain an optional `service = { kind = "...", npcs = {...}? }`.
+  Wired rows: `durability` → repair; `trainer_spells` → class trainer;
+  `weapon_trainers` → that row's weapon masters; `supplies` food/drink row →
+  supplies; `rested` (logging out outside an inn) → inn; `profession_rank`
+  trainer rows (not book/quest rows) → that profession's trainer.
+- List style: a 16 px map-pin button at the right end of the row (text
+  width shrinks by 18 px on those rows); gold when that kind is marked.
+  Icons style: Ctrl+click an icon marks/unmarks (tooltip says so).
+  Builder's call: no extra button in the combat strip.
+
+### Show nearby services
+- `db.services.showAll` (default off). When on, the world map shows every
+  service NPC of the player's faction on the map being viewed: repair, inn,
+  supplies, the player's class trainer, weapon masters, trainers of the
+  player's professions; same level filter. Smaller (14 px), no gold ring;
+  clicking one marks it.
+- Toggles: minimap menu checkbox "Show services on the world map", the Map
+  and minimap options page, and `/nudge services`.
+
+### Tests
+Importer (fixture → output); closest by distance, faction, level filter,
+other continent; marks saved/replaced/removed; pins shown only on their
+map; row buttons; minimap tracking turned on for repair and not for
+trainers; show-all pins; slash command; menu entries.
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list
