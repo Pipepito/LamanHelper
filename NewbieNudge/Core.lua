@@ -44,6 +44,8 @@ NN.defaults = {
   tooltipPrice = true,
   infobar = { enabled = true, bags = true, gold = true, gear = true },
   minimap = { hide = false, angle = 225 },
+  marks = {},
+  services = { showAll = false },
 }
 
 -------------------------------------------------------------------------------

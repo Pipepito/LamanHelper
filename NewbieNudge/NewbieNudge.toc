@@ -22,6 +22,7 @@ Highlight.lua
 Panel.lua
 InfoBar.lua
 Minimap.lua
+Services.lua
 Options.lua
 CVarSection.lua
 Camera.lua

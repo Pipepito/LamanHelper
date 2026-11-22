@@ -747,6 +747,18 @@ C_RestrictedActions = nil
 -------------------------------------------------------------------------------
 C_Map = {}
 function C_Map.GetBestMapForUnit(unit) return S().mapID end
+-- Positions: S().playerPos = { x =, y = } (0-1) on S().mapID; S().mapWorld[map] =
+-- { continent, left, top, width, height } turns map coordinates into world ones.
+function CreateVector2D(x, y) return { x = x, y = y, GetXY = function(self) return self.x, self.y end } end
+function C_Map.GetPlayerMapPosition(mapID, unit)
+  local p = S().playerPos
+  if p and mapID == S().mapID then return CreateVector2D(p.x, p.y) end
+end
+function C_Map.GetWorldPosFromMapPos(mapID, pos)
+  local w = S().mapWorld and S().mapWorld[mapID]
+  if not w then return nil end
+  return w[1], CreateVector2D(w[2] + pos.x * w[4], w[3] + pos.y * w[5])
+end
 function C_Map.GetMapInfo(mapID) local m = S().mapInfo[mapID]; if m then return { mapID = mapID, name = m.name, mapType = m.mapType, parentMapID = m.parentMapID } end end
 Enum.UIMapType = { Cosmic = 0, World = 1, Continent = 2, Zone = 3, Dungeon = 4, Micro = 5, Orphan = 6 }
 function C_Map.GetMapArtLayers(mapID) return S().mapLayers[mapID] or { { tileWidth = 256, tileHeight = 256 } } end
