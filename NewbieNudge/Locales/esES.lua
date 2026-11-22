@@ -90,6 +90,8 @@ NN.RegisterLocale("esES", {
   SERVICE_KIND_WEAPON = "maestro de armas",
   SERVICE_KIND_TRAINER = "instructor de clase",
   SERVICE_KIND_PROF = "instructor de profesión",
+  MAPPIN_REMOVE = "Clic derecho: quitar esta marca",
+  MAPPIN_CLICK_MARK = "Clic: marcarlo",
   OPT_SCALE = "Escala del panel",
   OPT_SNOOZE = "Duración de la posposición (minutos)",
   OPT_COMBAT_STRIP = "Mostrar tira compacta en combate",

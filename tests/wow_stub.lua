@@ -789,6 +789,14 @@ end
 WorldMapFrame = CreateFrame("Frame", "WorldMapFrame", UIParent)
 WorldMapFrame.shown = false
 WorldMapFrame.pins = {}
+-- Canvas: 1000 x 667; S().worldMapID is the map being viewed.
+WorldMapFrame.ScrollContainer = CreateFrame("Frame", nil, WorldMapFrame)
+WorldMapFrame.ScrollContainer.Child = CreateFrame("Frame", nil, WorldMapFrame.ScrollContainer)
+WorldMapFrame.ScrollContainer.Child:SetSize(1000, 667)
+function WorldMapFrame.ScrollContainer:GetCanvasScale() return S().canvasScale or 1 end
+function WorldMapFrame:GetMapID() return S().worldMapID end
+function WorldMapFrame:OnMapChanged() end
+function WOW.ViewMap(mapID) S().worldMapID = mapID; WorldMapFrame:Show(); WorldMapFrame:OnMapChanged() end
 function WorldMapFrame:EnumeratePinsByTemplate(template)
   local i = 0
   return function() i = i + 1; return self.pins[i] end

@@ -23,6 +23,7 @@ Panel.lua
 InfoBar.lua
 Minimap.lua
 Services.lua
+MapPins.lua
 Options.lua
 CVarSection.lua
 Camera.lua

@@ -91,6 +91,8 @@ NN.RegisterLocale("enUS", {
   SERVICE_KIND_WEAPON = "weapon master",
   SERVICE_KIND_TRAINER = "class trainer",
   SERVICE_KIND_PROF = "profession trainer",
+  MAPPIN_REMOVE = "Right-click: remove this mark",
+  MAPPIN_CLICK_MARK = "Click: mark it",
   OPT_SCALE = "Panel scale",
   OPT_SNOOZE = "Snooze length (minutes)",
   OPT_COMBAT_STRIP = "Show compact strip in combat",
