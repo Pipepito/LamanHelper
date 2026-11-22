@@ -72,7 +72,8 @@ talent of your Icy Veins build · no food, drink or bandages in your bags ·
 quests that need a group · the next rank of Cooking, First Aid or Fishing
 (trainer, book or quest) · an innkeeper who could set your Hearthstone nearby
 · saving up for your mount from level 30, and learning to ride at 40 · a
-weapon skill far behind its cap · the Legacy system opening at 25, and new
+weapon skill far behind its cap · weapon skills your class can learn, and which
+city of your faction teaches them · the Legacy system opening at 25, and new
 Legacy challenges to look at · a flight path in your zone you have not
 unlocked yet.
 

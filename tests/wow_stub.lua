@@ -528,6 +528,11 @@ local function itemByLink(link)
   local id = tonumber(tostring(link):match("item:(%d+)"))
   return id, S().itemInfo[id]
 end
+-- Item subclass names (weapons: classID 2); S().subclassNames[sub] when set.
+function C_Item.GetItemSubClassInfo(classID, sub)
+  local names = S().subclassNames
+  return names and names[sub] or nil
+end
 function C_Item.GetItemInfoInstant(idOrLink)
   local id, info = idOrLink, S().itemInfo[idOrLink]
   if type(idOrLink) ~= "number" then id, info = itemByLink(idOrLink) end

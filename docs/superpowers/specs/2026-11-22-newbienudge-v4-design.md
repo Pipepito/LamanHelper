@@ -255,6 +255,43 @@ should move it there.
   bag is a normal bag, or when it is a quiver/ammo pouch; click calls
   the two API functions with the right slots and refuses in combat.
 
+## 4c. `weapon_trainers` — weapon skills you could learn, and where
+
+Owner request (2026-11-22): list **every** weapon skill the character's
+class can learn but hasn't, and the city of the player's faction that
+teaches it, because not every city teaches every weapon.
+
+- **Data** (`Data/WeaponTrainers.lua`, hand-written; source: Warcraft
+  Tavern's WoW Forever weapon-trainer guide, checked against
+  warcraft.wiki.gg): per faction, the trainers with city, NPC name and the
+  skill line IDs they teach; per class, the skill line IDs it can learn
+  (Forever's table: rogues get one-handed axes, druids get polearms; wands
+  are excluded — built in, no trainer). Polearms: level 20.
+  - Alliance: Stormwind / Woo Ping (43, 55, 173, 136, 226, 229);
+    Ironforge / Buliwyf Stonehand (44, 172, 54, 160, 473, 46) and Bixi
+    Wobblebonk (226, 173, 176); Darnassus / Ilyenia Moonfire (45, 173,
+    473, 136, 176).
+  - Horde: Orgrimmar / Sayoc (45, 173, 473, 44, 136, 176, 172) and Hanashi
+    (45, 44, 136, 176, 172); Thunder Bluff / Ansekhwa (46, 54, 136, 160);
+    Undercity / Archibald (226, 173, 43, 229, 55).
+- **Known skills:** `NN.SkillLines()` by skill ID (already used by
+  `weapon_skill`). Silent when the skill API is missing.
+- **Rows:** one row per city that teaches at least one missing skill
+  (at most three), nearest-to-home order not attempted — cities in data
+  order. Text: "Learn %s in %s (%s)." → "Learn Two-Handed Maces and Staves
+  in Thunder Bluff (Ansekhwa)." Weapon names from the client
+  (`C_Item.GetItemSubClassInfo(2, subclass)`), so they follow the game
+  language. Two trainers in one city are joined ("Sayoc or Hanashi").
+  A skill taught in two cities appears only under the first. Polearms only
+  from level 20.
+- **Applies:** level ≥ 10 (builder's call: before that the player can't
+  travel to other cities easily), faction Alliance or Horde, the skill API
+  exists. Group `spells`, priority right after `weapon_skill`. Icon 135324.
+  Events: `SKILL_LINES_CHANGED`, `PLAYER_LEVEL_UP`. No click action.
+- **Tests:** per faction/class the right cities and weapons; learned skills
+  drop out; polearms hidden below 20; a level-9 character sees nothing; no
+  skill API → silent; weapon names come from the client.
+
 ## 5. Slash commands, bindings, docs
 
 - `/nudge minimap` toggles the minimap button. `/nudge style` toggles list

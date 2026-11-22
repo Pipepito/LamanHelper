@@ -33,6 +33,7 @@ Data\TrainerSpells.lua
 Data\Zones.lua
 Data\Dungeons.lua
 Data\IcyTalents.lua
+Data\WeaponTrainers.lua
 MapReveal.lua
 BagFull.lua
 Vendor.lua
@@ -46,6 +47,7 @@ Rules\Supplies.lua
 Rules\HearthBind.lua
 Rules\Mount.lua
 Rules\WeaponSkill.lua
+Rules\WeaponTrainers.lua
 Rules\Legacy.lua
 Rules\FlightPath.lua
 Rules\Talents.lua

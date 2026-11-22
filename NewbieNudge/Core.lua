@@ -15,7 +15,7 @@ NN.MAX_ROWS = 10
 NN.CHECK_DELAY = 0.5
 NN.TICK_SECONDS = 30
 NN.PRIORITY = {
-  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "weapon_skill", "buffs", "ammo", "pet", "demon",
+  "durability", "bag_unequipped", "materials_bag", "bag_full", "talents", "talent_build", "spell_ranks", "weapon_skill", "weapon_trainers", "buffs", "ammo", "pet", "demon",
   "tracking", "hearthstone", "hearth_bind", "supplies", "quests", "quest_item", "quest_turnin", "quest_slots", "quest_soon", "quest_grey", "quest_group", "mail",
   "professions", "profession_rank", "trainer_spells", "mount", "legacy", "flight_path", "dungeon_ready", "zone_level", "gear_upgrade", "rested",
 }
