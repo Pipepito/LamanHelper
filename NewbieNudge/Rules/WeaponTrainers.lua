@@ -31,6 +31,11 @@ local function cityName(city)
   return (info and NN.Plain(info.name, "string")) or city.name
 end
 
+local function spellKnown(spellID)
+  if IsPlayerSpell and IsPlayerSpell(spellID) then return true end
+  return NN.Spellbook ~= nil and NN.Spellbook:Knows(spellID)
+end
+
 -- Set of known skill line IDs, or nil when the client can't tell yet.
 local function knownSkills()
   local lines = NN.SkillLines and NN.SkillLines()
@@ -42,6 +47,9 @@ local function knownSkills()
   end
   -- every character knows at least one weapon; none means the list isn't loaded
   if not anyWeapon then return nil end
+  for skillID, spellID in pairs(data().spell or {}) do
+    if not known[skillID] and spellKnown(spellID) then known[skillID] = true end
+  end
   return known
 end
 

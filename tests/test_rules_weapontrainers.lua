@@ -24,6 +24,15 @@ end
 local function row(weapons, city, trainers) return L().WEAPON_TRAINERS_ROW:format(weapons, city, trainers) end
 
 return {
+  -- Forever (2026-11-23, druid): learning Fist Weapons adds no skill line 473,
+  -- only the Fist Weapons spell (15590) in the spellbook.
+  weapon_known_by_its_spell_without_a_skill_line = function()
+    char("DRUID", "Horde", 15, { 173, 54, 136, 160, 162 })
+    WOW.state.spellBook.items[40] = { spellID = 15590, passive = true }
+    WOW.state.spellInfo[15590] = { name = "Fist Weapons" }
+    run()
+    assert_eq(#results_of("weapon_trainers"), 0)
+  end,
   alliance_mage_learns_everything_in_stormwind = function()
     char("MAGE", "Alliance", 12, { 228 }) -- wands only
     run()

@@ -15,6 +15,12 @@ NN.WeaponTrainers = {
     [44] = 0, [172] = 1, [45] = 2, [46] = 3, [54] = 4, [160] = 5, [229] = 6,
     [43] = 7, [55] = 8, [136] = 10, [473] = 13, [173] = 15, [176] = 16, [226] = 18,
   },
+  -- weapon skill line ID -> the spell learning it gives. On Forever learning
+  -- Fist Weapons adds the spell but no skill line (2026-11-23), so either counts.
+  spell = {
+    [44] = 196, [172] = 197, [45] = 264, [46] = 266, [54] = 198, [160] = 199, [229] = 200,
+    [43] = 201, [55] = 202, [136] = 227, [473] = 15590, [173] = 1180, [176] = 2567, [226] = 5011,
+  },
   minLevel = { [229] = 20 }, -- polearms
   -- per faction, cities in display order; uiMapID gives the localized name
   cities = {
