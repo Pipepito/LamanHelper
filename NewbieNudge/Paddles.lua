@@ -35,6 +35,12 @@ local function spellName(id)
   return NN.Plain(name, "string")
 end
 
+-- known by the player (any rank)
+local function spellKnown(id)
+  if IsPlayerSpell and IsPlayerSpell(id) then return true end
+  return NN.Spellbook ~= nil and NN.Spellbook:Knows(id)
+end
+
 local function macroIndex(name)
   local i = GetMacroIndexByName and NN.Plain(GetMacroIndexByName(name)) or 0
   return (i and i > 0) and i or nil
@@ -50,7 +56,7 @@ function Paddles:Describe(action)
   elseif kind == "spell" then
     local name = spellName(value)
     local icon = C_Spell and C_Spell.GetSpellTexture and NN.Plain(C_Spell.GetSpellTexture(value))
-    return name or tostring(value), icon or 134400, name == nil
+    return name or tostring(value), icon or 134400, name == nil or not spellKnown(value)
   elseif kind == "item" then
     local name = C_Item and C_Item.GetItemNameByID and NN.Plain(C_Item.GetItemNameByID(value), "string")
     local icon = C_Item and C_Item.GetItemIconByID and NN.Plain(C_Item.GetItemIconByID(value))
@@ -73,7 +79,7 @@ function Paddles.SetupButton(button, action)
   button:SetAttribute("spell", nil); button:SetAttribute("item", nil); button:SetAttribute("macro", nil)
   if kind == "spell" then
     local name = spellName(value)
-    if not name then return false end
+    if not name or not spellKnown(value) then return false end
     button:SetAttribute("type", "spell"); button:SetAttribute("spell", name)
   elseif kind == "item" then
     button:SetAttribute("type", "item"); button:SetAttribute("item", "item:" .. tostring(value))
@@ -89,7 +95,8 @@ end
 local function actionButton(name)
   if not buttons[name] then
     local b = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
-    b:RegisterForClicks("AnyDown")
+    -- both: the template acts on down or up per the game's key-down setting
+    b:RegisterForClicks("AnyUp", "AnyDown")
     b:Hide()
     buttons[name] = b
   end
@@ -242,9 +249,24 @@ local function finish(key, reason)
   if current and current.done then current.done(key, reason) end
 end
 
+local MODIFIERS = { LSHIFT = true, RSHIFT = true, LCTRL = true, RCTRL = true, LALT = true, RALT = true,
+  LMETA = true, RMETA = true }
+
+-- "ALT-CTRL-SHIFT-F1", the order the game writes bindings in
+local function withModifiers(key)
+  local prefix = ""
+  if IsAltKeyDown and IsAltKeyDown() then prefix = prefix .. "ALT-" end
+  if IsControlKeyDown and IsControlKeyDown() then prefix = prefix .. "CTRL-" end
+  if IsShiftKeyDown and IsShiftKeyDown() then prefix = prefix .. "SHIFT-" end
+  return prefix .. key
+end
+
 local function onPress(_, key)
   if not learning then return end
   key = NN.Plain(key, "string")
+  -- a Steam chord (Ctrl+F1) arrives as the modifier first: keep listening
+  if key and MODIFIERS[key] then return end
+  if key and key ~= "ESCAPE" and not Paddles.REFUSED[key] then key = withModifiers(key) end
   if key == "ESCAPE" then finish(nil, "cancel")
   elseif not key or Paddles.REFUSED[key] then finish(nil, "refused")
   else finish(key) end
@@ -275,6 +297,11 @@ function Paddles:IsLearning() return learning ~= nil end
 
 NN:OnAnyEvent(function(event)
   if event == "PLAYER_REGEN_ENABLED" and pending then Paddles:Apply() end
+  -- a paddle held through a loading screen never sends its release
+  if event == "PLAYER_ENTERING_WORLD" and NN.db and not (InCombatLockdown and InCombatLockdown()) then
+    Paddles:ClearLayers()
+  end
+  if event == "SPELLS_CHANGED" and NN.db then Paddles:Apply() end
   if event == "PLAYER_REGEN_DISABLED" and learning then finish(nil, "combat") end
 end)
 

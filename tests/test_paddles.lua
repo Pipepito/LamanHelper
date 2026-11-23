@@ -7,6 +7,7 @@ local function count(t) local n = 0; for _ in pairs(t) do n = n + 1 end; return 
 
 local function setup()
   WOW.state.spellInfo[774] = { name = "Rejuvenation", icon = 136081 }
+  WOW.state.spellBook.items[1] = { spellID = 774 }
   WOW.state.macros = { { name = "Mount", icon = 132261 } }
   load_addon()
 end
@@ -192,6 +193,49 @@ return {
     local got
     assert_eq(P():StartLearning(1, function(key, reason) got = { key, reason } end), false)
     assert_eq(got[2], "combat")
+  end,
+  -- final review (2026-11-23)
+  unlearned_spell_is_missing_until_learned = function()
+    setup()
+    WOW.state.spellInfo[8936] = { name = "Regrowth", icon = 136085 }
+    P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 8936 })
+    assert_nil(binds().F9, "not known: not bound")
+    local _, _, missing = P():Describe(P():Get(1).action)
+    assert_eq(missing, true)
+    WOW.state.spellBook.items[2] = { spellID = 8936 }
+    WOW.FireEvent("SPELLS_CHANGED")
+    assert_eq(binds().F9, "CLICK NewbieNudgePaddle1:LeftButton", "bound once learned")
+  end,
+  held_layer_released_on_loading_screen = function()
+    setup()
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "layer" })
+    WOW.calls = {}
+    WOW.FireEvent("PLAYER_ENTERING_WORLD")
+    local cleared = false
+    for _, c in ipairs(WOW.calls) do
+      if c[1] == "Execute" and c[2] == "NewbieNudgePaddleLayer2" and c[3]:find("ClearBindings", 1, true) then cleared = true end
+    end
+    assert_true(cleared)
+  end,
+  action_buttons_follow_key_down_setting = function()
+    setup()
+    P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })
+    assert_eq(_G.NewbieNudgePaddle1.clicks, { "AnyUp", "AnyDown" })
+  end,
+  learning_skips_lone_modifiers_and_keeps_chords = function()
+    setup()
+    P():StartLearning(1)
+    local l = _G.NewbieNudgePaddleListener
+    l:GetScript("OnKeyDown")(l, "LCTRL")
+    assert_eq(P():IsLearning(), true, "a lone modifier is not the paddle")
+    WOW.state.ctrlDown = true
+    l:GetScript("OnKeyDown")(l, "F1")
+    assert_eq(P():Get(1).key, "CTRL-F1")
+    WOW.state.ctrlDown = false
+    WOW.state.altDown, WOW.state.shiftDown = true, true
+    P():StartLearning(2)
+    l:GetScript("OnKeyDown")(l, "F2")
+    assert_eq(P():Get(2).key, "ALT-SHIFT-F2")
   end,
   no_cvar_is_written = function()
     setup()

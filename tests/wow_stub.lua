@@ -337,7 +337,7 @@ function WOW.Hover(frame) frame:Fire("OnEnter") end
 function WOW.Unhover(frame) frame:Fire("OnLeave") end
 function IsShiftKeyDown() return S().shiftDown end
 function IsControlKeyDown() return S().ctrlDown or false end
-function IsAltKeyDown() return false end
+function IsAltKeyDown() return S().altDown or false end
 
 -------------------------------------------------------------------------------
 -- Events and timers

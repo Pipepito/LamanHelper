@@ -8,6 +8,7 @@ local function row(n) return W().rows[n] end
 
 local function setup()
   WOW.state.spellInfo[774] = { name = "Rejuvenation", icon = 136081 }
+  WOW.state.spellBook.items[1] = { spellID = 774 }
   WOW.state.macros = { { name = "Mount", icon = 132261 } }
   WOW.state.bindingNames = { TOGGLEBACKPACK = "Open Backpack", TOGGLEWORLDMAP = "Toggle World Map", JUMP = "Jump" }
   WOW.state.bindingList = {
@@ -89,7 +90,7 @@ return {
   window_locks_in_combat = function()
     setup()
     W():Show()
-    WOW.state.inCombat = true
+    -- PLAYER_REGEN_DISABLED fires before InCombatLockdown() turns true
     WOW.FireEvent("PLAYER_REGEN_DISABLED")
     assert_eq(row(1).learn:IsEnabled(), false); assert_eq(row(1).slot:IsEnabled(), false)
     assert_true(W().frame.combat:IsShown())

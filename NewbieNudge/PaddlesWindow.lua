@@ -12,7 +12,9 @@ local EMPTY_ICON = 134400
 local COMMAND_ICON = 136243
 
 local function P() return NN.Paddles end
-local function inCombat() return InCombatLockdown and InCombatLockdown() end
+-- PLAYER_REGEN_DISABLED fires before InCombatLockdown() turns true
+local fighting = false
+local function inCombat() return fighting or (InCombatLockdown and InCombatLockdown()) end
 
 local function slotLabel(slot)
   return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[slot]) or slot
@@ -283,6 +285,8 @@ function Window:Toggle()
 end
 
 NN:OnAnyEvent(function(event)
+  if event == "PLAYER_REGEN_DISABLED" then fighting = true end
+  if event == "PLAYER_REGEN_ENABLED" then fighting = false end
   if (event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED") and Window.frame and Window.frame:IsShown() then
     Window:Refresh()
   end
