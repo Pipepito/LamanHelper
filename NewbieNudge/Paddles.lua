@@ -54,6 +54,22 @@ function Paddles.Icon(v)
 end
 local icon = Paddles.Icon
 
+-- Icons for game commands, by words in the command's name (first match wins).
+local COMMAND_ICONS = {
+  { "BAG", "Interface\\Icons\\INV_Misc_Bag_08" }, { "BACKPACK", "Interface\\Icons\\INV_Misc_Bag_08" },
+  { "MAP", "Interface\\Icons\\INV_Misc_Map_01" }, { "SPELLBOOK", "Interface\\Icons\\INV_Misc_Book_09" }, { "QUEST", "Interface\\Icons\\INV_Misc_Note_01" },
+  { "CHARACTER", "Interface\\Icons\\INV_Chest_Cloth_17" }, { "TALENT", "Interface\\Icons\\Ability_Marksmanship" },
+  { "SOCIAL", "Interface\\Icons\\INV_Letter_15" }, { "FRIEND", "Interface\\Icons\\INV_Letter_15" }, { "GUILD", "Interface\\Icons\\INV_Letter_15" },
+  { "MOUNT", "Interface\\Icons\\Ability_Mount_RidingHorse" }, { "TARGET", "Interface\\Icons\\Ability_Hunter_SniperShot" }, { "RUN", "Interface\\Icons\\Ability_Rogue_Sprint" },
+}
+local function commandIcon(command)
+  command = tostring(command)
+  for _, pair in ipairs(COMMAND_ICONS) do
+    if command:find(pair[1], 1, true) then return pair[2] end
+  end
+  return nil
+end
+
 -- The action bar slot a binding command presses (page 1 for the main bar),
 -- or nil: ACTIONBUTTON6 -> 6, MULTIACTIONBAR1BUTTON1 (bottom left) -> 61.
 local BAR_OFFSET = { ACTIONBUTTON = 0, MULTIACTIONBAR1BUTTON = 60, MULTIACTIONBAR2BUTTON = 48,
@@ -73,7 +89,7 @@ function Paddles:Describe(action)
     local name = GetBindingName and NN.Plain(GetBindingName(value), "string")
     local slot = Paddles.ActionSlot(value)
     local tex = slot and GetActionTexture and icon(GetActionTexture(slot))
-    return name or tostring(value), tex or 136243, false
+    return name or tostring(value), tex or commandIcon(value) or 136243, false
   elseif kind == "spell" then
     local name = spellName(value)
     local tex = C_Spell and C_Spell.GetSpellTexture and icon(C_Spell.GetSpellTexture(value))

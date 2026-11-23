@@ -249,6 +249,17 @@ return {
     _, icon = P():Describe({ kind = "command", value = "ACTIONBUTTON7" })
     assert_eq(icon, 136243, "empty slot: the command icon")
   end,
+  commands_get_a_fitting_icon = function()
+    setup()
+    local function iconOf(command) local _, icon = P():Describe({ kind = "command", value = command }); return tostring(icon) end
+    assert_true(iconOf("TOGGLEBACKPACK"):find("Bag"), iconOf("TOGGLEBACKPACK"))
+    assert_true(iconOf("OPENALLBAGS"):find("Bag"))
+    assert_true(iconOf("TOGGLEWORLDMAP"):find("Map"))
+    assert_true(iconOf("TOGGLEBATTLEFIELDMINIMAP"):find("Map"))
+    assert_true(iconOf("TOGGLESPELLBOOK"):find("Book"))
+    assert_true(iconOf("TOGGLEQUESTLOG"):find("Note"))
+    assert_eq(iconOf("TOGGLEGAMEMENU"), "136243", "others keep the gear")
+  end,
   no_cvar_is_written = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })
