@@ -81,6 +81,9 @@ function Paddles.ActionSlot(command)
   return nil
 end
 
+-- Generated with Magnific for NewbieNudge (2026-11-23): stacked layers
+Paddles.LAYER_ICON = "Interface\\AddOns\\NewbieNudge\\Media\\layer"
+
 -- name, icon, missing for an action; nil for no action.
 function Paddles:Describe(action)
   if not action or not action.kind then return nil end
@@ -103,7 +106,7 @@ function Paddles:Describe(action)
     local tex = i and GetMacroInfo and select(2, GetMacroInfo(i))
     return tostring(value), icon(tex) or 134400, i == nil
   elseif kind == "layer" then
-    return nil, 134400, false
+    return nil, Paddles.LAYER_ICON, false
   end
   return nil
 end

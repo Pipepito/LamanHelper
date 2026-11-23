@@ -117,7 +117,7 @@ end
 
 local function commandChoices(forPaddle)
   local out = {}
-  if forPaddle then out[#out + 1] = { label = L.PADDLES_LAYER, icon = EMPTY_ICON, action = { kind = "layer" } } end
+  if forPaddle then out[#out + 1] = { label = L.PADDLES_LAYER, icon = P().LAYER_ICON, action = { kind = "layer" } } end
   local order, groups = commandGroups()
   for _, title in ipairs(order) do
     out[#out + 1] = { label = title, header = true }

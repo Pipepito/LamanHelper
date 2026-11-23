@@ -260,6 +260,11 @@ return {
     assert_true(iconOf("TOGGLEQUESTLOG"):find("Note"))
     assert_eq(iconOf("TOGGLEGAMEMENU"), "136243", "others keep the gear")
   end,
+  layer_has_its_own_icon = function()
+    setup()
+    local _, icon = P():Describe({ kind = "layer" })
+    assert_eq(icon, "Interface\\AddOns\\NewbieNudge\\Media\\layer")
+  end,
   no_cvar_is_written = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })
