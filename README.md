@@ -186,7 +186,10 @@ own paddle button). Give each paddle a game command (open bags, character,
 map, mount…), a spell, an item or a macro by dragging it onto the paddle's
 slot, or make it a layer: while it is held, A/B/X/Y and the d-pad do eight
 extra actions. The game's own buttons can't be learned, and nothing changes
-during combat. On the Steam Deck, first map the back grips to free keys in
+during combat. The window works with the controller alone: d-pad to move, A to
+select, B to go back, X to clear, LB/RB to switch between spells, items, macros
+and game commands; it also opens from Options → Controller and a key binding.
+On the Steam Deck, first map the back grips to free keys in
 Steam (Controller settings → Edit layout → Back grip buttons): Steam's default
 layout copies A/B/X/Y onto them.
 

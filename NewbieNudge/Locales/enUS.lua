@@ -315,7 +315,7 @@ NN.RegisterLocale("enUS", {
   PADDLES_PICKER_HINT = "D-pad: move and turn pages · A: choose · LB/RB: tab · X: clear · B: back",
   PADDLES_WINDOW_HINT = "D-pad: move · A: select · X: clear · B: close",
   PADDLES_NOTHING = "Nothing here.",
-  OPT_CONTROLLER_PADDLES = "Back paddles: open the minimap button's menu > Paddles, or type /nudge paddles.",
+  OPT_CONTROLLER_PADDLES = "Back paddles (also in the minimap button's menu, /nudge paddles and Key Bindings)",
   OPT_CONTROLLER_PANEL = "Reminder panel with a controller",
   OPT_CONTROLLER_BOOST = "Scale up the panel when a controller is in use",
   OPT_CONTROLLER_BOOST_TT = "On a small screen like the Steam Deck's, the panel and the combat strip grow by the factor below.",
@@ -328,6 +328,7 @@ NN.RegisterLocale("enUS", {
   BINDING_OPEN_TOP = "Open the top reminder",
   BINDING_SNOOZE_TOP = "Snooze the top reminder",
   BINDING_OPTIONS = "Open NewbieNudge options",
+  BINDING_PADDLES = "Open the Paddles window",
   SLASH_PANEL_HIDDEN = "The reminder panel is hidden. Use the key binding or /nudge show to bring it back.",
 
   -- Options: game settings page

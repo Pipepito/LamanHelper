@@ -292,15 +292,25 @@ return {
     W().frame.enable:SetChecked(false); W().frame.enable:GetScript("OnClick")(W().frame.enable)
     assert_eq(P():IsEnabled(), false)
   end,
-  never_opened_from_settings = function()
+  options_button_only_opens_the_window = function()
     setup()
+    local button
     for _, c in ipairs(WOW.calls) do
-      if c[1] == "initializer" and c[2] == "button" then assert_true(c[3] ~= L().MENU_PADDLES, "no settings button") end
+      if c[1] == "initializer" and c[2] == "button" and c[3] == L().OPT_CONTROLLER_PADDLES then button = c end
     end
-    local line = false
-    for _, c in ipairs(WOW.calls) do
-      if c[1] == "initializer" and c[2] == "header" and c[3] == L().OPT_CONTROLLER_PADDLES then line = true end
+    assert_true(button, "Controller page has a Paddles button")
+    local before = #WOW.calls
+    button[4].fn()
+    assert_true(_G.NewbieNudgePaddles:IsShown())
+    for i = before + 1, #WOW.calls do
+      assert_true(WOW.calls[i][1] ~= "SetCVar" and WOW.calls[i][1] ~= "SetValue", "writes no setting")
     end
-    assert_true(line, "the Controller page points to the window")
+  end,
+  binding_opens_the_window = function()
+    setup()
+    assert_eq(_G.BINDING_NAME_NEWBIENUDGE_PADDLES, L().BINDING_PADDLES)
+    local xml = io.open("NewbieNudge/Bindings.xml"):read("*a")
+    assert_true(xml:find('name="NEWBIENUDGE_PADDLES"', 1, true), "binding declared")
+    assert_true(xml:find("NewbieNudge.PaddlesWindow:Toggle()", 1, true))
   end,
 }

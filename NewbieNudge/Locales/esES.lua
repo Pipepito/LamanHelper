@@ -314,7 +314,7 @@ NN.RegisterLocale("esES", {
   PADDLES_PICKER_HINT = "Cruceta: moverse y pasar páginas · A: elegir · LB/RB: pestaña · X: quitar · B: volver",
   PADDLES_WINDOW_HINT = "Cruceta: moverse · A: seleccionar · X: quitar · B: cerrar",
   PADDLES_NOTHING = "No hay nada aquí.",
-  OPT_CONTROLLER_PADDLES = "Palancas traseras: abre el menú del botón del minimapa > Palancas, o escribe /nudge paddles.",
+  OPT_CONTROLLER_PADDLES = "Palancas traseras (también en el menú del botón del minimapa, /nudge paddles y Asignación de teclas)",
   OPT_CONTROLLER_PANEL = "Panel de recordatorios con mando",
   OPT_CONTROLLER_BOOST = "Agrandar el panel cuando se usa un mando",
   OPT_CONTROLLER_BOOST_TT = "En una pantalla pequeña como la de la Steam Deck, el panel y la tira de combate crecen según el factor de abajo.",
@@ -327,6 +327,7 @@ NN.RegisterLocale("esES", {
   BINDING_OPEN_TOP = "Abrir el primer recordatorio",
   BINDING_SNOOZE_TOP = "Posponer el primer recordatorio",
   BINDING_OPTIONS = "Abrir las opciones de NewbieNudge",
+  BINDING_PADDLES = "Abrir la ventana de palancas",
   SLASH_PANEL_HIDDEN = "El panel de recordatorios está oculto. Usa el atajo o /nudge show para recuperarlo.",
 
   -- Options: game settings page

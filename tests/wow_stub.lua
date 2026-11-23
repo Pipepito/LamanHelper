@@ -861,7 +861,7 @@ local function newCategory(name)
   function cat:GetID() return name end
   function cat:GetName() return name end
   local layout = {}
-  function layout:AddInitializer(init) record("initializer", init.kind, init.name) end
+  function layout:AddInitializer(init) record("initializer", init.kind, init.name, init) end
   return cat, layout
 end
 function Settings.RegisterVerticalLayoutCategory(name) record("RegisterVerticalLayoutCategory", name); return newCategory(name) end

@@ -3,4 +3,5 @@
   <Binding name="NEWBIENUDGE_OPEN_TOP" category="ADDONS">NewbieNudge.Panel:OpenTop()</Binding>
   <Binding name="NEWBIENUDGE_SNOOZE_TOP" category="ADDONS">NewbieNudge.Panel:SnoozeTop()</Binding>
   <Binding name="NEWBIENUDGE_OPTIONS" category="ADDONS">NewbieNudge:OpenOptions()</Binding>
+  <Binding name="NEWBIENUDGE_PADDLES" category="ADDONS">NewbieNudge.PaddlesWindow:Toggle()</Binding>
 </Bindings>

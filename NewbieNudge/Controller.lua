@@ -88,6 +88,7 @@ BINDING_NAME_NEWBIENUDGE_TOGGLE = L.BINDING_TOGGLE
 BINDING_NAME_NEWBIENUDGE_OPEN_TOP = L.BINDING_OPEN_TOP
 BINDING_NAME_NEWBIENUDGE_SNOOZE_TOP = L.BINDING_SNOOZE_TOP
 BINDING_NAME_NEWBIENUDGE_OPTIONS = L.BINDING_OPTIONS
+BINDING_NAME_NEWBIENUDGE_PADDLES = L.BINDING_PADDLES
 
 function Controller:AddPanelOptions(category, layout)
   local Options = NN.Options
@@ -119,7 +120,11 @@ if C_GamePad then
   NN.Options.RegisterPage("controller", "OPT_CONTROLLER", function(category, layout)
     local Options = NN.Options
     if Controller.AddPanelOptions then Controller:AddPanelOptions(category, layout) end
-    -- the paddle editor is NewbieNudge's own window, not part of this page
-    Options.AddHeader(layout, L.OPT_CONTROLLER_PADDLES)
+    -- the paddle editor is NewbieNudge's own window; this button only shows
+    -- it and writes no setting (the Options window's commit tainted the
+    -- controller interface when settings were written from it)
+    Options.AddButton(layout, L.OPT_CONTROLLER_PADDLES, L.MENU_PADDLES, function()
+      if NN.PaddlesWindow then NN.PaddlesWindow:Show() end
+    end)
   end)
 end
