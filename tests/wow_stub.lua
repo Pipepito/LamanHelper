@@ -1036,3 +1036,5 @@ end
 function C_Item.GetItemNameByID(id) local i = S().itemInfo[id]; return i and i.name end
 function C_Item.GetItemIconByID(id) local i = S().itemInfo[id]; return i and i.icon end
 function C_Item.GetItemSpell(id) local i = S().itemInfo[id]; if i and i.useSpell then return i.useSpell, 1 end end
+function Region:LockHighlight() self.highlightLocked = true end
+function Region:UnlockHighlight() self.highlightLocked = false end

@@ -138,24 +138,172 @@ function Window:Choices(tab, forPaddle)
   return {}
 end
 
-function Window:OpenActionMenu(n, slot)
-  if inCombat() or not (MenuUtil and MenuUtil.CreateContextMenu) then return end
-  local owner = (slot and self.rows[n] and self.rows[n].layer[slot]) or (self.rows[n] and self.rows[n].slot) or UIParent
-  MenuUtil.CreateContextMenu(owner, function(_, root)
-    local commands = root:CreateButton(L.PADDLES_COMMAND)
-    local order, groups = commandGroups()
-    for _, title in ipairs(order) do
-      local sub = commands:CreateButton(title)
-      if sub.SetScrollMode then sub:SetScrollMode(400) end
-      for _, c in ipairs(groups[title]) do
-        sub:CreateButton(c.name, function() setAction(n, slot, { kind = "command", value = c.command }) end)
+-------------------------------------------------------------------------------
+-- Picker: choose a slot's action from a list (works with the d-pad)
+-------------------------------------------------------------------------------
+
+local PER_PAGE = 10
+local TAB_LABEL = { spells = "PADDLES_TAB_SPELLS", items = "PADDLES_TAB_ITEMS", macros = "PADDLES_TAB_MACROS",
+  commands = "PADDLES_TAB_COMMANDS" }
+
+local function pickerTarget(p)
+  local name = L.PADDLES_ROW:format(p.n)
+  if p.slot then name = name .. ": " .. slotLabel(p.slot) end
+  return name
+end
+
+function Window:RenderPicker()
+  local p, ui = self.picker, self.frame and self.frame.picker
+  if not ui then return end
+  if not p then ui:Hide(); return end
+  p.list = self:Choices(p.tab, p.slot == nil)
+  local pages = math.max(1, math.ceil(#p.list / PER_PAGE))
+  p.page = math.min(math.max(p.page or 1, 1), pages)
+  local first = (p.page - 1) * PER_PAGE
+  if not p.index or p.index <= first or p.index > first + PER_PAGE then p.index = first + 1 end
+  ui.title:SetText(L.PADDLES_PICK_FOR:format(pickerTarget(p)))
+  for i, tab in ipairs(self.TABS) do
+    ui.tabs[i]:SetText(L[TAB_LABEL[tab]])
+    if tab == p.tab then ui.tabs[i]:LockHighlight() else ui.tabs[i]:UnlockHighlight() end
+  end
+  for i, e in ipairs(ui.entries) do
+    local c = p.list[first + i]
+    if c then
+      e.text:SetText(c.label)
+      e.icon:SetTexture(c.icon)
+      if c.header then
+        e.icon:Hide(); e.text:SetTextColor(1, 0.82, 0)
+      else
+        e.icon:Show(); e.text:SetTextColor(1, 1, 1)
       end
+      if first + i == p.index then e.mark:Show() else e.mark:Hide() end
+      e:Show()
+    else
+      e:Hide()
     end
-    if not slot then
-      root:CreateButton(L.PADDLES_LAYER, function() setAction(n, nil, { kind = "layer" }) end)
-    end
-    root:CreateButton(L.PADDLES_CLEAR, function() setAction(n, slot, nil) end)
-  end)
+  end
+  ui.empty:SetText(#p.list == 0 and L.PADDLES_NOTHING or "")
+  ui.page:SetText(L.PADDLES_PAGE:format(p.page, pages))
+  ui:Show()
+end
+
+function Window:OpenPicker(n, slot)
+  if inCombat() then return end
+  if not self.frame then self:Show() end
+  self.picker = { n = n, slot = slot, tab = "spells", page = 1 }
+  self:RenderPicker()
+end
+
+function Window:ClosePicker()
+  self.picker = nil
+  self:RenderPicker()
+end
+
+function Window:PickerSetTab(tab)
+  if not self.picker then return end
+  self.picker.tab, self.picker.page, self.picker.index = tab, 1, nil
+  self:RenderPicker()
+end
+
+function Window:PickerTab(delta)
+  if not self.picker then return end
+  local i = 1
+  for k, tab in ipairs(self.TABS) do if tab == self.picker.tab then i = k end end
+  i = ((i - 1 + delta) % #self.TABS) + 1
+  self:PickerSetTab(self.TABS[i])
+end
+
+function Window:PickerPage(delta)
+  local p = self.picker
+  if not p then return end
+  p.page, p.index = (p.page or 1) + delta, nil
+  self:RenderPicker()
+end
+
+-- moves the mark through the list, turning pages at the edges
+function Window:PickerMove(delta)
+  local p = self.picker
+  if not (p and p.list and #p.list > 0) then return end
+  p.index = math.min(math.max((p.index or 1) + delta, 1), #p.list)
+  p.page = math.floor((p.index - 1) / PER_PAGE) + 1
+  self:RenderPicker()
+end
+
+function Window:PickerChoose()
+  local p = self.picker
+  local c = p and p.list and p.list[p.index or 0]
+  if not c or c.header or not c.action then return end
+  self.picker = nil
+  setAction(p.n, p.slot, c.action)
+  self:RenderPicker()
+end
+
+function Window:PickerClear()
+  local p = self.picker
+  if not p then return end
+  self.picker = nil
+  setAction(p.n, p.slot, nil)
+  self:RenderPicker()
+end
+
+local function buildPicker(frame)
+  local ui = CreateFrame("Frame", nil, frame)
+  ui:SetAllPoints()
+  if ui.SetFrameLevel and frame.GetFrameLevel then ui:SetFrameLevel((frame:GetFrameLevel() or 1) + 20) end
+  ui:EnableMouse(true)
+  ui.bg = ui:CreateTexture(nil, "BACKGROUND")
+  ui.bg:SetAllPoints()
+  ui.bg:SetColorTexture(0.05, 0.05, 0.08, 1)
+  ui.title = ui:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  ui.title:SetPoint("TOP", ui, "TOP", 0, -8)
+  ui.tabs = {}
+  for i, tab in ipairs(Window.TABS) do
+    local t = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
+    t:SetSize(110, 22)
+    t:SetPoint("TOPLEFT", ui, "TOPLEFT", 12 + (i - 1) * 116, -28)
+    t:SetScript("OnClick", function() Window:PickerSetTab(tab) end)
+    ui.tabs[i] = t
+  end
+  ui.entries = {}
+  for i = 1, PER_PAGE do
+    local e = CreateFrame("Button", nil, ui)
+    e:SetSize(520, 22)
+    e:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -56 - (i - 1) * 24)
+    e.mark = e:CreateTexture(nil, "BACKGROUND")
+    e.mark:SetAllPoints()
+    e.mark:SetColorTexture(1, 0.82, 0, 0.25)
+    e.icon = e:CreateTexture(nil, "ARTWORK")
+    e.icon:SetSize(20, 20)
+    e.icon:SetPoint("LEFT", e, "LEFT", 0, 0)
+    e.text = e:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    e.text:SetPoint("LEFT", e, "LEFT", 26, 0)
+    e:SetScript("OnClick", function()
+      local p = Window.picker
+      if not p then return end
+      p.index = (p.page - 1) * PER_PAGE + i
+      Window:PickerChoose()
+    end)
+    ui.entries[i] = e
+  end
+  ui.empty = ui:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+  ui.empty:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -60)
+  ui.page = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  ui.page:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 26)
+  ui.hint = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  ui.hint:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
+  ui.hint:SetText(L.PADDLES_PICKER_HINT)
+  ui.clear = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
+  ui.clear:SetSize(90, 22)
+  ui.clear:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -110, 8)
+  ui.clear:SetText(L.PADDLES_CLEAR)
+  ui.clear:SetScript("OnClick", function() Window:PickerClear() end)
+  ui.back = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
+  ui.back:SetSize(90, 22)
+  ui.back:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -12, 8)
+  ui.back:SetText(BACK or "Back")
+  ui.back:SetScript("OnClick", function() Window:ClosePicker() end)
+  ui:Hide()
+  return ui
 end
 
 -------------------------------------------------------------------------------
@@ -178,7 +326,7 @@ local function slotButton(parent, n, slot)
     end
   end
   b:SetScript("OnReceiveDrag", receive)
-  b:SetScript("OnClick", function() if not receive() then Window:OpenActionMenu(n, slot) end end)
+  b:SetScript("OnClick", function() if not receive() then Window:OpenPicker(n, slot) end end)
   b:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -273,6 +421,7 @@ local function build()
     if fs.SetJustifyH then fs:SetJustifyH("LEFT") end
   end
   for n = 1, P().MAX do Window.rows[n] = buildRow(frame, n) end
+  frame.picker = buildPicker(frame)
   frame:Hide()
   -- not in UISpecialFrames: the game's Esc menu reads that list, and the
   -- taint log showed addons there mixing into it (2026-11-23)
