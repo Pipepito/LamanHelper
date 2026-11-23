@@ -39,6 +39,40 @@ Controller.PadLabel = function(_, token) return padLabel(token) end
 Controller.session = false
 
 -------------------------------------------------------------------------------
+-- Button assignments from chat: /nudge pad <role> <button>
+-- Blizzard's Options window doesn't offer these, and writing them from the
+-- addon's Settings page tainted the gamepad UI; a chat command runs outside
+-- that window.
+-------------------------------------------------------------------------------
+
+Controller.PAD_ROLES = {
+  { key = "alt", cvar = "GamePadEmulateAlt", label = "PAD_ROLE_ALT" },
+  { key = "shift", cvar = "GamePadEmulateShift", label = "PAD_ROLE_SHIFT" },
+  { key = "ctrl", cvar = "GamePadEmulateCtrl", label = "PAD_ROLE_CTRL" },
+  { key = "esc", cvar = "GamePadEmulateEsc", label = "PAD_ROLE_ESC" },
+  { key = "click", cvar = "GamePadCursorLeftClick", label = "PAD_ROLE_CLICK" },
+  { key = "rightclick", cvar = "GamePadCursorRightClick", label = "PAD_ROLE_RIGHTCLICK" },
+}
+-- words the player types -> pad button tokens
+local PAD_WORDS = {
+  none = "none", paddle1 = "PADPADDLE1", paddle2 = "PADPADDLE2", paddle3 = "PADPADDLE3", paddle4 = "PADPADDLE4",
+  lt = "PADLTRIGGER", rt = "PADRTRIGGER", lb = "PADLSHOULDER", rb = "PADRSHOULDER", ls = "PADLSTICK", rs = "PADRSTICK",
+  a = "PAD1", b = "PAD2", x = "PAD3", y = "PAD4", back = "PADBACK", start = "PADFORWARD",
+  up = "PADDUP", down = "PADDDOWN", left = "PADDLEFT", right = "PADDRIGHT",
+}
+
+function Controller:SetPadButton(roleKey, word)
+  local role
+  for _, r in ipairs(self.PAD_ROLES) do if r.key == roleKey then role = r end end
+  local token = word and PAD_WORDS[word]
+  if not (role and token) then NN:Say(L.PAD_USAGE); return false end
+  if InCombatLockdown and InCombatLockdown() then NN:Say(L.CVAR_IN_COMBAT); return false end
+  if C_CVar and C_CVar.SetCVar then C_CVar.SetCVar(role.cvar, token) elseif SetCVar then SetCVar(role.cvar, token) end
+  NN:Say(L.PAD_SET:format(L[role.label], padLabel(token)))
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- The addon when a controller is in use
 -------------------------------------------------------------------------------
 
@@ -119,8 +153,12 @@ if C_GamePad then
   NN.Options.RegisterPage("controller", "OPT_CONTROLLER", function(category, layout)
     local Options = NN.Options
     if Controller.AddPanelOptions then Controller:AddPanelOptions(category, layout) end
-    -- the game's controller settings: in Esc > Options > Controls; changing
-    -- them from here broke the gamepad interface on Forever
-    Options.AddHeader(layout, L.OPT_CONTROLLER_GAME_NOTE)
+    -- the hidden button assignments: shown here, changed from chat
+    -- (writing them from this page broke the gamepad interface on Forever)
+    Options.AddHeader(layout, L.OPT_CONTROLLER_PADS)
+    for _, role in ipairs(Controller.PAD_ROLES) do
+      Options.AddHeader(layout, L.PAD_LINE:format(L[role.label], padLabel(Controller:GetString(role.cvar))))
+    end
+    Options.AddHeader(layout, L.OPT_CONTROLLER_PAD_HELP)
   end)
 end

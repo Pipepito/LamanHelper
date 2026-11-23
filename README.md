@@ -43,6 +43,7 @@ Then start the game or type `/reload`.
 | `/nudge minimap` | Show or hide the minimap button. |
 | `/nudge style` | Switch the panel between the full list and icons only. |
 | `/nudge bar` | Turn the info bar on top of the panel on or off. |
+| `/nudge pad <role> <button>` | Assign a pad button to Alt, Shift, Ctrl, Escape or a cursor click (e.g. `/nudge pad alt paddle2`). |
 | `/nudge services` | Show or hide nearby services (repair, inns, trainers…) on the world map. |
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
@@ -178,10 +179,14 @@ bound to pad combinations in the game's Key Bindings window under
 "NewbieNudge": show/hide the panel, open the top reminder, snooze the top
 reminder, open the options.
 
-NewbieNudge doesn't change the game's controller settings (button
-assignments, camera, cursor, soft targeting): on WoW Forever, changing them
-from an addon breaks the game's controller interface. They are in Esc →
-Options → Controls.
+Options → Controller shows which pad buttons act as Alt, Shift, Ctrl, Escape
+and the cursor clicks (the game's own options don't show these). Change one
+from chat with `/nudge pad <alt|shift|ctrl|esc|click|rightclick> <button>`,
+for example `/nudge pad alt paddle2` (buttons: `paddle1`–`paddle4`, `lt`,
+`rt`, `lb`, `rb`, `ls`, `rs`, `a`, `b`, `x`, `y`, `back`, `start`, `up`,
+`down`, `left`, `right`, `none`). The options page itself never changes the
+game's controller settings: on WoW Forever, doing that from an addon's
+options page breaks the game's controller interface.
 
 ## Game settings for new players
 
