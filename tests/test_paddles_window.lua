@@ -189,6 +189,22 @@ return {
     f:GetScript("OnShow")(f)
     assert_true(f:GetScript("OnGamePadButtonDown"))
   end,
+  -- Forever returns some icons as file paths, not file IDs (2026-11-23)
+  icons_given_as_paths_are_shown = function()
+    setup()
+    WOW.state.spellInfo[774].icon = "Interface/Icons/Spell_Nature_Rejuvenation"
+    WOW.state.itemInfo[6948] = { name = "Hearthstone", icon = "Interface/Icons/INV_Misc_Rune_01", useSpell = "Hearthstone" }
+    WOW.state.bags[0].items = { [1] = { itemID = 6948 } }
+    P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "item", value = 6948 })
+    W():Show()
+    assert_eq(row(1).slot.icon:GetTexture(), "Interface/Icons/Spell_Nature_Rejuvenation")
+    assert_eq(row(2).slot.icon:GetTexture(), "Interface/Icons/INV_Misc_Rune_01")
+    WOW.state.spellBook.lines = { { name = "Balance", offset = 0, num = 1 } }
+    WOW.FireEvent("SPELLS_CHANGED")
+    assert_eq(W():Choices("spells")[1].icon, "Interface/Icons/Spell_Nature_Rejuvenation")
+    assert_eq(W():Choices("items")[1].icon, "Interface/Icons/INV_Misc_Rune_01")
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")

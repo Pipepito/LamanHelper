@@ -77,7 +77,7 @@ end
 local function spellChoices()
   local out = {}
   for _, sp in ipairs(NN.Spellbook and NN.Spellbook:KnownSpells() or {}) do
-    local icon = C_Spell and C_Spell.GetSpellTexture and NN.Plain(C_Spell.GetSpellTexture(sp.id))
+    local icon = C_Spell and C_Spell.GetSpellTexture and P().Icon(C_Spell.GetSpellTexture(sp.id))
     out[#out + 1] = { label = sp.name, icon = icon or EMPTY_ICON, action = { kind = "spell", value = sp.id } }
   end
   return out
@@ -92,7 +92,7 @@ local function itemChoices()
       if id and not seen[id] and C_Item and C_Item.GetItemSpell and C_Item.GetItemSpell(id) then
         seen[id] = true
         local name = NN.Plain(C_Item.GetItemNameByID and C_Item.GetItemNameByID(id), "string")
-        local icon = NN.Plain(C_Item.GetItemIconByID and C_Item.GetItemIconByID(id))
+        local icon = C_Item.GetItemIconByID and P().Icon(C_Item.GetItemIconByID(id))
         out[#out + 1] = { label = name or ("item:" .. id), icon = icon or EMPTY_ICON, action = { kind = "item", value = id } }
       end
     end
@@ -108,7 +108,7 @@ local function macroChoices()
   local function add(i)
     local name, icon = GetMacroInfo(i)
     name = NN.Plain(name, "string")
-    if name then out[#out + 1] = { label = name, icon = NN.Plain(icon) or EMPTY_ICON, action = { kind = "macro", value = name } } end
+    if name then out[#out + 1] = { label = name, icon = P().Icon(icon) or EMPTY_ICON, action = { kind = "macro", value = name } } end
   end
   for i = 1, NN.Plain(account) or 0 do add(i) end
   for i = 121, 120 + (NN.Plain(character) or 0) do add(i) end

@@ -46,6 +46,14 @@ local function macroIndex(name)
   return (i and i > 0) and i or nil
 end
 
+-- An icon as the client gives it: a file ID, or on Forever often a path.
+function Paddles.Icon(v)
+  if issecretvalue and issecretvalue(v) then return nil end
+  if type(v) == "number" or type(v) == "string" then return v end
+  return nil
+end
+local icon = Paddles.Icon
+
 -- name, icon, missing for an action; nil for no action.
 function Paddles:Describe(action)
   if not action or not action.kind then return nil end
@@ -55,16 +63,16 @@ function Paddles:Describe(action)
     return name or tostring(value), 136243, false
   elseif kind == "spell" then
     local name = spellName(value)
-    local icon = C_Spell and C_Spell.GetSpellTexture and NN.Plain(C_Spell.GetSpellTexture(value))
-    return name or tostring(value), icon or 134400, name == nil or not spellKnown(value)
+    local tex = C_Spell and C_Spell.GetSpellTexture and icon(C_Spell.GetSpellTexture(value))
+    return name or tostring(value), tex or 134400, name == nil or not spellKnown(value)
   elseif kind == "item" then
     local name = C_Item and C_Item.GetItemNameByID and NN.Plain(C_Item.GetItemNameByID(value), "string")
-    local icon = C_Item and C_Item.GetItemIconByID and NN.Plain(C_Item.GetItemIconByID(value))
-    return name or ("item:" .. tostring(value)), icon or 134400, false
+    local tex = C_Item and C_Item.GetItemIconByID and icon(C_Item.GetItemIconByID(value))
+    return name or ("item:" .. tostring(value)), tex or 134400, false
   elseif kind == "macro" then
     local i = macroIndex(value)
-    local icon = i and GetMacroInfo and select(2, GetMacroInfo(i))
-    return tostring(value), NN.Plain(icon) or 134400, i == nil
+    local tex = i and GetMacroInfo and select(2, GetMacroInfo(i))
+    return tostring(value), icon(tex) or 134400, i == nil
   elseif kind == "layer" then
     return nil, 134400, false
   end
