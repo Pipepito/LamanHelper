@@ -258,6 +258,31 @@ return {
     W():Show()
     assert_eq(row(3).layer.PAD1.icon:GetTexture(), 136081)
   end,
+  -- the game's own prompts use the Xbox-style images (letters), not the
+  -- generic numbered ones GetBindingText names (snapshot, 2026-11-23)
+  markers_prefer_the_letter_buttons = function()
+    WOW.state.bindingTexts = { PAD1 = "|A:Gamepad_Gen_1_64:24:24|a", PAD2 = "|A:Gamepad_Gen_2_64:24:24|a",
+      PADPADDLE1 = "|A:Gamepad_Gen_Paddle1_64:24:24|a" }
+    WOW.state.atlases = { ["Gamepad-Xbox1-ButtonA-Normal"] = {}, Gamepad_Ltr_B_64 = {}, Gamepad_Gen_1_64 = {},
+      Gamepad_Gen_2_64 = {}, Gamepad_Gen_Paddle1_64 = {} }
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    local ui = W().frame.picker
+    assert_eq(ui.entries[1].badge.icon.atlas, "Gamepad-Xbox1-ButtonA-Normal", "A: the game's prompt image")
+    assert_eq(ui.back.badge.icon.atlas, "Gamepad_Ltr_B_64", "B: the letter set when there is no Xbox image")
+    assert_eq(W().PadAtlas("PADPADDLE1"), "Gamepad_Gen_Paddle1_64", "paddles: the game's own")
+  end,
+  button_icons_sit_inside_their_buttons = function()
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    for _, b in ipairs({ W().frame.picker.back, W().frame.picker.clear }) do
+      assert_true(b.badge:GetParent() == b, "inside the button")
+      local point, _, _, x = b.badge:GetPoint(1)
+      assert_eq(point, "LEFT"); assert_true(x > 0, "on the button's left edge, inside")
+    end
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")

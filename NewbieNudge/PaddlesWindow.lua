@@ -148,14 +148,35 @@ local function padName(token)
   return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[token]) or token
 end
 
--- The game's own icon for a pad button, for the controller in use: Forever's
--- GetBindingText returns "|A:Gamepad_Gen_1_64:24:24|a" (snapshot, 2026-11-23).
-local function padAtlas(token)
-  local text = token and GetBindingText and NN.Plain(GetBindingText(token), "string")
-  local atlas = text and text:match("|A:([^:|]+)")
-  if atlas and C_Texture and C_Texture.GetAtlasInfo and not C_Texture.GetAtlasInfo(atlas) then return nil end
-  return atlas
+-- The game's own image for a pad button. Its prompts use the Xbox-style
+-- images (letters); GetBindingText names the generic numbered set
+-- ("|A:Gamepad_Gen_1_64:24:24|a"), still the only one with the paddles
+-- (snapshot, 2026-11-23).
+local XBOX = { PAD1 = "ButtonA", PAD2 = "ButtonB", PAD3 = "ButtonX", PAD4 = "ButtonY",
+  PADLSHOULDER = "Trigger-LB", PADRSHOULDER = "Trigger-RB", PADLTRIGGER = "Trigger-LT", PADRTRIGGER = "Trigger-RT",
+  PADDUP = "DPadUp", PADDDOWN = "DPadDown", PADDLEFT = "DPadLeft", PADDRIGHT = "DPadRight",
+  PADLSTICK = "Stick-L3", PADRSTICK = "Stick-R3" }
+local LETTER = { PAD1 = "A", PAD2 = "B", PAD3 = "X", PAD4 = "Y", PADFORWARD = "Menu", PADBACK = "View" }
+
+local function atlasExists(name)
+  if not (C_Texture and C_Texture.GetAtlasInfo) then return true end
+  return C_Texture.GetAtlasInfo(name) ~= nil
 end
+
+local function padAtlas(token)
+  if not token then return nil end
+  local candidates = {}
+  if XBOX[token] then candidates[#candidates + 1] = "Gamepad-Xbox1-" .. XBOX[token] .. "-Normal" end
+  if LETTER[token] then candidates[#candidates + 1] = "Gamepad_Ltr_" .. LETTER[token] .. "_64" end
+  local text = GetBindingText and NN.Plain(GetBindingText(token), "string")
+  local generic = text and text:match("|A:([^:|]+)")
+  if generic then candidates[#candidates + 1] = generic end
+  for _, name in ipairs(candidates) do
+    if atlasExists(name) then return name end
+  end
+  return nil
+end
+Window.PadAtlas = padAtlas
 
 -- token: a pad button (PAD1, PADLSHOULDER...); label: the drawn marker's text
 -- when the game has no icon for it
@@ -375,19 +396,19 @@ local function buildPicker(frame)
   ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE, "PADDUP" }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE, "PAD1" } })
   ui.legend:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
   ui.clear = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
-  ui.clear:SetSize(90, 22)
+  ui.clear:SetSize(100, 24)
   ui.clear:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -110, 8)
   ui.clear:SetText(L.PADDLES_CLEAR)
   ui.clear:SetScript("OnClick", function() Window:PickerClear() end)
   ui.clear.badge = badge(ui.clear, "PAD3")
-  ui.clear.badge:SetPoint("RIGHT", ui.clear, "LEFT", -2, 0)
+  ui.clear.badge:SetPoint("LEFT", ui.clear, "LEFT", 4, 0)
   ui.back = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
-  ui.back:SetSize(90, 22)
+  ui.back:SetSize(100, 24)
   ui.back:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -12, 8)
   ui.back:SetText(BACK or "Back")
   ui.back:SetScript("OnClick", function() Window:ClosePicker() end)
   ui.back.badge = badge(ui.back, "PAD2")
-  ui.back.badge:SetPoint("RIGHT", ui.back, "LEFT", -2, 0)
+  ui.back.badge:SetPoint("LEFT", ui.back, "LEFT", 4, 0)
   ui:Hide()
   return ui
 end
