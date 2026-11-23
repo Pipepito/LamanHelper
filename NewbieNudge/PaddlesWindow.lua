@@ -230,7 +230,7 @@ end
 -------------------------------------------------------------------------------
 
 local PER_PAGE = 10
-local PICKER_HEIGHT = 56 + PER_PAGE * 24 + 56
+local PICKER_HEIGHT = 56 + PER_PAGE * 24 + 76
 local TAB_LABEL = { spells = "PADDLES_TAB_SPELLS", items = "PADDLES_TAB_ITEMS", macros = "PADDLES_TAB_MACROS",
   commands = "PADDLES_TAB_COMMANDS" }
 
@@ -343,16 +343,59 @@ function Window:PickerClear()
   self:RenderPicker()
 end
 
+-- The look of the game's own controller frames (its button-prompt bar):
+-- the DiamondMetal border and a golden line under the title. Images only,
+-- drawn on NewbieNudge's frames; nothing of the game's frames is used.
+local BORDER = {
+  TopLeft = { "UI-Frame-DiamondMetal-CornerTopLeft", "TOPLEFT" },
+  TopRight = { "UI-Frame-DiamondMetal-CornerTopRight", "TOPRIGHT" },
+  BottomLeft = { "UI-Frame-DiamondMetal-CornerBottomLeft", "BOTTOMLEFT" },
+  BottomRight = { "UI-Frame-DiamondMetal-CornerBottomRight", "BOTTOMRIGHT" },
+  Top = { "_UI-Frame-DiamondMetal-EdgeTop" }, Bottom = { "_UI-Frame-DiamondMetal-EdgeBottom" },
+  Left = { "!UI-Frame-DiamondMetal-EdgeLeft" }, Right = { "!UI-Frame-DiamondMetal-EdgeRight" },
+}
+
+local function styleFrame(frame)
+  for _, part in pairs(BORDER) do if not atlasExists(part[1]) then return end end
+  local b = {}
+  for key, part in pairs(BORDER) do
+    local t = frame:CreateTexture(nil, "BORDER")
+    t:SetAtlas(part[1], true)
+    b[key] = t
+  end
+  for key, part in pairs(BORDER) do
+    if part[2] then b[key]:SetPoint(part[2], frame, part[2], 0, 0) end
+  end
+  b.Top:SetPoint("TOPLEFT", b.TopLeft, "TOPRIGHT"); b.Top:SetPoint("TOPRIGHT", b.TopRight, "TOPLEFT")
+  b.Bottom:SetPoint("BOTTOMLEFT", b.BottomLeft, "BOTTOMRIGHT"); b.Bottom:SetPoint("BOTTOMRIGHT", b.BottomRight, "BOTTOMLEFT")
+  b.Left:SetPoint("TOPLEFT", b.TopLeft, "BOTTOMLEFT"); b.Left:SetPoint("BOTTOMLEFT", b.BottomLeft, "TOPLEFT")
+  b.Right:SetPoint("TOPRIGHT", b.TopRight, "BOTTOMRIGHT"); b.Right:SetPoint("BOTTOMRIGHT", b.BottomRight, "TOPRIGHT")
+  for _, key in ipairs({ "Top", "Bottom" }) do if b[key].SetHorizTile then b[key]:SetHorizTile(true) end end
+  for _, key in ipairs({ "Left", "Right" }) do if b[key].SetVertTile then b[key]:SetVertTile(true) end end
+  frame.border = b
+end
+
+local function titleLine(frame, title)
+  if not atlasExists("UI-World-Quest-golden-line") then return end
+  local line = frame:CreateTexture(nil, "ARTWORK")
+  line:SetAtlas("UI-World-Quest-golden-line")
+  line:SetSize(360, 6)
+  line:SetPoint("TOP", title, "BOTTOM", 0, -2)
+  frame.titleLine = line
+end
+
 local function buildPicker(frame)
   local ui = CreateFrame("Frame", nil, frame)
-  ui:SetAllPoints()
+  ui:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -10)
+  ui:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -10, 10)
   if ui.SetFrameLevel and frame.GetFrameLevel then ui:SetFrameLevel((frame:GetFrameLevel() or 1) + 20) end
   ui:EnableMouse(true)
   ui.bg = ui:CreateTexture(nil, "BACKGROUND")
   ui.bg:SetAllPoints()
   ui.bg:SetColorTexture(0.05, 0.05, 0.08, 1)
-  ui.title = ui:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  ui.title:SetPoint("TOP", ui, "TOP", 0, -8)
+  ui.title = ui:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  ui.title:SetPoint("TOP", ui, "TOP", 0, -4)
+  titleLine(ui, ui.title)
   ui.tabs = {}
   for i, tab in ipairs(Window.TABS) do
     local t = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
@@ -514,9 +557,11 @@ local function build()
   frame.bg = frame:CreateTexture(nil, "BACKGROUND")
   frame.bg:SetAllPoints()
   frame.bg:SetColorTexture(0.05, 0.05, 0.08, 0.95)
-  frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  frame.title:SetPoint("TOP", frame, "TOP", 0, -8)
+  frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  frame.title:SetPoint("TOP", frame, "TOP", 0, -12)
   frame.title:SetText(L.PADDLES_TITLE)
+  styleFrame(frame)
+  titleLine(frame, frame.title)
   local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
   close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
   close:SetScript("OnClick", function() frame:Hide() end)

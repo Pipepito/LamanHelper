@@ -283,6 +283,28 @@ return {
       assert_eq(point, "LEFT"); assert_true(x > 0, "on the button's left edge, inside")
     end
   end,
+  -- the game's own controller frames: DiamondMetal border, golden title line
+  window_uses_the_games_frame_style = function()
+    WOW.state.atlases = {}
+    for _, n in ipairs({ "UI-Frame-DiamondMetal-CornerTopLeft", "UI-Frame-DiamondMetal-CornerTopRight",
+      "UI-Frame-DiamondMetal-CornerBottomLeft", "UI-Frame-DiamondMetal-CornerBottomRight",
+      "_UI-Frame-DiamondMetal-EdgeTop", "_UI-Frame-DiamondMetal-EdgeBottom", "!UI-Frame-DiamondMetal-EdgeLeft",
+      "!UI-Frame-DiamondMetal-EdgeRight", "UI-World-Quest-golden-line" }) do WOW.state.atlases[n] = {} end
+    setup()
+    W():Show()
+    local f = W().frame
+    assert_eq(f.border.TopLeft.atlas, "UI-Frame-DiamondMetal-CornerTopLeft")
+    assert_eq(f.border.Bottom.atlas, "_UI-Frame-DiamondMetal-EdgeBottom")
+    assert_eq(f.border.Left.atlas, "!UI-Frame-DiamondMetal-EdgeLeft")
+    assert_eq(f.titleLine.atlas, "UI-World-Quest-golden-line")
+    assert_eq(f.title.fontObject, "GameFontNormalLarge")
+  end,
+  window_plain_without_the_style_images = function()
+    WOW.state.atlases = {}
+    setup()
+    W():Show()
+    assert_nil(W().frame.border, "no broken border when the images are missing")
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")
