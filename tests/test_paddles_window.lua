@@ -227,6 +227,37 @@ return {
     assert_eq(seen.A, L().PADDLES_KEY_SELECT); assert_eq(seen.X, L().PADDLES_KEY_CLEAR)
     assert_eq(seen.B, L().PADDLES_KEY_CLOSE); assert_eq(seen[L().PADDLES_DPAD], L().PADDLES_KEY_MOVE)
   end,
+  -- Forever's GetBindingText gives "|A:Gamepad_Gen_1_64:24:24|a" for pad buttons:
+  -- the game's own icon for the controller in use (snapshot, 2026-11-23)
+  markers_use_the_games_button_icons = function()
+    WOW.state.bindingTexts = { PAD1 = "|A:Gamepad_Gen_1_64:24:24|a", PADLSHOULDER = "|A:Gamepad_Gen_LShoulder_64:24:24|a" }
+    WOW.state.atlases = { Gamepad_Gen_1_64 = { width = 64, height = 64 }, Gamepad_Gen_LShoulder_64 = { width = 64, height = 64 } }
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    local lb = W().frame.picker.lb
+    assert_eq(lb.icon.atlas, "Gamepad_Gen_LShoulder_64"); assert_true(lb.icon:IsShown())
+    assert_true(not lb.text:IsShown(), "no drawn marker when the game has the icon")
+    local rb = W().frame.picker.rb
+    assert_true(rb.text:IsShown() and rb.text:GetText() == "RB", "drawn marker when it doesn't")
+  end,
+  command_list_shows_action_bar_icons = function()
+    setup()
+    WOW.state.bindingNames.ACTIONBUTTON6 = "Action Button 6"
+    table.insert(WOW.state.bindingList, { "ACTIONBUTTON6", "BINDING_HEADER_ACTIONBAR" })
+    WOW.state.actions[6] = { type = "spell", id = 774 }
+    local found
+    for _, c in ipairs(W():Choices("commands", true)) do if c.action and c.action.value == "ACTIONBUTTON6" then found = c end end
+    assert_eq(found.icon, 136081)
+  end,
+  layer_slot_with_an_action_button_shows_its_spell = function()
+    setup()
+    WOW.state.actions[6] = { type = "spell", id = 774 }
+    P():SetKey(3, "F10"); P():SetAction(3, { kind = "layer" })
+    P():SetLayerAction(3, "PAD1", { kind = "command", value = "ACTIONBUTTON6" })
+    W():Show()
+    assert_eq(row(3).layer.PAD1.icon:GetTexture(), 136081)
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")

@@ -237,6 +237,18 @@ return {
     l:GetScript("OnKeyDown")(l, "F2")
     assert_eq(P():Get(2).key, "ALT-SHIFT-F2")
   end,
+  -- a command that presses an action bar slot shows what is in that slot
+  action_button_commands_show_the_slots_icon = function()
+    setup()
+    WOW.state.actions[6] = { type = "spell", id = 774 }
+    WOW.state.actions[61] = { type = "spell", id = 774 }
+    local _, icon = P():Describe({ kind = "command", value = "ACTIONBUTTON6" })
+    assert_eq(icon, 136081)
+    _, icon = P():Describe({ kind = "command", value = "MULTIACTIONBAR1BUTTON1" })
+    assert_eq(icon, 136081, "bottom left bar, slot 61")
+    _, icon = P():Describe({ kind = "command", value = "ACTIONBUTTON7" })
+    assert_eq(icon, 136243, "empty slot: the command icon")
+  end,
   no_cvar_is_written = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })

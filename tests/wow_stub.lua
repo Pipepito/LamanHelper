@@ -959,7 +959,7 @@ function C_Console.GetAllCommands() return S().consoleCommands or {} end
 C_GamePad = {}
 function C_GamePad.IsEnabled() return S().gamepad.enabled end
 function C_GamePad.GetActiveDeviceID() return S().gamepad.deviceID end
-function GetBindingText(key) return "|" end
+function GetBindingText(key) return (S().bindingTexts or {})[key] or "|" end
 function GetBindingAction(key) return (S().bindings or {})[key] or "" end
 function GetNumBindings() return #(S().bindingList or {}) end
 function GetBinding(i) local b = (S().bindingList or {})[i]; if b then return b[1], b[2], b[3], b[4] end end
@@ -1041,3 +1041,7 @@ function Region:UnlockHighlight() self.highlightLocked = false end
 function Region:GetAtlas() return self.atlas end
 C_Texture = C_Texture or {}
 function C_Texture.GetAtlasInfo(name) return (S().atlases or {})[name] end
+function GetActionTexture(slot)
+  local a = S().actions[slot]
+  if a and a.type == "spell" then return C_Spell.GetSpellTexture(a.id) end
+end

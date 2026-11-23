@@ -122,7 +122,9 @@ local function commandChoices(forPaddle)
   for _, title in ipairs(order) do
     out[#out + 1] = { label = title, header = true }
     for _, c in ipairs(groups[title]) do
-      out[#out + 1] = { label = c.name, icon = COMMAND_ICON, action = { kind = "command", value = c.command } }
+      local action = { kind = "command", value = c.command }
+      local _, tex = P():Describe(action)
+      out[#out + 1] = { label = c.name, icon = tex or COMMAND_ICON, action = action }
     end
   end
   return out
@@ -142,9 +144,24 @@ end
 -- Pad button markers: a small dark key with the button's name
 -------------------------------------------------------------------------------
 
-local function badge(parent, label)
+local function padName(token)
+  return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[token]) or token
+end
+
+-- The game's own icon for a pad button, for the controller in use: Forever's
+-- GetBindingText returns "|A:Gamepad_Gen_1_64:24:24|a" (snapshot, 2026-11-23).
+local function padAtlas(token)
+  local text = token and GetBindingText and NN.Plain(GetBindingText(token), "string")
+  local atlas = text and text:match("|A:([^:|]+)")
+  if atlas and C_Texture and C_Texture.GetAtlasInfo and not C_Texture.GetAtlasInfo(atlas) then return nil end
+  return atlas
+end
+
+-- token: a pad button (PAD1, PADLSHOULDER...); label: the drawn marker's text
+-- when the game has no icon for it
+local function badge(parent, token, label)
+  label = label or padName(token)
   local b = CreateFrame("Frame", nil, parent)
-  b:SetSize(math.max(20, 9 * #label + 6), 16)
   b.edge = b:CreateTexture(nil, "BORDER")
   b.edge:SetAllPoints()
   b.edge:SetColorTexture(1, 0.82, 0, 0.9)
@@ -155,11 +172,18 @@ local function badge(parent, label)
   b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   b.text:SetPoint("CENTER", b, "CENTER", 0, 0)
   b.text:SetText(label)
+  b.icon = b:CreateTexture(nil, "OVERLAY")
+  b.icon:SetAllPoints()
+  local atlas = padAtlas(token)
+  if atlas then
+    b:SetSize(22, 22)
+    b.icon:SetAtlas(atlas)
+    b.icon:Show(); b.edge:Hide(); b.bg:Hide(); b.text:Hide()
+  else
+    b:SetSize(math.max(20, 9 * #label + 6), 16)
+    b.icon:Hide()
+  end
   return b
-end
-
-local function padName(token)
-  return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[token]) or token
 end
 
 -- A row of "[A] Select  [B] Close ..." under a window.
@@ -169,7 +193,7 @@ local function legend(parent, pairs)
   row.badges = {}
   local x = 0
   for _, pair in ipairs(pairs) do
-    local b = badge(row, pair[1])
+    local b = badge(row, pair[3], pair[1])
     b:SetPoint("LEFT", row, "LEFT", x, 0)
     b.label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     b.label:SetPoint("LEFT", b, "RIGHT", 4, 0)
@@ -316,9 +340,9 @@ local function buildPicker(frame)
     t:SetScript("OnClick", function() Window:PickerSetTab(tab) end)
     ui.tabs[i] = t
   end
-  ui.lb = badge(ui, padName("PADLSHOULDER"))
+  ui.lb = badge(ui, "PADLSHOULDER")
   ui.lb:SetPoint("RIGHT", ui.tabs[1], "LEFT", -4, 0)
-  ui.rb = badge(ui, padName("PADRSHOULDER"))
+  ui.rb = badge(ui, "PADRSHOULDER")
   ui.rb:SetPoint("LEFT", ui.tabs[#ui.tabs], "RIGHT", 4, 0)
   ui.entries = {}
   for i = 1, PER_PAGE do
@@ -333,7 +357,7 @@ local function buildPicker(frame)
     e.icon:SetPoint("LEFT", e, "LEFT", 0, 0)
     e.text = e:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     e.text:SetPoint("LEFT", e, "LEFT", 26, 0)
-    e.badge = badge(e, padName("PAD1"))
+    e.badge = badge(e, "PAD1")
     e.badge:SetPoint("RIGHT", e, "RIGHT", -4, 0)
     e.badge:Hide()
     e:SetScript("OnClick", function()
@@ -348,21 +372,21 @@ local function buildPicker(frame)
   ui.empty:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -60)
   ui.page = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   ui.page:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 26)
-  ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE } })
+  ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE, "PADDUP" }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE, "PAD1" } })
   ui.legend:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
   ui.clear = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
   ui.clear:SetSize(90, 22)
   ui.clear:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -110, 8)
   ui.clear:SetText(L.PADDLES_CLEAR)
   ui.clear:SetScript("OnClick", function() Window:PickerClear() end)
-  ui.clear.badge = badge(ui.clear, padName("PAD3"))
+  ui.clear.badge = badge(ui.clear, "PAD3")
   ui.clear.badge:SetPoint("RIGHT", ui.clear, "LEFT", -2, 0)
   ui.back = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
   ui.back:SetSize(90, 22)
   ui.back:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -12, 8)
   ui.back:SetText(BACK or "Back")
   ui.back:SetScript("OnClick", function() Window:ClosePicker() end)
-  ui.back.badge = badge(ui.back, padName("PAD2"))
+  ui.back.badge = badge(ui.back, "PAD2")
   ui.back.badge:SetPoint("RIGHT", ui.back, "LEFT", -2, 0)
   ui:Hide()
   return ui
@@ -409,7 +433,6 @@ local function showAction(b, text, action)
     return
   end
   if action.kind == "layer" then name = L.PADDLES_LAYER end
-  if action.kind == "command" then icon = COMMAND_ICON end
   b.icon:SetTexture(icon or EMPTY_ICON)
   local absent = missing or (action.kind == "item" and (NN.Plain(GetItemCount and GetItemCount(action.value)) or 0) == 0)
   b.icon:SetDesaturated(absent and true or false)
@@ -502,8 +525,8 @@ local function build()
   frame.focusMark.tex:SetColorTexture(1, 0.82, 0, 0.35)
   frame.focusMark:Hide()
   frame.legend = legend(frame, {
-    { L.PADDLES_DPAD, L.PADDLES_KEY_MOVE }, { padName("PAD1"), L.PADDLES_KEY_SELECT },
-    { padName("PAD3"), L.PADDLES_KEY_CLEAR }, { padName("PAD2"), L.PADDLES_KEY_CLOSE },
+    { L.PADDLES_DPAD, L.PADDLES_KEY_MOVE, "PADDUP" }, { padName("PAD1"), L.PADDLES_KEY_SELECT, "PAD1" },
+    { padName("PAD3"), L.PADDLES_KEY_CLEAR, "PAD3" }, { padName("PAD2"), L.PADDLES_KEY_CLOSE, "PAD2" },
   })
   frame:Hide()
   -- not in UISpecialFrames: the game's Esc menu reads that list, and the

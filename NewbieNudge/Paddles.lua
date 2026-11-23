@@ -54,13 +54,26 @@ function Paddles.Icon(v)
 end
 local icon = Paddles.Icon
 
+-- The action bar slot a binding command presses (page 1 for the main bar),
+-- or nil: ACTIONBUTTON6 -> 6, MULTIACTIONBAR1BUTTON1 (bottom left) -> 61.
+local BAR_OFFSET = { ACTIONBUTTON = 0, MULTIACTIONBAR1BUTTON = 60, MULTIACTIONBAR2BUTTON = 48,
+  MULTIACTIONBAR3BUTTON = 24, MULTIACTIONBAR4BUTTON = 36 }
+function Paddles.ActionSlot(command)
+  local bar, n = tostring(command):match("^(%u[%u%d]-BUTTON)(%d+)$")
+  n = tonumber(n)
+  if bar and BAR_OFFSET[bar] and n and n >= 1 and n <= 12 then return BAR_OFFSET[bar] + n end
+  return nil
+end
+
 -- name, icon, missing for an action; nil for no action.
 function Paddles:Describe(action)
   if not action or not action.kind then return nil end
   local kind, value = action.kind, action.value
   if kind == "command" then
     local name = GetBindingName and NN.Plain(GetBindingName(value), "string")
-    return name or tostring(value), 136243, false
+    local slot = Paddles.ActionSlot(value)
+    local tex = slot and GetActionTexture and icon(GetActionTexture(slot))
+    return name or tostring(value), tex or 136243, false
   elseif kind == "spell" then
     local name = spellName(value)
     local tex = C_Spell and C_Spell.GetSpellTexture and icon(C_Spell.GetSpellTexture(value))
