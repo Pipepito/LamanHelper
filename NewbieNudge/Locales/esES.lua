@@ -320,6 +320,7 @@ NN.RegisterLocale("esES", {
   PADDLES_KEY_BACK = "Volver",
   PADDLES_KEY_CHOOSE = "Elegir",
   PADDLES_KEY_PAGE = "Moverse, pasar páginas",
+  PADDLES_KEY_SEARCH = "Buscar",
   OPT_CONTROLLER_PADDLES = "Palancas traseras (también en el menú del botón del minimapa, /nudge paddles y Asignación de teclas)",
   OPT_CONTROLLER_PANEL = "Panel de recordatorios con mando",
   OPT_CONTROLLER_BOOST = "Agrandar el panel cuando se usa un mando",

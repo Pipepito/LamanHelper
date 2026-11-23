@@ -230,7 +230,7 @@ end
 -------------------------------------------------------------------------------
 
 local PER_PAGE = 10
-local PICKER_HEIGHT = 56 + PER_PAGE * 24 + 76
+local PICKER_HEIGHT = 82 + PER_PAGE * 24 + 76
 local TAB_LABEL = { spells = "PADDLES_TAB_SPELLS", items = "PADDLES_TAB_ITEMS", macros = "PADDLES_TAB_MACROS",
   commands = "PADDLES_TAB_COMMANDS" }
 
@@ -245,6 +245,19 @@ function Window:RenderPicker()
   if not ui then return end
   if not p then ui:Hide(); return end
   p.list = self:Choices(p.tab, p.slot == nil)
+  local q = p.search and p.search:lower() or ""
+  if q ~= "" then
+    local kept, heading = {}, nil
+    for _, c in ipairs(p.list) do
+      if c.header then
+        heading = c
+      elseif c.label:lower():find(q, 1, true) then
+        if heading then kept[#kept + 1] = heading; heading = nil end
+        kept[#kept + 1] = c
+      end
+    end
+    p.list = kept
+  end
   local pages = math.max(1, math.ceil(#p.list / PER_PAGE))
   p.page = math.min(math.max(p.page or 1, 1), pages)
   local first = (p.page - 1) * PER_PAGE
@@ -281,7 +294,8 @@ end
 function Window:OpenPicker(n, slot)
   if inCombat() then return end
   if not self.frame then self:Show() end
-  self.picker = { n = n, slot = slot, tab = "spells", page = 1 }
+  self.picker = { n = n, slot = slot, tab = "spells", page = 1, search = "" }
+  if self.frame.picker.search then self.frame.picker.search:SetText("") end
   self:RenderPicker()
 end
 
@@ -333,6 +347,17 @@ function Window:PickerChoose()
   self.picker = nil
   setAction(p.n, p.slot, c.action)
   self:RenderPicker()
+end
+
+function Window:PickerSearch(text)
+  if not self.picker then return end
+  self.picker.search, self.picker.page, self.picker.index = text or "", 1, nil
+  self:RenderPicker()
+end
+
+function Window:PickerFocusSearch()
+  local box = self.frame and self.frame.picker and self.frame.picker.search
+  if box then box:SetFocus() end
 end
 
 function Window:PickerClear()
@@ -408,11 +433,24 @@ local function buildPicker(frame)
   ui.lb:SetPoint("RIGHT", ui.tabs[1], "LEFT", -4, 0)
   ui.rb = badge(ui, "PADRSHOULDER")
   ui.rb:SetPoint("LEFT", ui.tabs[#ui.tabs], "RIGHT", 4, 0)
+  ui.search = CreateFrame("EditBox", nil, ui, "InputBoxTemplate")
+  ui.search:SetSize(200, 20)
+  ui.search:SetPoint("TOPRIGHT", ui, "TOPRIGHT", -16, -56)
+  ui.search:SetAutoFocus(false)
+  ui.search:SetScript("OnTextChanged", function(box) Window:PickerSearch(box:GetText()) end)
+  ui.search:SetScript("OnEnterPressed", function(box) box:ClearFocus() end)
+  ui.search:SetScript("OnEscapePressed", function(box) box:ClearFocus() end)
+  ui.searchIcon = ui:CreateTexture(nil, "OVERLAY")
+  ui.searchIcon:SetSize(14, 14)
+  ui.searchIcon:SetTexture("Interface\\Common\\UI-Searchbox-Icon")
+  ui.searchIcon:SetPoint("RIGHT", ui.search, "LEFT", -6, 0)
+  ui.searchBadge = badge(ui, "PAD4")
+  ui.searchBadge:SetPoint("RIGHT", ui.searchIcon, "LEFT", -4, 0)
   ui.entries = {}
   for i = 1, PER_PAGE do
     local e = CreateFrame("Button", nil, ui)
     e:SetSize(520, 22)
-    e:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -56 - (i - 1) * 24)
+    e:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -82 - (i - 1) * 24)
     e.mark = e:CreateTexture(nil, "BACKGROUND")
     e.mark:SetAllPoints()
     e.mark:SetColorTexture(1, 0.82, 0, 0.25)
@@ -433,10 +471,11 @@ local function buildPicker(frame)
     ui.entries[i] = e
   end
   ui.empty = ui:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-  ui.empty:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -60)
+  ui.empty:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -86)
   ui.page = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   ui.page:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 26)
-  ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE, "PADDUP" }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE, "PAD1" } })
+  ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE, "PADDUP" }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE, "PAD1" },
+    { padName("PAD4"), L.PADDLES_KEY_SEARCH, "PAD4" } })
   ui.legend:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
   ui.clear = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
   ui.clear:SetSize(100, 24)
@@ -664,6 +703,7 @@ onPad = function(_, button)
     elseif button == "PADRSHOULDER" then Window:PickerTab(1)
     elseif button == "PAD1" then Window:PickerChoose()
     elseif button == "PAD3" then Window:PickerClear()
+    elseif button == "PAD4" then Window:PickerFocusSearch()
     elseif button == "PAD2" then Window:ClosePicker() end
     showFocus()
     return

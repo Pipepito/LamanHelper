@@ -321,6 +321,7 @@ NN.RegisterLocale("enUS", {
   PADDLES_KEY_BACK = "Back",
   PADDLES_KEY_CHOOSE = "Choose",
   PADDLES_KEY_PAGE = "Move, turn pages",
+  PADDLES_KEY_SEARCH = "Search",
   OPT_CONTROLLER_PADDLES = "Back paddles (also in the minimap button's menu, /nudge paddles and Key Bindings)",
   OPT_CONTROLLER_PANEL = "Reminder panel with a controller",
   OPT_CONTROLLER_BOOST = "Scale up the panel when a controller is in use",

@@ -305,6 +305,29 @@ return {
     W():Show()
     assert_nil(W().frame.border, "no broken border when the images are missing")
   end,
+  -- search box: type to filter the open list
+  picker_search_filters_the_list = function()
+    setup()
+    W():Show()
+    W():OpenPicker(1); W():PickerSetTab("commands")
+    local box = W().frame.picker.search
+    box:SetText("map")
+    box:GetScript("OnTextChanged")(box, true)
+    local labels = {}
+    for _, c in ipairs(W().picker.list) do labels[#labels + 1] = c.label end
+    assert_eq(labels, { "Interface Panel", "Toggle World Map" }, "matches, with their heading")
+    W():PickerTab(-1)
+    assert_eq(W().picker.search, "map", "the search stays when switching tabs")
+    W():OpenPicker(2)
+    assert_eq(box:GetText(), "", "a new picker starts empty")
+  end,
+  y_jumps_into_the_search_box = function()
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    pad("PAD4")
+    assert_eq(W().frame.picker.search.hasFocus, true)
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")

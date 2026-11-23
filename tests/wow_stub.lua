@@ -987,8 +987,8 @@ function Region:SetMultiLine(b) self.multiLine = b end
 function Region:SetAutoFocus(b) self.autoFocus = b end
 function Region:HighlightText() self.highlighted = true end
 function Region:SetCursorPosition(p) self.cursor = p end
-function Region:ClearFocus() end
-function Region:SetFocus() end
+function Region:ClearFocus() self.hasFocus = false end
+function Region:SetFocus() self.hasFocus = true end
 function Region:SetMaxLetters(n) self.maxLetters = n end
 function Region:SetTextInsets() end
 function Region:EnableKeyboard(on) self.keyboard = on and true or false end
