@@ -119,5 +119,7 @@ if C_GamePad then
   NN.Options.RegisterPage("controller", "OPT_CONTROLLER", function(category, layout)
     local Options = NN.Options
     if Controller.AddPanelOptions then Controller:AddPanelOptions(category, layout) end
+    -- the paddle editor is NewbieNudge's own window, not part of this page
+    Options.AddHeader(layout, L.OPT_CONTROLLER_PADDLES)
   end)
 end

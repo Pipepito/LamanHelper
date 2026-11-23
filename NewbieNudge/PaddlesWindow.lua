@@ -1,0 +1,289 @@
+-- The Paddles window: NewbieNudge's own editor for the back paddles. Opened
+-- from the minimap menu and /nudge paddles, never from Blizzard's Settings
+-- panel (its commit tainted Forever's controller interface, 2026-11-23).
+local _, NN = ...
+local L = NN.L
+
+local Window = { rows = {} }
+NN.PaddlesWindow = Window
+
+local ROW_H, SLOT = 34, 28
+local EMPTY_ICON = 134400
+local COMMAND_ICON = 136243
+
+local function P() return NN.Paddles end
+local function inCombat() return InCombatLockdown and InCombatLockdown() end
+
+local function slotLabel(slot)
+  return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[slot]) or slot
+end
+
+-------------------------------------------------------------------------------
+-- What goes on a slot
+-------------------------------------------------------------------------------
+
+-- The action the cursor holds, or nil.
+local function cursorAction()
+  if not GetCursorInfo then return nil end
+  local kind, a, _, c = GetCursorInfo()
+  if kind == "spell" then
+    local id = NN.Plain(c) or NN.Plain(a)
+    return id and { kind = "spell", value = id }
+  elseif kind == "item" then
+    return NN.Plain(a) and { kind = "item", value = NN.Plain(a) }
+  elseif kind == "macro" then
+    local name = GetMacroInfo and NN.Plain((GetMacroInfo(a)), "string")
+    return name and { kind = "macro", value = name }
+  end
+  return nil
+end
+
+-- slot nil = the paddle itself, else a layer slot of paddle n
+local function setAction(n, slot, action)
+  if slot then P():SetLayerAction(n, slot, action) else P():SetAction(n, action) end
+  Window:Refresh()
+end
+
+local function currentAction(n, slot)
+  local entry = P():Get(n)
+  if slot then return entry.layer and entry.layer[slot] end
+  return entry.action
+end
+
+-- Every game command with a name, grouped by the game's binding headers.
+local function commandGroups()
+  local groups, order = {}, {}
+  if not (GetNumBindings and GetBinding) then return order, groups end
+  for i = 1, GetNumBindings() or 0 do
+    local command, category = GetBinding(i)
+    command = NN.Plain(command, "string")
+    if command and not command:find("^HEADER_") then
+      local name = GetBindingName and NN.Plain(GetBindingName(command), "string")
+      if name and name ~= command then
+        local header = NN.Plain(category, "string") or ""
+        local title = (header ~= "" and NN.Plain(_G[header], "string")) or header
+        if not groups[title] then groups[title] = {}; order[#order + 1] = title end
+        local list = groups[title]
+        list[#list + 1] = { command = command, name = name }
+      end
+    end
+  end
+  return order, groups
+end
+
+function Window:OpenActionMenu(n, slot)
+  if inCombat() or not (MenuUtil and MenuUtil.CreateContextMenu) then return end
+  local owner = (slot and self.rows[n] and self.rows[n].layer[slot]) or (self.rows[n] and self.rows[n].slot) or UIParent
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    local commands = root:CreateButton(L.PADDLES_COMMAND)
+    local order, groups = commandGroups()
+    for _, title in ipairs(order) do
+      local sub = commands:CreateButton(title)
+      if sub.SetScrollMode then sub:SetScrollMode(400) end
+      for _, c in ipairs(groups[title]) do
+        sub:CreateButton(c.name, function() setAction(n, slot, { kind = "command", value = c.command }) end)
+      end
+    end
+    if not slot then
+      root:CreateButton(L.PADDLES_LAYER, function() setAction(n, nil, { kind = "layer" }) end)
+    end
+    root:CreateButton(L.PADDLES_CLEAR, function() setAction(n, slot, nil) end)
+  end)
+end
+
+-------------------------------------------------------------------------------
+-- Widgets
+-------------------------------------------------------------------------------
+
+local function slotButton(parent, n, slot)
+  local b = CreateFrame("Button", nil, parent)
+  b:SetSize(SLOT, SLOT)
+  b.icon = b:CreateTexture(nil, "ARTWORK")
+  b.icon:SetAllPoints()
+  b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  local function receive()
+    if inCombat() then return end
+    local action = cursorAction()
+    if action then
+      if ClearCursor then ClearCursor() end
+      setAction(n, slot, action)
+      return true
+    end
+  end
+  b:SetScript("OnReceiveDrag", receive)
+  b:SetScript("OnClick", function() if not receive() then Window:OpenActionMenu(n, slot) end end)
+  b:SetScript("OnEnter", function(self)
+    if not GameTooltip then return end
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    local name = P():Describe(currentAction(n, slot))
+    GameTooltip:SetText(name or L.PADDLES_EMPTY)
+    GameTooltip:Show()
+  end)
+  b:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+  return b
+end
+
+local function showAction(b, text, action)
+  local name, icon, missing = P():Describe(action)
+  if not action or not action.kind then
+    b.icon:SetTexture(EMPTY_ICON); b.icon:SetDesaturated(true)
+    if text then text:SetText(L.PADDLES_EMPTY) end
+    return
+  end
+  if action.kind == "layer" then name = L.PADDLES_LAYER end
+  if action.kind == "command" then icon = COMMAND_ICON end
+  b.icon:SetTexture(icon or EMPTY_ICON)
+  local absent = missing or (action.kind == "item" and (NN.Plain(GetItemCount and GetItemCount(action.value)) or 0) == 0)
+  b.icon:SetDesaturated(absent and true or false)
+  if text then text:SetText(missing and L.PADDLES_MISSING:format(name) or name) end
+end
+
+local function buildRow(frame, n)
+  local r = { layer = {}, layerLabels = {} }
+  r.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  r.title:SetText(L.PADDLES_ROW:format(n))
+  r.key = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  r.learn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+  r.learn:SetSize(80, 22)
+  r.learn:SetText(L.PADDLES_LEARN)
+  r.learn:SetScript("OnClick", function()
+    frame.status:SetText(L.PADDLES_PRESS)
+    P():StartLearning(n, function(key, reason)
+      if reason == "refused" then frame.status:SetText(L.PADDLES_REFUSED)
+      elseif reason == "combat" then frame.status:SetText(L.PADDLES_COMBAT)
+      elseif reason == "cancel" then frame.status:SetText(L.PADDLES_CANCELLED)
+      else frame.status:SetText("") end
+      Window:Refresh()
+    end)
+  end)
+  r.slot = slotButton(frame, n, nil)
+  r.action = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  r.replaces = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  for _, slot in ipairs(P().LAYER_SLOTS) do
+    r.layer[slot] = slotButton(frame, n, slot)
+    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    label:SetText(slotLabel(slot))
+    r.layerLabels[slot] = label
+  end
+  return r
+end
+
+local function build()
+  local frame = CreateFrame("Frame", "NewbieNudgePaddles", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+  frame:SetSize(560, 300)
+  frame:SetPoint("CENTER")
+  frame:SetFrameStrata("DIALOG")
+  frame:SetMovable(true)
+  frame:EnableMouse(true)
+  frame:RegisterForDrag("LeftButton")
+  frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+  frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+  frame:SetScript("OnHide", function() if P():IsLearning() then P():StopLearning() end end)
+  frame.bg = frame:CreateTexture(nil, "BACKGROUND")
+  frame.bg:SetAllPoints()
+  frame.bg:SetColorTexture(0.05, 0.05, 0.08, 0.95)
+  frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  frame.title:SetPoint("TOP", frame, "TOP", 0, -8)
+  frame.title:SetText(L.PADDLES_TITLE)
+  local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+  close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+  close:SetScript("OnClick", function() frame:Hide() end)
+
+  frame.enable = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+  frame.enable:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -26)
+  frame.enable:SetScript("OnClick", function(self) P():SetEnabled(self:GetChecked()); Window:Refresh() end)
+  frame.enableText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  frame.enableText:SetPoint("LEFT", frame.enable, "RIGHT", 2, 0)
+  frame.enableText:SetText(L.PADDLES_USE)
+
+  frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  frame.combat = frame:CreateFontString(nil, "OVERLAY", "GameFontRedSmall")
+  frame.combat:SetText(L.PADDLES_COMBAT)
+  frame.tip = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  frame.tip:SetText(L.PADDLES_TIP)
+  for _, fs in ipairs({ frame.status, frame.tip }) do
+    if fs.SetWidth then fs:SetWidth(530) end
+    if fs.SetJustifyH then fs:SetJustifyH("LEFT") end
+  end
+  for n = 1, P().MAX do Window.rows[n] = buildRow(frame, n) end
+  frame:Hide()
+  -- not in UISpecialFrames: the game's Esc menu reads that list, and the
+  -- taint log showed addons there mixing into it (2026-11-23)
+  return frame
+end
+
+-------------------------------------------------------------------------------
+-- Layout and state
+-------------------------------------------------------------------------------
+
+local function place(region, x, y)
+  region:ClearAllPoints()
+  region:SetPoint("TOPLEFT", Window.frame, "TOPLEFT", x, y)
+end
+
+function Window:Refresh()
+  local frame = self.frame
+  if not frame then return end
+  local locked = inCombat() and true or false
+  frame.enable:SetChecked(P():IsEnabled())
+  if locked then frame.enable:Disable() else frame.enable:Enable() end
+  local y = -58
+  for n, r in ipairs(self.rows) do
+    local entry = P():Get(n)
+    place(r.title, 12, y - 6)
+    r.key:SetText(entry.key or L.PADDLES_NOT_SET)
+    place(r.key, 90, y - 6)
+    place(r.learn, 170, y - 2)
+    place(r.slot, 260, y)
+    place(r.action, 296, y - 4)
+    showAction(r.slot, r.action, entry.action)
+    local bound = entry.key and GetBindingAction and NN.Plain(GetBindingAction(entry.key), "string")
+    if bound and bound ~= "" then
+      r.replaces:SetText(L.PADDLES_REPLACES:format(GetBindingName and NN.Plain(GetBindingName(bound), "string") or bound))
+      r.replaces:Show()
+    else
+      r.replaces:SetText(""); r.replaces:Hide()
+    end
+    place(r.replaces, 296, y - 18)
+    for _, b in ipairs({ r.learn, r.slot }) do if locked then b:Disable() else b:Enable() end end
+    y = y - ROW_H
+    local isLayer = entry.action and entry.action.kind == "layer"
+    for i, slot in ipairs(P().LAYER_SLOTS) do
+      local b, label = r.layer[slot], r.layerLabels[slot]
+      if isLayer then
+        local col, line = (i - 1) % 4, math.floor((i - 1) / 4)
+        place(label, 30 + col * 130, y - line * ROW_H - 8)
+        place(b, 100 + col * 130, y - line * ROW_H)
+        showAction(b, nil, entry.layer and entry.layer[slot])
+        if locked then b:Disable() else b:Enable() end
+        b:Show(); label:Show()
+      else
+        b:Hide(); label:Hide()
+      end
+    end
+    if isLayer then y = y - math.ceil(#P().LAYER_SLOTS / 4) * ROW_H end
+  end
+  place(frame.status, 12, y - 4)
+  place(frame.combat, 12, y - 20)
+  if locked then frame.combat:Show() else frame.combat:Hide() end
+  place(frame.tip, 12, y - 36)
+  frame:SetHeight(-y + 70)
+end
+
+function Window:Show()
+  if not self.frame then self.frame = build() end
+  self.frame:Show()
+  self:Refresh()
+end
+
+function Window:Hide() if self.frame then self.frame:Hide() end end
+
+function Window:Toggle()
+  if self.frame and self.frame:IsShown() then self:Hide() else self:Show() end
+end
+
+NN:OnAnyEvent(function(event)
+  if (event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED") and Window.frame and Window.frame:IsShown() then
+    Window:Refresh()
+  end
+end)

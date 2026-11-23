@@ -115,6 +115,9 @@ function MinimapButton:MenuEntries()
   add({ kind = "button", label = db.panel.hidden and L.MENU_SHOW or L.MENU_HIDE, onClick = function()
     if NN.Panel then NN.Panel:ToggleHidden() else db.panel.hidden = not db.panel.hidden end
   end })
+  if NN.PaddlesWindow then
+    add({ kind = "button", label = L.MENU_PADDLES, onClick = function() NN.PaddlesWindow:Show() end })
+  end
   add({ kind = "button", label = L.MENU_SETTINGS, onClick = function() NN:OpenOptions() end })
   return entries
 end

@@ -494,6 +494,8 @@ function NN:HandleSlash(msg)
     local style = (self.db.panel.style == "icons") and "list" or "icons"
     if self.Panel then self.Panel:SetStyle(style) else self.db.panel.style = style end
     self:Say(style == "icons" and L.SLASH_STYLE_ICONS or L.SLASH_STYLE_LIST)
+  elseif command == "paddles" then
+    if self.PaddlesWindow then self.PaddlesWindow:Toggle() end
   elseif command == "services" then
     if self.MapPins then self.MapPins:SetShowAll(not self.db.services.showAll) else self.db.services.showAll = not self.db.services.showAll end
     self:Say(self.db.services.showAll and L.SLASH_SERVICES_ON or L.SLASH_SERVICES_OFF)

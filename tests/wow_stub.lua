@@ -907,9 +907,12 @@ Minimap:SetSize(140, 140)
 function Minimap:GetCenter() return 1000, 700 end
 function GetCursorPosition() return S().cursorX or 0, S().cursorY or 0 end
 -- MenuUtil: runs the generator against a recording description (WOW.lastMenu).
-local function newMenuDescription()
-  local d = { items = {} }
-  local function add(kind, label) local it = { kind = kind, label = label }; d.items[#d.items + 1] = it; return it end
+local newMenuDescription
+newMenuDescription = function(kind, label)
+  local d = { items = {}, kind = kind, label = label }
+  -- every item is itself a description, so submenus can be built on it
+  local function add(kind, label) local it = newMenuDescription(kind, label); d.items[#d.items + 1] = it; return it end
+  function d:SetScrollMode(h) self.scroll = h end
   function d:CreateTitle(text) return add("title", text) end
   function d:CreateDivider() return add("divider") end
   function d:CreateButton(text, fn) local it = add("button", text); it.onClick = fn; return it end
@@ -1020,3 +1023,6 @@ function GetMacroInfo(i) local m = (S().macros or {})[i]; if m then return m.nam
 function Region:WrapScript(frame, script, pre, post) frame.wrapped = frame.wrapped or {}; frame.wrapped[script] = pre end
 function Region:UnwrapScript(frame, script) if frame.wrapped then frame.wrapped[script] = nil end end
 function Region:Execute(body) record("Execute", self:GetName(), body) end
+function GetBindingName(command) return (S().bindingNames or {})[command] or command end
+function Region:SetChecked(v) self.checked = v and true or false end
+function Region:GetChecked() return self.checked == true end
