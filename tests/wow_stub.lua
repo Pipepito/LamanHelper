@@ -988,12 +988,14 @@ function Region:ClearFocus() end
 function Region:SetFocus() end
 function Region:SetMaxLetters(n) self.maxLetters = n end
 function Region:SetTextInsets() end
-function Region:EnableKeyboard() end
+function Region:EnableKeyboard(on) self.keyboard = on and true or false end
 function Region:SetScrollChild(c) self.scrollChild = c end
 function Region:SetVerticalScroll(v) self.verticalScroll = v end
 function Region:GetVerticalScroll() return self.verticalScroll or 0 end
 function Region:GetVerticalScrollRange() return 0 end
-function Region:SetPropagateKeyboardInput() end
+function Region:SetPropagateKeyboardInput(on) self.propagateKeys = on end
+function Region:EnableGamePadButton(on) self.gamepad = on and true or false end
+function Region:SetPropagateGamePadInput(on) self.propagatePad = on end
 
 -- Override bindings (per owner frame name) and macros
 local function ownerBinds(owner)

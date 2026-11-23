@@ -132,6 +132,67 @@ return {
     end
     assert_true(cleared, "layer bindings cleared")
   end,
+  learning_stores_a_keyboard_key = function()
+    setup()
+    local got
+    P():StartLearning(1, function(key, reason) got = { key, reason } end)
+    local l = _G.NewbieNudgePaddleListener
+    assert_eq(l.propagateKeys, true)
+    l:GetScript("OnKeyDown")(l, "F9")
+    assert_eq(P():Get(1).key, "F9"); assert_eq(got[1], "F9")
+    assert_nil(l:GetScript("OnKeyDown")); assert_nil(l:GetScript("OnGamePadButtonDown"))
+    assert_eq(l.gamepad, false); assert_eq(l.keyboard, false)
+    assert_eq(P():IsLearning(), false)
+  end,
+  learning_stores_a_paddle_button = function()
+    setup()
+    P():StartLearning(2)
+    local l = _G.NewbieNudgePaddleListener
+    l:GetScript("OnGamePadButtonDown")(l, "PADPADDLE1")
+    assert_eq(P():Get(2).key, "PADPADDLE1")
+  end,
+  learning_refuses_the_games_buttons = function()
+    setup()
+    local l
+    for _, b in ipairs({ "PAD1", "PADRTRIGGER", "PADDUP", "PADFORWARD" }) do
+      local got
+      P():StartLearning(1, function(key, reason) got = { key, reason } end)
+      l = _G.NewbieNudgePaddleListener
+      l:GetScript("OnGamePadButtonDown")(l, b)
+      assert_nil(P():Get(1).key, b); assert_eq(got[2], "refused", b)
+    end
+    local got
+    P():StartLearning(1, function(key, reason) got = { key, reason } end)
+    l:GetScript("OnKeyDown")(l, "ENTER")
+    assert_eq(got[2], "refused")
+    P():StartLearning(1, function(key, reason) got = { key, reason } end)
+    l:GetScript("OnKeyDown")(l, "ESCAPE")
+    assert_eq(got[2], "cancel"); assert_nil(P():Get(1).key)
+  end,
+  listener_has_no_scripts_until_learning = function()
+    setup()
+    local l = _G.NewbieNudgePaddleListener
+    if l then
+      assert_nil(l:GetScript("OnGamePadButtonDown")); assert_nil(l:GetScript("OnKeyDown"))
+      assert_true(not l.gamepad)
+    end
+  end,
+  combat_cancels_learning = function()
+    setup()
+    local got
+    P():StartLearning(1, function(key, reason) got = { key, reason } end)
+    WOW.state.inCombat = true
+    WOW.FireEvent("PLAYER_REGEN_DISABLED")
+    assert_eq(P():IsLearning(), false); assert_eq(got[2], "combat")
+    assert_nil(_G.NewbieNudgePaddleListener:GetScript("OnGamePadButtonDown"))
+  end,
+  learning_refused_in_combat = function()
+    setup()
+    WOW.state.inCombat = true
+    local got
+    assert_eq(P():StartLearning(1, function(key, reason) got = { key, reason } end), false)
+    assert_eq(got[2], "combat")
+  end,
   no_cvar_is_written = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })

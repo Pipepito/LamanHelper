@@ -207,8 +207,75 @@ function Paddles:ClearLayers()
   end
 end
 
+-------------------------------------------------------------------------------
+-- Learning: press the paddle and its key is remembered
+-------------------------------------------------------------------------------
+
+-- Keys a paddle may not take: the game's own controller buttons (its bars use
+-- them) and the keys that close windows or open chat.
+Paddles.REFUSED = {
+  ENTER = true,
+  PAD1 = true, PAD2 = true, PAD3 = true, PAD4 = true, PAD5 = true, PAD6 = true,
+  PADDUP = true, PADDDOWN = true, PADDLEFT = true, PADDRIGHT = true,
+  PADLSHOULDER = true, PADRSHOULDER = true, PADLTRIGGER = true, PADRTRIGGER = true,
+  PADLSTICK = true, PADRSTICK = true, PADFORWARD = true, PADBACK = true, PADSYSTEM = true, PADSOCIAL = true,
+}
+
+local listener
+local learning -- { n = paddle, done = callback }
+
+local function stopListening()
+  if not listener then return end
+  -- a frame with a pad script takes the pad buttons (seen live, 2026-11-23):
+  -- scripts exist only while learning
+  listener:SetScript("OnKeyDown", nil)
+  listener:SetScript("OnGamePadButtonDown", nil)
+  listener:EnableKeyboard(false)
+  if listener.EnableGamePadButton then listener:EnableGamePadButton(false) end
+end
+
+local function finish(key, reason)
+  local current = learning
+  learning = nil
+  stopListening()
+  if current and key then Paddles:SetKey(current.n, key) end
+  if current and current.done then current.done(key, reason) end
+end
+
+local function onPress(_, key)
+  if not learning then return end
+  key = NN.Plain(key, "string")
+  if key == "ESCAPE" then finish(nil, "cancel")
+  elseif not key or Paddles.REFUSED[key] then finish(nil, "refused")
+  else finish(key) end
+end
+
+-- false (and done(nil, "combat")) when it can't start
+function Paddles:StartLearning(n, done)
+  if InCombatLockdown and InCombatLockdown() then
+    if done then done(nil, "combat") end
+    return false
+  end
+  if learning then finish(nil, "cancel") end
+  if not listener then
+    listener = CreateFrame("Frame", "NewbieNudgePaddleListener", UIParent)
+    listener:SetPropagateKeyboardInput(true)
+    if listener.SetPropagateGamePadInput then listener:SetPropagateGamePadInput(true) end
+  end
+  learning = { n = n, done = done }
+  listener:SetScript("OnKeyDown", onPress)
+  listener:SetScript("OnGamePadButtonDown", onPress)
+  listener:EnableKeyboard(true)
+  if listener.EnableGamePadButton then listener:EnableGamePadButton(true) end
+  return true
+end
+
+function Paddles:StopLearning() if learning then finish(nil, "cancel") end end
+function Paddles:IsLearning() return learning ~= nil end
+
 NN:OnAnyEvent(function(event)
   if event == "PLAYER_REGEN_ENABLED" and pending then Paddles:Apply() end
+  if event == "PLAYER_REGEN_DISABLED" and learning then finish(nil, "combat") end
 end)
 
 NN:AfterLogin(function() Paddles:Apply() end)
