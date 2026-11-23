@@ -43,7 +43,7 @@ Then start the game or type `/reload`.
 | `/nudge minimap` | Show or hide the minimap button. |
 | `/nudge style` | Switch the panel between the full list and icons only. |
 | `/nudge bar` | Turn the info bar on top of the panel on or off. |
-| `/nudge pad <role> <button>` | Assign a pad button to Alt, Shift, Ctrl, Escape or a cursor click (e.g. `/nudge pad alt paddle2`). |
+| `/nudge paddles` | Open the Paddles window: actions for your controller's back paddles. |
 | `/nudge services` | Show or hide nearby services (repair, inns, trainers…) on the world map. |
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
@@ -179,14 +179,19 @@ bound to pad combinations in the game's Key Bindings window under
 "NewbieNudge": show/hide the panel, open the top reminder, snooze the top
 reminder, open the options.
 
-Options → Controller shows which pad buttons act as Alt, Shift, Ctrl, Escape
-and the cursor clicks (the game's own options don't show these). Change one
-from chat with `/nudge pad <alt|shift|ctrl|esc|click|rightclick> <button>`,
-for example `/nudge pad alt paddle2` (buttons: `paddle1`–`paddle4`, `lt`,
-`rt`, `lb`, `rb`, `ls`, `rs`, `a`, `b`, `x`, `y`, `back`, `start`, `up`,
-`down`, `left`, `right`, `none`). The options page itself never changes the
-game's controller settings: on WoW Forever, doing that from an addon's
-options page breaks the game's controller interface.
+**Back paddles.** The minimap button's menu → Paddles (or `/nudge paddles`)
+opens NewbieNudge's paddle editor. Press Learn and then the paddle: NewbieNudge
+remembers whatever the paddle sends (a key from your Steam layout, or the pad's
+own paddle button). Give each paddle a game command (open bags, character,
+map, mount…), a spell, an item or a macro by dragging it onto the paddle's
+slot, or make it a layer: while it is held, A/B/X/Y and the d-pad do eight
+extra actions. The game's own buttons can't be learned, and nothing changes
+during combat. On the Steam Deck, first map the back grips to free keys in
+Steam (Controller settings → Edit layout → Back grip buttons): Steam's default
+layout copies A/B/X/Y onto them.
+
+NewbieNudge never changes the game's controller settings: on WoW Forever,
+doing that from an addon breaks the game's controller interface.
 
 ## Game settings for new players
 
