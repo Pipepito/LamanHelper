@@ -44,6 +44,14 @@ local function map(self)
   return self.topByName or self:Refresh()
 end
 
+-- Known, active, top-rank spells as { id, name }, sorted by name.
+function Spellbook:KnownSpells()
+  local list = {}
+  for name, id in pairs(map(self)) do list[#list + 1] = { id = id, name = name } end
+  table.sort(list, function(a, b) return a.name < b.name end)
+  return list
+end
+
 function Spellbook:TopRankByName(name)
   if not name then return nil end
   return map(self)[name]

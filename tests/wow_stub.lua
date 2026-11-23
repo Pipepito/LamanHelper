@@ -1014,7 +1014,7 @@ function SetOverrideBindingClick(owner, prio, key, button, mouse)
 end
 function ClearOverrideBindings(owner) record("ClearOverrideBindings"); local t = ownerBinds(owner); for k in pairs(t) do t[k] = nil end end
 function GetMacroIndexByName(name)
-  for i, m in ipairs(S().macros or {}) do if m.name == name then return i end end
+  for i, m in pairs(S().macros or {}) do if m.name == name then return i end end
   return 0
 end
 function GetMacroInfo(i) local m = (S().macros or {})[i]; if m then return m.name, m.icon, m.body or "" end end
@@ -1026,3 +1026,13 @@ function Region:Execute(body) record("Execute", self:GetName(), body) end
 function GetBindingName(command) return (S().bindingNames or {})[command] or command end
 function Region:SetChecked(v) self.checked = v and true or false end
 function Region:GetChecked() return self.checked == true end
+
+-- macros: [1..120] account, [121..] character
+function GetNumMacros()
+  local a, c = 0, 0
+  for i in pairs(S().macros or {}) do if i > 120 then c = c + 1 else a = a + 1 end end
+  return a, c
+end
+function C_Item.GetItemNameByID(id) local i = S().itemInfo[id]; return i and i.name end
+function C_Item.GetItemIconByID(id) local i = S().itemInfo[id]; return i and i.icon end
+function C_Item.GetItemSpell(id) local i = S().itemInfo[id]; if i and i.useSpell then return i.useSpell, 1 end end

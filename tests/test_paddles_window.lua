@@ -26,6 +26,47 @@ local function findItem(items, label)
 end
 
 return {
+  -- controller mode: lists instead of dragging
+  spell_choices_are_known_top_ranks = function()
+    setup()
+    WOW.state.spellBook.lines = { { name = "Balance", offset = 0, num = 4 } }
+    WOW.state.spellBook.items = {
+      [1] = { spellID = 774 }, [2] = { spellID = 5185, lowRank = true }, [3] = { spellID = 5186 },
+      [4] = { spellID = 9999, passive = true },
+    }
+    WOW.state.spellInfo[5185] = { name = "Healing Touch" }; WOW.state.spellInfo[5186] = { name = "Healing Touch" }
+    WOW.state.spellInfo[9999] = { name = "Aura" }
+    WOW.FireEvent("SPELLS_CHANGED")
+    local labels = {}
+    for _, c in ipairs(W():Choices("spells")) do labels[#labels + 1] = c.label .. "=" .. c.action.value end
+    assert_eq(labels, { "Healing Touch=5186", "Rejuvenation=774" })
+  end,
+  item_choices_have_a_use = function()
+    setup()
+    WOW.state.itemInfo[6948] = { name = "Hearthstone", icon = 134414, useSpell = "Hearthstone" }
+    WOW.state.itemInfo[2589] = { name = "Linen Cloth" }
+    WOW.state.bags[0].items = { [1] = { itemID = 6948 }, [2] = { itemID = 2589 }, [3] = { itemID = 6948 } }
+    local list = W():Choices("items")
+    assert_eq(#list, 1)
+    assert_eq(list[1].label, "Hearthstone"); assert_eq(list[1].action, { kind = "item", value = 6948 })
+  end,
+  macro_choices_account_and_character = function()
+    setup()
+    WOW.state.macros = { [1] = { name = "Mount", icon = 1 }, [121] = { name = "Heal", icon = 2 } }
+    local labels = {}
+    for _, c in ipairs(W():Choices("macros")) do labels[#labels + 1] = c.action.value end
+    assert_eq(labels, { "Mount", "Heal" })
+  end,
+  command_choices_start_with_layer_for_a_paddle = function()
+    setup()
+    local list = W():Choices("commands", true)
+    assert_eq(list[1].action, { kind = "layer" })
+    assert_eq(list[2].header, true); assert_nil(list[2].action)
+    local found = false
+    for _, c in ipairs(list) do if c.action and c.action.value == "TOGGLEWORLDMAP" then found = true end end
+    assert_true(found)
+    assert_true(W():Choices("commands", false)[1].header, "no Layer inside a layer")
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")

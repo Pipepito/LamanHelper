@@ -73,6 +73,71 @@ local function commandGroups()
   return order, groups
 end
 
+-- The picker's lists: { label, icon, action } rows; header rows have no action.
+local function spellChoices()
+  local out = {}
+  for _, sp in ipairs(NN.Spellbook and NN.Spellbook:KnownSpells() or {}) do
+    local icon = C_Spell and C_Spell.GetSpellTexture and NN.Plain(C_Spell.GetSpellTexture(sp.id))
+    out[#out + 1] = { label = sp.name, icon = icon or EMPTY_ICON, action = { kind = "spell", value = sp.id } }
+  end
+  return out
+end
+
+local function itemChoices()
+  local out, seen = {}, {}
+  if not (C_Container and C_Container.GetContainerNumSlots) then return out end
+  for bag = 0, (NUM_BAG_SLOTS or 4) + 1 do
+    for slot = 1, NN.Plain(C_Container.GetContainerNumSlots(bag)) or 0 do
+      local id = NN.Plain(C_Container.GetContainerItemID(bag, slot))
+      if id and not seen[id] and C_Item and C_Item.GetItemSpell and C_Item.GetItemSpell(id) then
+        seen[id] = true
+        local name = NN.Plain(C_Item.GetItemNameByID and C_Item.GetItemNameByID(id), "string")
+        local icon = NN.Plain(C_Item.GetItemIconByID and C_Item.GetItemIconByID(id))
+        out[#out + 1] = { label = name or ("item:" .. id), icon = icon or EMPTY_ICON, action = { kind = "item", value = id } }
+      end
+    end
+  end
+  table.sort(out, function(a, b) return a.label < b.label end)
+  return out
+end
+
+local function macroChoices()
+  local out = {}
+  if not (GetNumMacros and GetMacroInfo) then return out end
+  local account, character = GetNumMacros()
+  local function add(i)
+    local name, icon = GetMacroInfo(i)
+    name = NN.Plain(name, "string")
+    if name then out[#out + 1] = { label = name, icon = NN.Plain(icon) or EMPTY_ICON, action = { kind = "macro", value = name } } end
+  end
+  for i = 1, NN.Plain(account) or 0 do add(i) end
+  for i = 121, 120 + (NN.Plain(character) or 0) do add(i) end
+  return out
+end
+
+local function commandChoices(forPaddle)
+  local out = {}
+  if forPaddle then out[#out + 1] = { label = L.PADDLES_LAYER, icon = EMPTY_ICON, action = { kind = "layer" } } end
+  local order, groups = commandGroups()
+  for _, title in ipairs(order) do
+    out[#out + 1] = { label = title, header = true }
+    for _, c in ipairs(groups[title]) do
+      out[#out + 1] = { label = c.name, icon = COMMAND_ICON, action = { kind = "command", value = c.command } }
+    end
+  end
+  return out
+end
+
+Window.TABS = { "spells", "items", "macros", "commands" }
+
+function Window:Choices(tab, forPaddle)
+  if tab == "spells" then return spellChoices() end
+  if tab == "items" then return itemChoices() end
+  if tab == "macros" then return macroChoices() end
+  if tab == "commands" then return commandChoices(forPaddle) end
+  return {}
+end
+
 function Window:OpenActionMenu(n, slot)
   if inCombat() or not (MenuUtil and MenuUtil.CreateContextMenu) then return end
   local owner = (slot and self.rows[n] and self.rows[n].layer[slot]) or (self.rows[n] and self.rows[n].slot) or UIParent
