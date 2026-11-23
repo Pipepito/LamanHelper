@@ -146,6 +146,67 @@ end
 
 function Paddles:IsEnabled() return db().enabled ~= false end
 
+-------------------------------------------------------------------------------
+-- Layers: hold a paddle and the layer buttons do other actions
+-------------------------------------------------------------------------------
+
+-- The buttons a layer can take over while its paddle is held.
+Paddles.LAYER_SLOTS = { "PAD1", "PAD2", "PAD3", "PAD4", "PADDUP", "PADDDOWN", "PADDLEFT", "PADDRIGHT" }
+local isSlot = {}
+for _, slot in ipairs(Paddles.LAYER_SLOTS) do isSlot[slot] = true end
+
+local handlers = {}
+
+local function layerHandler(n)
+  if not handlers[n] then
+    local h = CreateFrame("Button", "NewbieNudgePaddleLayer" .. n, UIParent,
+      "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
+    h:RegisterForClicks("AnyDown", "AnyUp")
+    h:Hide()
+    handlers[n] = h
+  end
+  return handlers[n]
+end
+
+-- false when the slot or the action can't go on a layer
+function Paddles:SetLayerAction(n, slot, action)
+  if not isSlot[slot] then return false end
+  if action and action.kind == "layer" then return false end
+  local entry = self:Get(n)
+  entry.layer = entry.layer or {}
+  entry.layer[slot] = action
+  self:Apply()
+  return true
+end
+
+-- The wrapped OnClick: on press, bind every filled slot; on release, let go.
+function Paddles:BindLayer(n, entry)
+  local lines = {}
+  for _, slot in ipairs(self.LAYER_SLOTS) do
+    local action = entry.layer and entry.layer[slot]
+    if action and action.kind == "command" then
+      lines[#lines + 1] = ('self:SetBinding(true, "%s", "%s")'):format(slot, action.value)
+    elseif action and action.kind then
+      local name = "NewbieNudgeLayer" .. n .. slot
+      if Paddles.SetupButton(actionButton(name), action) then
+        lines[#lines + 1] = ('self:SetBindingClick(true, "%s", "%s")'):format(slot, name)
+      end
+    end
+  end
+  local h = layerHandler(n)
+  local snippet = "if down then " .. table.concat(lines, " ") .. " else self:ClearBindings() end"
+  h:WrapScript(h, "OnClick", snippet)
+  SetOverrideBindingClick(owner, true, entry.key, h:GetName())
+end
+
+-- Drops every layer's wrap and any binding a held layer still has.
+function Paddles:ClearLayers()
+  for _, h in pairs(handlers) do
+    h:UnwrapScript(h, "OnClick")
+    h:Execute("self:ClearBindings()")
+  end
+end
+
 NN:OnAnyEvent(function(event)
   if event == "PLAYER_REGEN_ENABLED" and pending then Paddles:Apply() end
 end)

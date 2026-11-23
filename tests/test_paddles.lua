@@ -87,6 +87,51 @@ return {
     setup()
     assert_eq(binds().F11, "TOGGLECHARACTER0")
   end,
+  layer_paddle_clicks_its_handler = function()
+    setup()
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "layer" })
+    assert_eq(binds().F10, "CLICK NewbieNudgePaddleLayer2:LeftButton")
+    assert_eq(_G.NewbieNudgePaddleLayer2.clicks, { "AnyDown", "AnyUp" })
+  end,
+  layer_snippet_binds_filled_slots_on_down = function()
+    setup()
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "layer" })
+    P():SetLayerAction(2, "PAD1", { kind = "spell", value = 774 })
+    P():SetLayerAction(2, "PADDUP", { kind = "command", value = "TOGGLEWORLDMAP" })
+    local snippet = _G.NewbieNudgePaddleLayer2.wrapped.OnClick
+    assert_true(snippet:find('SetBindingClick(true, "PAD1", "NewbieNudgeLayer2PAD1")', 1, true), snippet)
+    assert_true(snippet:find('SetBinding(true, "PADDUP", "TOGGLEWORLDMAP")', 1, true), snippet)
+    assert_true(snippet:find("ClearBindings()", 1, true), snippet)
+    assert_true(not snippet:find("PAD2", 1, true), "empty slots left out")
+  end,
+  layer_slot_buttons_get_their_actions = function()
+    setup()
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "layer" })
+    P():SetLayerAction(2, "PAD1", { kind = "spell", value = 774 })
+    local b = _G.NewbieNudgeLayer2PAD1
+    assert_eq(b.attributes.type, "spell"); assert_eq(b.attributes.spell, "Rejuvenation")
+  end,
+  layer_only_offers_working_slots = function()
+    setup()
+    assert_eq(P():SetLayerAction(2, "PADBACK", { kind = "command", value = "TOGGLEWORLDMAP" }), false)
+    assert_nil((P():Get(2).layer or {}).PADBACK)
+  end,
+  layer_kind_refused_for_layer_slots = function()
+    setup()
+    assert_eq(P():SetLayerAction(2, "PAD1", { kind = "layer" }), false)
+    assert_nil((P():Get(2).layer or {}).PAD1)
+  end,
+  turning_off_releases_a_held_layer = function()
+    setup()
+    P():SetKey(2, "F10"); P():SetAction(2, { kind = "layer" })
+    P():SetLayerAction(2, "PAD1", { kind = "spell", value = 774 })
+    P():SetEnabled(false)
+    local cleared = false
+    for _, c in ipairs(WOW.calls) do
+      if c[1] == "Execute" and c[2] == "NewbieNudgePaddleLayer2" and c[3]:find("ClearBindings", 1, true) then cleared = true end
+    end
+    assert_true(cleared, "layer bindings cleared")
+  end,
   no_cvar_is_written = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "spell", value = 774 })

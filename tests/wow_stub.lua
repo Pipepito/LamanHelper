@@ -1013,3 +1013,8 @@ function GetMacroIndexByName(name)
   return 0
 end
 function GetMacroInfo(i) local m = (S().macros or {})[i]; if m then return m.name, m.icon, m.body or "" end end
+
+-- Secure handlers: the wrapped snippet is kept as text for the tests to read
+function Region:WrapScript(frame, script, pre, post) frame.wrapped = frame.wrapped or {}; frame.wrapped[script] = pre end
+function Region:UnwrapScript(frame, script) if frame.wrapped then frame.wrapped[script] = nil end end
+function Region:Execute(body) record("Execute", self:GetName(), body) end
