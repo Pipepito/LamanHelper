@@ -23,7 +23,6 @@ return {
       assert_true(not variable:find("^NN_cvar_GamePad") and not variable:find("^NN_cvar_SoftTarget"), variable)
     end
     assert_nil(NewbieNudge.Controller.ApplyPreset, "no presets")
-    assert_true(has(callsNamed("initializer"), function(c) return c[2] == "header" and c[3] == L().OPT_CONTROLLER_PADS end))
   end,
   no_page_can_write_controller_settings = function()
     cvars({ GamePadEmulateAlt = { default = "none" }, SoftTargetInteract = { default = "1" }, cameraDistanceMaxZoomFactor = { default = "1.9" } })
@@ -102,33 +101,16 @@ return {
     assert_true(WOW.settings["NN_controller_boost"] and WOW.settings["NN_controller_scale"] and WOW.settings["NN_controller_hints"])
     WOW.settings["NN_controller_scale"].setter(1.4); assert_eq(NewbieNudge.db.controller.scale, 1.4)
   end,
-  -- the hidden button assignments, changed from chat (outside Blizzard's
-  -- Options window, where writing them tainted the gamepad UI)
-  pad_command_sets_a_button = function()
-    cvars({ GamePadEmulateAlt = { default = "none" }, GamePadCursorLeftClick = { default = "PADRTRIGGER" } })
-    load_addon()
-    NewbieNudge:HandleSlash("pad alt paddle2")
-    assert_eq(C_CVar.GetCVar("GamePadEmulateAlt"), "PADPADDLE2")
-    assert_true(WOW.printed[#WOW.printed]:find(L().PAD_SET:format(L().PAD_ROLE_ALT, "Paddle 2"), 1, true))
-    NewbieNudge:HandleSlash("pad click a")
-    assert_eq(C_CVar.GetCVar("GamePadCursorLeftClick"), "PAD1")
-    NewbieNudge:HandleSlash("pad alt none")
-    assert_eq(C_CVar.GetCVar("GamePadEmulateAlt"), "none")
-  end,
-  pad_command_rejects_unknown_words_and_combat = function()
+  -- 2026-11-23: /nudge pad (writing GamePadEmulate*) is replaced by the
+  -- paddle editor; nothing may write the game's controller settings.
+  pad_command_is_gone = function()
     cvars({ GamePadEmulateAlt = { default = "none" } })
     load_addon()
-    NewbieNudge:HandleSlash("pad alt banana")
+    NewbieNudge:HandleSlash("pad alt paddle2")
     assert_eq(C_CVar.GetCVar("GamePadEmulateAlt"), "none")
-    assert_true(WOW.printed[#WOW.printed]:find(L().PAD_USAGE, 1, true))
-    WOW.state.inCombat = true
-    NewbieNudge:HandleSlash("pad alt paddle1")
-    assert_eq(C_CVar.GetCVar("GamePadEmulateAlt"), "none")
-  end,
-  page_shows_current_assignments_and_the_command = function()
-    cvars({ GamePadEmulateAlt = { default = "none", value = "PADPADDLE2" } })
-    load_addon()
-    assert_true(has(callsNamed("initializer"), function(c) return c[2] == "header" and c[3] == L().PAD_LINE:format(L().PAD_ROLE_ALT, "Paddle 2") end))
-    assert_true(has(callsNamed("initializer"), function(c) return c[2] == "header" and c[3] == L().OPT_CONTROLLER_PAD_HELP end))
+    assert_eq(#callsNamed("SetCVar"), 0)
+    assert_nil(NewbieNudge.Controller.SetPadButton)
+    assert_nil(NewbieNudge.Controller.PAD_ROLES)
+    assert_nil(has(callsNamed("initializer"), function(c) return c[2] == "header" and tostring(c[3]):find("Controller buttons", 1, true) end))
   end,
 }
