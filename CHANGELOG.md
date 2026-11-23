@@ -5,10 +5,11 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
-## 0.4.1 - unreleased
+## 0.5.0 - unreleased
 
 - **Back paddles:** give your controller's back paddles (Steam Deck L4/R4/L5/R5 and the like) their own actions. Open the minimap button's menu → Paddles (or `/nudge paddles`), press Learn, then press the paddle. Each paddle opens a window or does any game command, casts a spell, uses an item or runs a macro — drag it from your spellbook, bags or macros. Or make it a **layer**: while you hold it, A/B/X/Y and the d-pad do eight extra actions. Works in combat; changes wait until combat ends. On the Steam Deck, map the back grips to free keys in Steam first.
 - **Controller fix:** changing controller settings (camera, cursor, soft targeting, button assignments) on NewbieNudge's Controller page broke WoW Forever's controller interface — the game blocked its actions and asked to disable the addon. NewbieNudge no longer changes the game's controller settings at all, and the Steam Deck / controller presets are gone. If you used those presets in 0.4.0 and your controller behaves oddly, reset its settings in the game's own options.
+- **Controller fix, part two:** the minimap button's menu is now NewbieNudge's own. Opened from an addon, the game's pop-up menus upset its controller interface, which then blocked its own actions at vendors and when looting.
 - **Weapon skills to learn** no longer keeps listing Fist Weapons after you learn them (WoW Forever adds the skill without a skill line).
 - Small fixes: the map's NewbieNudge button stays above pins, the map list fits under the top of the map, the profession count follows the switches, other factions' flight points are left out even without a faction from the game, zooming the map only rescales the pins, class-quest wording.
 

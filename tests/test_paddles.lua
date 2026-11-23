@@ -1,4 +1,4 @@
--- Paddles (0.4.1): the Steam Deck's back paddles, learned as whatever key
+-- Paddles (0.5.0): the Steam Deck's back paddles, learned as whatever key
 -- they send, doing a game command, a spell, an item, a macro or a layer.
 -- Override bindings on NewbieNudge's own owner; never the game's settings.
 local function P() return NewbieNudge.Paddles end

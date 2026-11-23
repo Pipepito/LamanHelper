@@ -1,4 +1,4 @@
--- The Paddles window (0.4.1): NewbieNudge's own editor for the back paddles,
+-- The Paddles window (0.5.0): NewbieNudge's own editor for the back paddles,
 -- opened from the minimap menu and /nudge paddles (never from the game's
 -- Options window, whose commit tainted the controller interface).
 local L = function() return NewbieNudge.L end
