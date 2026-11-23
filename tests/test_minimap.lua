@@ -1,6 +1,11 @@
 -- Minimap button and its menu (v4).
 local L = function() return NewbieNudge.L end
 local function MB() return NewbieNudge.MinimapButton end
+local function shownItems()
+  local out = {}
+  for _, b in ipairs(NewbieNudgeMenu.items) do if b:IsShown() then out[#out + 1] = b end end
+  return out
+end
 local function near(a, b) return math.abs(a - b) < 0.01 end
 
 local function rule(name)
@@ -113,11 +118,14 @@ return {
   click_opens_menu_with_title = function()
     load_addon()
     WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
-    assert_eq(WOW.lastMenu.items[1].kind, "title")
-    assert_eq(WOW.lastMenu.items[1].label, L().ADDON_TITLE)
-    WOW.lastMenu = nil
+    local items = shownItems()
+    assert_true(NewbieNudgeMenu:IsShown())
+    assert_eq(items[1].entry.kind, "title")
+    assert_eq(items[1].text:GetText(), L().ADDON_TITLE)
     WOW.Click(NewbieNudgeMinimapButton, "RightButton")
-    assert_true(WOW.lastMenu)
+    assert_true(not NewbieNudgeMenu:IsShown(), "a second click closes it")
+    WOW.Click(NewbieNudgeMinimapButton, "RightButton")
+    assert_true(NewbieNudgeMenu:IsShown())
   end,
   tooltip_counts_rows = function()
     load_addon()
@@ -142,31 +150,40 @@ return {
     MB():SetShown(false)
     WOW.compartment.func()
     WOW.AdvanceTime(0)
-    assert_eq(WOW.lastMenu.items[1].label, L().ADDON_TITLE)
+    assert_eq(shownItems()[1].text:GetText(), L().ADDON_TITLE)
   end,
-  fallback_without_menuutil = function()
-    MenuUtil = nil
-    local got
-    EasyMenu = function(list) got = list end
+  -- 2026-11-23 (taint log): a game pop-up menu opened from addon code left
+  -- addon-marked entries in the controller's menu navigation, and the game
+  -- later blocked SetPreferredGamepadInteractTarget (vendor, loot, Esc).
+  never_uses_the_games_menus = function()
+    local used = false
+    MenuUtil = { CreateContextMenu = function() used = true end }
+    EasyMenu = function() used = true end
     load_addon()
     WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
-    assert_true(got)
-    assert_eq(got[1].isTitle, true)
-    assert_eq(got[1].text, L().ADDON_TITLE)
+    assert_eq(used, false)
+    assert_true(NewbieNudgeMenu:IsShown())
   end,
-  -- Review fixes (v4)
+  menu_item_runs_and_closes = function()
+    load_addon()
+    WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
+    local hide
+    for _, b in ipairs(shownItems()) do if b.text:GetText() == L().MENU_HIDE then hide = b end end
+    hide:GetScript("OnClick")(hide)
+    assert_eq(NewbieNudge.db.panel.hidden, true)
+    assert_true(not NewbieNudgeMenu:IsShown())
+  end,
   menu_ticks_follow_live_state_after_a_click = function()
     load_addon()
     WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
-    local box, icons
-    for _, it in ipairs(WOW.lastMenu.items) do
-      if it.label == L().MENU_INFOBAR then box = it end
-      if it.label == L().MENU_STYLE_ICONS then icons = it end
+    local function find(label)
+      for _, b in ipairs(shownItems()) do if b.text:GetText() == label then return b end end
     end
-    box.onClick()
-    assert_eq(box.isSelected(), false, "checkbox reads the new state")
-    icons.onClick()
-    assert_eq(icons.isSelected(), true, "radio reads the new state")
+    local box = find(L().MENU_INFOBAR)
+    local before = box.check:IsShown()
+    box:GetScript("OnClick")(box)
+    WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
+    assert_eq(find(L().MENU_INFOBAR).check:IsShown(), not before, "checkbox shows the new state")
   end,
   compartment_menu_not_anchored_to_hidden_button = function()
     load_addon()
@@ -174,21 +191,19 @@ return {
     local anchor = CreateFrame("Button", nil, UIParent)
     WOW.compartment.func(anchor)
     WOW.AdvanceTime(0)
-    assert_true(WOW.lastMenu, "menu opened")
-    assert_true(WOW.lastMenuOwner ~= NewbieNudgeMinimapButton, "not anchored to the hidden button")
+    assert_true(NewbieNudgeMenu:IsShown(), "menu opened")
+    assert_true(NewbieNudgeMenu.owner ~= NewbieNudgeMinimapButton, "not anchored to the hidden button")
   end,
   -- Forever: the menu closed when the mouse crossed the quest tracker below it.
   menu_drawn_above_other_frames = function()
     load_addon()
     WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
-    assert_eq(WOW.lastMenuFrame.strata, "FULLSCREEN_DIALOG")
+    assert_eq(NewbieNudgeMenu.strata, "FULLSCREEN_DIALOG")
   end,
-  fallback_menu_drawn_above_other_frames = function()
-    MenuUtil = nil
-    EasyMenu = function() end
-    DropDownList1 = CreateFrame("Frame", "DropDownList1", UIParent)
+  menu_closes_in_combat = function()
     load_addon()
     WOW.Click(NewbieNudgeMinimapButton, "LeftButton")
-    assert_eq(DropDownList1.strata, "FULLSCREEN_DIALOG")
+    WOW.FireEvent("PLAYER_REGEN_DISABLED")
+    assert_true(not NewbieNudgeMenu:IsShown())
   end,
 }

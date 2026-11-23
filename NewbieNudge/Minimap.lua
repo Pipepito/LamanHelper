@@ -126,45 +126,84 @@ end
 -- menu lost the mouse to it and closed (Forever, 2026-11-22).
 local TOP = "FULLSCREEN_DIALOG"
 
-local function openWithMenuUtil(owner, entries)
-  local menu = MenuUtil.CreateContextMenu(owner, function(_, root)
-    for _, e in ipairs(entries) do
-      if e.kind == "title" then root:CreateTitle(e.label)
-      elseif e.kind == "divider" then root:CreateDivider()
-      elseif e.kind == "button" then root:CreateButton(e.label, e.onClick)
-      elseif e.kind == "checkbox" then root:CreateCheckbox(e.label, e.isChecked, e.onClick)
-      elseif e.kind == "radio" then root:CreateRadio(e.label, e.isChecked, e.onClick)
-      end
-    end
+-- NewbieNudge's own menu. Not the game's pop-up menus (MenuUtil, EasyMenu):
+-- opened from addon code, those left addon-marked entries in the controller
+-- interface's menu navigation, and the game then blocked its own
+-- SetPreferredGamepadInteractTarget at vendors and loot (taint log, 2026-11-23).
+local ITEM_H, MENU_W = 20, 210
+
+local function buildMenu()
+  local menu = CreateFrame("Frame", "NewbieNudgeMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+  menu:SetFrameStrata(TOP)
+  menu:SetClampedToScreen(true)
+  menu:EnableMouse(true)
+  menu.bg = menu:CreateTexture(nil, "BACKGROUND")
+  menu.bg:SetAllPoints()
+  menu.bg:SetColorTexture(0.05, 0.05, 0.08, 0.96)
+  menu.items = {}
+  menu:RegisterEvent("GLOBAL_MOUSE_DOWN")
+  menu:RegisterEvent("PLAYER_REGEN_DISABLED")
+  menu:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_REGEN_DISABLED" then self:Hide(); return end
+    if MouseIsOver and not MouseIsOver(self) and not (self.owner and MouseIsOver(self.owner)) then self:Hide() end
   end)
-  if menu and menu.SetFrameStrata then menu:SetFrameStrata(TOP) end
+  menu:Hide()
+  return menu
 end
 
-local function openWithEasyMenu(entries)
-  local list = {}
-  for _, e in ipairs(entries) do
-    if e.kind == "divider" then
-      list[#list + 1] = { text = "", disabled = true, notCheckable = true }
-    else
-      list[#list + 1] = {
-        text = e.label, isTitle = e.kind == "title", notCheckable = e.kind == "title" or e.kind == "button",
-        checked = e.checked, func = e.onClick, keepShownOnClick = false,
-      }
-    end
+local function menuItem(menu, i)
+  local b = menu.items[i]
+  if b then return b end
+  b = CreateFrame("Button", nil, menu)
+  b:SetSize(MENU_W - 8, ITEM_H)
+  b:SetPoint("TOPLEFT", menu, "TOPLEFT", 4, -4 - (i - 1) * ITEM_H)
+  b.hl = b:CreateTexture(nil, "HIGHLIGHT")
+  b.hl:SetAllPoints()
+  b.hl:SetColorTexture(1, 1, 1, 0.12)
+  b.check = b:CreateTexture(nil, "ARTWORK")
+  b.check:SetSize(14, 14)
+  b.check:SetPoint("LEFT", b, "LEFT", 2, 0)
+  b.check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+  b.text = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  b.text:SetPoint("LEFT", b, "LEFT", 20, 0)
+  b:SetScript("OnClick", function(self)
+    local e = self.entry
+    if not e or not e.onClick then return end
+    menu:Hide()
+    e.onClick()
+  end)
+  menu.items[i] = b
+  return b
+end
+
+local function openOwnMenu(owner, entries)
+  local menu = MinimapButton.menu or buildMenu()
+  MinimapButton.menu = menu
+  if menu:IsShown() and menu.owner == owner then menu:Hide(); return end
+  menu.owner = owner
+  for i, e in ipairs(entries) do
+    local b = menuItem(menu, i)
+    b.entry = e
+    b.text:SetText(e.kind == "divider" and "" or e.label)
+    local ticked = (e.kind == "checkbox" or e.kind == "radio") and e.isChecked and e.isChecked()
+    if ticked then b.check:Show() else b.check:Hide() end
+    if e.kind == "title" then b.text:SetTextColor(1, 0.82, 0) else b.text:SetTextColor(1, 1, 1) end
+    if e.kind == "title" or e.kind == "divider" then b:Disable() else b:Enable() end
+    b:Show()
   end
-  MinimapButton.dropdown = MinimapButton.dropdown
-    or CreateFrame("Frame", "NewbieNudgeMinimapMenu", UIParent, "UIDropDownMenuTemplate")
-  EasyMenu(list, MinimapButton.dropdown, "cursor", 0, 0, "MENU")
-  if DropDownList1 and DropDownList1.SetFrameStrata then DropDownList1:SetFrameStrata(TOP) end
+  for i = #entries + 1, #menu.items do menu.items[i]:Hide(); menu.items[i].entry = nil end
+  menu:SetSize(MENU_W, #entries * ITEM_H + 8)
+  menu:ClearAllPoints()
+  if owner and owner ~= UIParent then
+    menu:SetPoint("TOPRIGHT", owner, "BOTTOMLEFT", 0, 0)
+  else
+    menu:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+  end
+  menu:Show()
 end
 
 function MinimapButton:OpenMenu(owner)
-  local entries = self:MenuEntries()
-  if MenuUtil and MenuUtil.CreateContextMenu then
-    openWithMenuUtil(owner or self.button or UIParent, entries)
-  elseif EasyMenu then
-    openWithEasyMenu(entries)
-  end
+  openOwnMenu(owner or self.button or UIParent, self:MenuEntries())
 end
 
 -------------------------------------------------------------------------------
