@@ -139,6 +139,48 @@ function Window:Choices(tab, forPaddle)
 end
 
 -------------------------------------------------------------------------------
+-- Pad button markers: a small dark key with the button's name
+-------------------------------------------------------------------------------
+
+local function badge(parent, label)
+  local b = CreateFrame("Frame", nil, parent)
+  b:SetSize(math.max(20, 9 * #label + 6), 16)
+  b.edge = b:CreateTexture(nil, "BORDER")
+  b.edge:SetAllPoints()
+  b.edge:SetColorTexture(1, 0.82, 0, 0.9)
+  b.bg = b:CreateTexture(nil, "ARTWORK")
+  b.bg:SetPoint("TOPLEFT", b, "TOPLEFT", 1, -1)
+  b.bg:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", -1, 1)
+  b.bg:SetColorTexture(0.1, 0.1, 0.12, 1)
+  b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  b.text:SetPoint("CENTER", b, "CENTER", 0, 0)
+  b.text:SetText(label)
+  return b
+end
+
+local function padName(token)
+  return (NN.Controller and NN.Controller.PAD_NAMES and NN.Controller.PAD_NAMES[token]) or token
+end
+
+-- A row of "[A] Select  [B] Close ..." under a window.
+local function legend(parent, pairs)
+  local row = CreateFrame("Frame", nil, parent)
+  row:SetSize(530, 18)
+  row.badges = {}
+  local x = 0
+  for _, pair in ipairs(pairs) do
+    local b = badge(row, pair[1])
+    b:SetPoint("LEFT", row, "LEFT", x, 0)
+    b.label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    b.label:SetPoint("LEFT", b, "RIGHT", 4, 0)
+    b.label:SetText(pair[2])
+    row.badges[#row.badges + 1] = b
+    x = x + b:GetWidth() + 10 + 7 * #pair[2]
+  end
+  return row
+end
+
+-------------------------------------------------------------------------------
 -- Picker: choose a slot's action from a list (works with the d-pad)
 -------------------------------------------------------------------------------
 
@@ -179,7 +221,7 @@ function Window:RenderPicker()
       else
         e.icon:Show(); e.text:SetTextColor(1, 1, 1)
       end
-      if first + i == p.index then e.mark:Show() else e.mark:Hide() end
+      if first + i == p.index then e.mark:Show(); e.badge:Show() else e.mark:Hide(); e.badge:Hide() end
       e:Show()
     else
       e:Hide()
@@ -270,10 +312,14 @@ local function buildPicker(frame)
   for i, tab in ipairs(Window.TABS) do
     local t = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
     t:SetSize(110, 22)
-    t:SetPoint("TOPLEFT", ui, "TOPLEFT", 12 + (i - 1) * 116, -28)
+    t:SetPoint("TOPLEFT", ui, "TOPLEFT", 42 + (i - 1) * 116, -28)
     t:SetScript("OnClick", function() Window:PickerSetTab(tab) end)
     ui.tabs[i] = t
   end
+  ui.lb = badge(ui, padName("PADLSHOULDER"))
+  ui.lb:SetPoint("RIGHT", ui.tabs[1], "LEFT", -4, 0)
+  ui.rb = badge(ui, padName("PADRSHOULDER"))
+  ui.rb:SetPoint("LEFT", ui.tabs[#ui.tabs], "RIGHT", 4, 0)
   ui.entries = {}
   for i = 1, PER_PAGE do
     local e = CreateFrame("Button", nil, ui)
@@ -287,6 +333,9 @@ local function buildPicker(frame)
     e.icon:SetPoint("LEFT", e, "LEFT", 0, 0)
     e.text = e:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     e.text:SetPoint("LEFT", e, "LEFT", 26, 0)
+    e.badge = badge(e, padName("PAD1"))
+    e.badge:SetPoint("RIGHT", e, "RIGHT", -4, 0)
+    e.badge:Hide()
     e:SetScript("OnClick", function()
       local p = Window.picker
       if not p then return end
@@ -299,19 +348,22 @@ local function buildPicker(frame)
   ui.empty:SetPoint("TOPLEFT", ui, "TOPLEFT", 16, -60)
   ui.page = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   ui.page:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 26)
-  ui.hint = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  ui.hint:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
-  ui.hint:SetText(L.PADDLES_PICKER_HINT)
+  ui.legend = legend(ui, { { L.PADDLES_DPAD, L.PADDLES_KEY_PAGE }, { padName("PAD1"), L.PADDLES_KEY_CHOOSE } })
+  ui.legend:SetPoint("BOTTOMLEFT", ui, "BOTTOMLEFT", 16, 10)
   ui.clear = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
   ui.clear:SetSize(90, 22)
   ui.clear:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -110, 8)
   ui.clear:SetText(L.PADDLES_CLEAR)
   ui.clear:SetScript("OnClick", function() Window:PickerClear() end)
+  ui.clear.badge = badge(ui.clear, padName("PAD3"))
+  ui.clear.badge:SetPoint("RIGHT", ui.clear, "LEFT", -2, 0)
   ui.back = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
   ui.back:SetSize(90, 22)
   ui.back:SetPoint("BOTTOMRIGHT", ui, "BOTTOMRIGHT", -12, 8)
   ui.back:SetText(BACK or "Back")
   ui.back:SetScript("OnClick", function() Window:ClosePicker() end)
+  ui.back.badge = badge(ui.back, padName("PAD2"))
+  ui.back.badge:SetPoint("RIGHT", ui.back, "LEFT", -2, 0)
   ui:Hide()
   return ui
 end
@@ -449,8 +501,10 @@ local function build()
   frame.focusMark.tex:SetAllPoints()
   frame.focusMark.tex:SetColorTexture(1, 0.82, 0, 0.35)
   frame.focusMark:Hide()
-  frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.hint:SetText(L.PADDLES_WINDOW_HINT)
+  frame.legend = legend(frame, {
+    { L.PADDLES_DPAD, L.PADDLES_KEY_MOVE }, { padName("PAD1"), L.PADDLES_KEY_SELECT },
+    { padName("PAD3"), L.PADDLES_KEY_CLEAR }, { padName("PAD2"), L.PADDLES_KEY_CLOSE },
+  })
   frame:Hide()
   -- not in UISpecialFrames: the game's Esc menu reads that list, and the
   -- taint log showed addons there mixing into it (2026-11-23)
@@ -598,7 +652,7 @@ function Window:Refresh()
   place(frame.combat, 12, y - 20)
   if locked then frame.combat:Show() else frame.combat:Hide() end
   place(frame.tip, 12, y - 36)
-  place(frame.hint, 12, y - 66)
+  place(frame.legend, 12, y - 66)
   frame:SetHeight(-y + 90)
   self.grid = grid
   self.focus = self.focus or { r = 2, c = 1 }

@@ -205,6 +205,28 @@ return {
     assert_eq(W():Choices("spells")[1].icon, "Interface/Icons/Spell_Nature_Rejuvenation")
     assert_eq(W():Choices("items")[1].icon, "Interface/Icons/INV_Misc_Rune_01")
   end,
+  -- pad button markers, so the player knows which button does what
+  picker_marks_its_buttons = function()
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    local ui = W().frame.picker
+    assert_eq(ui.lb.text:GetText(), "LB"); assert_eq(ui.rb.text:GetText(), "RB")
+    assert_true(ui.lb:IsShown() and ui.rb:IsShown())
+    assert_eq(ui.back.badge.text:GetText(), "B"); assert_eq(ui.clear.badge.text:GetText(), "X")
+    W():PickerSetTab("commands")
+    local marked
+    for _, e in ipairs(ui.entries) do if e:IsShown() and e.mark:IsShown() then marked = e end end
+    assert_true(marked and marked.badge:IsShown() and marked.badge.text:GetText() == "A", "A on the marked entry")
+  end,
+  window_legend_names_the_buttons = function()
+    setup()
+    W():Show()
+    local seen = {}
+    for _, b in ipairs(W().frame.legend.badges) do seen[b.text:GetText()] = b.label:GetText() end
+    assert_eq(seen.A, L().PADDLES_KEY_SELECT); assert_eq(seen.X, L().PADDLES_KEY_CLEAR)
+    assert_eq(seen.B, L().PADDLES_KEY_CLOSE); assert_eq(seen[L().PADDLES_DPAD], L().PADDLES_KEY_MOVE)
+  end,
   slash_and_menu_open_the_window = function()
     setup()
     NewbieNudge:HandleSlash("paddles")
