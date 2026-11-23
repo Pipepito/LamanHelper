@@ -5,6 +5,12 @@ local L = function() return NewbieNudge.L end
 local function P() return NewbieNudge.Paddles end
 local function W() return NewbieNudge.PaddlesWindow end
 local function row(n) return W().rows[n] end
+local function pad(button)
+  local f = W().frame
+  local h = f:GetScript("OnGamePadButtonDown")
+  assert_true(h, "the window takes pad buttons")
+  h(f, button)
+end
 
 local function setup()
   WOW.state.spellInfo[774] = { name = "Rejuvenation", icon = 136081 }
@@ -66,6 +72,88 @@ return {
     for _, c in ipairs(list) do if c.action and c.action.value == "TOGGLEWORLDMAP" then found = true end end
     assert_true(found)
     assert_true(W():Choices("commands", false)[1].header, "no Layer inside a layer")
+  end,
+  -- controller mode: d-pad, A, B, X, LB/RB while the window is open
+  dpad_moves_the_highlight = function()
+    setup()
+    W():Show()
+    assert_true(W():Focused() == row(1).learn, "starts on paddle 1's Learn")
+    pad("PADDRIGHT"); assert_true(W():Focused() == row(1).slot)
+    pad("PADDDOWN"); assert_true(W():Focused() == row(2).slot)
+    pad("PADDUP"); pad("PADDUP"); assert_true(W():Focused() == W().frame.enable)
+    pad("PADDUP"); assert_true(W():Focused() == W().frame.enable, "stops at the top")
+    assert_true(W().frame.focusMark:IsShown())
+  end,
+  dpad_reaches_layer_slots = function()
+    setup()
+    P():SetKey(1, "F10"); P():SetAction(1, { kind = "layer" })
+    W():Show()
+    pad("PADDDOWN")
+    assert_true(W():Focused() == row(1).layer.PAD1)
+  end,
+  a_opens_picker_and_chooses = function()
+    setup()
+    W():Show()
+    pad("PADDRIGHT"); pad("PAD1")
+    assert_eq(W().picker.n, 1)
+    pad("PADRSHOULDER"); pad("PADRSHOULDER"); pad("PADRSHOULDER")
+    assert_eq(W().picker.tab, "commands")
+    pad("PAD1") -- "Layer" is the first command for a paddle
+    assert_eq(P():Get(1).action, { kind = "layer" })
+    assert_nil(W().picker)
+  end,
+  a_on_learn_starts_learning = function()
+    setup()
+    W():Show()
+    pad("PAD1")
+    assert_eq(P():IsLearning(), true)
+    assert_nil(W().frame:GetScript("OnGamePadButtonDown"), "the window lets go of the pad while learning")
+    local l = _G.NewbieNudgePaddleListener
+    l:GetScript("OnKeyDown")(l, "F9")
+    assert_eq(P():Get(1).key, "F9")
+    assert_true(W().frame:GetScript("OnGamePadButtonDown"), "and takes it back after")
+  end,
+  picker_dpad_moves_and_pages = function()
+    setup()
+    for i = 1, 25 do WOW.state.macros[i] = { name = ("M%02d"):format(i), icon = 1 } end
+    W():Show()
+    W():OpenPicker(1); W():PickerSetTab("macros")
+    pad("PADDDOWN"); assert_eq(W().picker.index, 2)
+    pad("PADDRIGHT"); assert_eq(W().picker.page, 2)
+    pad("PADDLEFT"); assert_eq(W().picker.page, 1)
+    pad("PADLSHOULDER"); assert_eq(W().picker.tab, "items")
+  end,
+  b_backs_out = function()
+    setup()
+    W():Show()
+    W():OpenPicker(1)
+    pad("PAD2"); assert_nil(W().picker)
+    assert_true(W().frame:IsShown())
+    pad("PAD2"); assert_true(not W().frame:IsShown())
+  end,
+  x_clears = function()
+    setup()
+    P():SetKey(1, "F9"); P():SetAction(1, { kind = "command", value = "TOGGLEBACKPACK" })
+    W():Show()
+    pad("PADDRIGHT"); pad("PAD3")
+    assert_nil(P():Get(1).action)
+    P():SetAction(2, { kind = "command", value = "TOGGLEBACKPACK" })
+    W():OpenPicker(2); pad("PAD3")
+    assert_nil(P():Get(2).action); assert_nil(W().picker)
+  end,
+  pad_taken_only_while_open_and_out_of_combat = function()
+    setup()
+    W():Show()
+    local f = W().frame
+    assert_eq(f.gamepad, true); assert_true(f:GetScript("OnGamePadButtonDown"))
+    assert_eq(f.propagatePad, false)
+    W():Hide()
+    assert_eq(f.gamepad, false); assert_nil(f:GetScript("OnGamePadButtonDown"))
+    W():Show()
+    WOW.FireEvent("PLAYER_REGEN_DISABLED")
+    assert_eq(f.gamepad, false); assert_nil(f:GetScript("OnGamePadButtonDown"))
+    WOW.FireEvent("PLAYER_REGEN_ENABLED")
+    assert_eq(f.gamepad, true)
   end,
   slash_and_menu_open_the_window = function()
     setup()

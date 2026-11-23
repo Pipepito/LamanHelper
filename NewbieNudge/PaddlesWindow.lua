@@ -313,6 +313,7 @@ end
 local function slotButton(parent, n, slot)
   local b = CreateFrame("Button", nil, parent)
   b:SetSize(SLOT, SLOT)
+  b.nnSlotOf, b.nnLayerSlot = n, slot
   b.icon = b:CreateTexture(nil, "ARTWORK")
   b.icon:SetAllPoints()
   b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -363,7 +364,9 @@ local function buildRow(frame, n)
   r.learn:SetText(L.PADDLES_LEARN)
   r.learn:SetScript("OnClick", function()
     frame.status:SetText(L.PADDLES_PRESS)
+    Window:TakePad(false)
     P():StartLearning(n, function(key, reason)
+      if frame:IsShown() and not inCombat() then Window:TakePad(true) end
       if reason == "refused" then frame.status:SetText(L.PADDLES_REFUSED)
       elseif reason == "combat" then frame.status:SetText(L.PADDLES_COMBAT)
       elseif reason == "cancel" then frame.status:SetText(L.PADDLES_CANCELLED)
@@ -393,7 +396,10 @@ local function build()
   frame:RegisterForDrag("LeftButton")
   frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
   frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-  frame:SetScript("OnHide", function() if P():IsLearning() then P():StopLearning() end end)
+  frame:SetScript("OnHide", function()
+    if P():IsLearning() then P():StopLearning() end
+    Window:TakePad(false)
+  end)
   frame.bg = frame:CreateTexture(nil, "BACKGROUND")
   frame.bg:SetAllPoints()
   frame.bg:SetColorTexture(0.05, 0.05, 0.08, 0.95)
@@ -422,10 +428,95 @@ local function build()
   end
   for n = 1, P().MAX do Window.rows[n] = buildRow(frame, n) end
   frame.picker = buildPicker(frame)
+  frame.focusMark = CreateFrame("Frame", nil, frame)
+  if frame.focusMark.SetFrameLevel and frame.GetFrameLevel then frame.focusMark:SetFrameLevel((frame:GetFrameLevel() or 1) + 10) end
+  frame.focusMark.tex = frame.focusMark:CreateTexture(nil, "OVERLAY")
+  frame.focusMark.tex:SetAllPoints()
+  frame.focusMark.tex:SetColorTexture(1, 0.82, 0, 0.35)
+  frame.focusMark:Hide()
+  frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  frame.hint:SetText(L.PADDLES_WINDOW_HINT)
   frame:Hide()
   -- not in UISpecialFrames: the game's Esc menu reads that list, and the
   -- taint log showed addons there mixing into it (2026-11-23)
   return frame
+end
+
+-------------------------------------------------------------------------------
+-- Controller: the window takes the pad buttons while it is open (out of
+-- combat, not while learning) and gives them back when it closes
+-------------------------------------------------------------------------------
+
+-- Widgets in d-pad order: one list per line, built by Refresh.
+function Window:Focused()
+  local f = self.focus
+  local line = f and self.grid and self.grid[f.r]
+  return line and line[math.min(f.c, #line)]
+end
+
+local function showFocus()
+  local frame, w = Window.frame, Window:Focused()
+  if not (frame and frame.focusMark) then return end
+  if not w or Window.picker then frame.focusMark:Hide(); return end
+  frame.focusMark:ClearAllPoints()
+  frame.focusMark:SetPoint("TOPLEFT", w, "TOPLEFT", -3, 3)
+  frame.focusMark:SetPoint("BOTTOMRIGHT", w, "BOTTOMRIGHT", 3, -3)
+  frame.focusMark:Show()
+end
+
+local function moveFocus(dr, dc)
+  local grid, f = Window.grid, Window.focus
+  if not (grid and f) then return end
+  f.r = math.min(math.max(f.r + dr, 1), #grid)
+  f.c = math.min(math.max(math.min(f.c, #grid[f.r]) + dc, 1), #grid[f.r])
+  showFocus()
+end
+
+local function activate(w)
+  if not w then return end
+  if w.nnSlotOf then Window:OpenPicker(w.nnSlotOf, w.nnLayerSlot)
+  elseif w.GetScript and w:GetScript("OnClick") then
+    if w.GetChecked and w.SetChecked then w:SetChecked(not w:GetChecked()) end
+    w:GetScript("OnClick")(w)
+  end
+end
+
+local function clearFocused(w)
+  if w and w.nnSlotOf then setAction(w.nnSlotOf, w.nnLayerSlot, nil) end
+end
+
+local onPad
+local function takePad(on)
+  local frame = Window.frame
+  if not frame then return end
+  frame:SetScript("OnGamePadButtonDown", on and onPad or nil)
+  if frame.EnableGamePadButton then frame:EnableGamePadButton(on and true or false) end
+  if on and frame.SetPropagateGamePadInput then frame:SetPropagateGamePadInput(false) end
+end
+Window.TakePad = function(_, on) takePad(on) end
+
+onPad = function(_, button)
+  if P():IsLearning() then return end
+  if Window.picker then
+    if button == "PADDUP" then Window:PickerMove(-1)
+    elseif button == "PADDDOWN" then Window:PickerMove(1)
+    elseif button == "PADDLEFT" then Window:PickerPage(-1)
+    elseif button == "PADDRIGHT" then Window:PickerPage(1)
+    elseif button == "PADLSHOULDER" then Window:PickerTab(-1)
+    elseif button == "PADRSHOULDER" then Window:PickerTab(1)
+    elseif button == "PAD1" then Window:PickerChoose()
+    elseif button == "PAD3" then Window:PickerClear()
+    elseif button == "PAD2" then Window:ClosePicker() end
+    showFocus()
+    return
+  end
+  if button == "PADDUP" then moveFocus(-1, 0)
+  elseif button == "PADDDOWN" then moveFocus(1, 0)
+  elseif button == "PADDLEFT" then moveFocus(0, -1)
+  elseif button == "PADDRIGHT" then moveFocus(0, 1)
+  elseif button == "PAD1" then activate(Window:Focused())
+  elseif button == "PAD3" then clearFocused(Window:Focused())
+  elseif button == "PAD2" then Window:Hide() end
 end
 
 -------------------------------------------------------------------------------
@@ -444,7 +535,9 @@ function Window:Refresh()
   frame.enable:SetChecked(P():IsEnabled())
   if locked then frame.enable:Disable() else frame.enable:Enable() end
   local y = -58
+  local grid = { { frame.enable } }
   for n, r in ipairs(self.rows) do
+    grid[#grid + 1] = { r.learn, r.slot }
     local entry = P():Get(n)
     place(r.title, 12, y - 6)
     r.key:SetText(entry.key or L.PADDLES_NOT_SET)
@@ -477,19 +570,32 @@ function Window:Refresh()
         b:Hide(); label:Hide()
       end
     end
-    if isLayer then y = y - math.ceil(#P().LAYER_SLOTS / 4) * ROW_H end
+    if isLayer then
+      y = y - math.ceil(#P().LAYER_SLOTS / 4) * ROW_H
+      for i, slot in ipairs(P().LAYER_SLOTS) do
+        if (i - 1) % 4 == 0 then grid[#grid + 1] = {} end
+        local cur = grid[#grid]
+        cur[#cur + 1] = r.layer[slot]
+      end
+    end
   end
   place(frame.status, 12, y - 4)
   place(frame.combat, 12, y - 20)
   if locked then frame.combat:Show() else frame.combat:Hide() end
   place(frame.tip, 12, y - 36)
-  frame:SetHeight(-y + 70)
+  place(frame.hint, 12, y - 66)
+  frame:SetHeight(-y + 90)
+  self.grid = grid
+  self.focus = self.focus or { r = 2, c = 1 }
+  self.focus.r = math.min(self.focus.r, #grid)
+  showFocus()
 end
 
 function Window:Show()
   if not self.frame then self.frame = build() end
   self.frame:Show()
   self:Refresh()
+  if not inCombat() and not P():IsLearning() then takePad(true) end
 end
 
 function Window:Hide() if self.frame then self.frame:Hide() end end
@@ -499,8 +605,11 @@ function Window:Toggle()
 end
 
 NN:OnAnyEvent(function(event)
-  if event == "PLAYER_REGEN_DISABLED" then fighting = true end
-  if event == "PLAYER_REGEN_ENABLED" then fighting = false end
+  if event == "PLAYER_REGEN_DISABLED" then fighting = true; takePad(false) end
+  if event == "PLAYER_REGEN_ENABLED" then
+    fighting = false
+    if Window.frame and Window.frame:IsShown() and not P():IsLearning() then takePad(true) end
+  end
   if (event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED") and Window.frame and Window.frame:IsShown() then
     Window:Refresh()
   end
