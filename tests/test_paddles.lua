@@ -258,12 +258,27 @@ return {
     assert_true(iconOf("TOGGLEBATTLEFIELDMINIMAP"):find("Map"))
     assert_true(iconOf("TOGGLESPELLBOOK"):find("Book"))
     assert_true(iconOf("TOGGLEQUESTLOG"):find("Note"))
-    assert_eq(iconOf("TOGGLEGAMEMENU"), "136243", "others keep the gear")
+    assert_eq(iconOf("XYZZYCOMMAND"), "136243", "only unknown commands keep the gear")
   end,
   layer_has_its_own_icon = function()
     setup()
     local _, icon = P():Describe({ kind = "layer" })
     assert_eq(icon, "Interface\\AddOns\\NewbieNudge\\Media\\layer")
+  end,
+  more_commands_get_icons = function()
+    WOW.state.bindingList = {
+      { "MOVEFORWARD", "BINDING_HEADER_MOVEMENT" }, { "SOMETHINGODD", "BINDING_HEADER_CHAT" },
+      { "OTHERODD", "BINDING_HEADER_TARGETING" },
+    }
+    setup()
+    local function iconOf(command) local _, icon = P():Describe({ kind = "command", value = command }); return tostring(icon) end
+    assert_true(iconOf("CAMERAZOOMIN"):find("Spyglass"), "camera")
+    assert_true(iconOf("PETATTACK"):find("BeastCall"), "pet")
+    assert_true(iconOf("RAIDTARGET3"):find("RaidTargetingIcon_3"), "raid marker 3")
+    assert_true(iconOf("NEWBIENUDGE_PADDLES"):find("NewbieNudge"), "our own commands")
+    assert_true(iconOf("MOVEFORWARD"):find("Sprint"), "movement")
+    assert_true(iconOf("SOMETHINGODD"):find("Letter"), "by the game's group: chat")
+    assert_true(iconOf("OTHERODD"):find("SniperShot"), "by the game's group: targeting")
   end,
   no_cvar_is_written = function()
     setup()

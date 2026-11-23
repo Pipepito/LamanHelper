@@ -54,20 +54,89 @@ function Paddles.Icon(v)
 end
 local icon = Paddles.Icon
 
--- Icons for game commands, by words in the command's name (first match wins).
+-- Icons for game commands, by words in the command's name (first match wins),
+-- then by the group the game files the command under (its binding header).
 local COMMAND_ICONS = {
-  { "BAG", "Interface\\Icons\\INV_Misc_Bag_08" }, { "BACKPACK", "Interface\\Icons\\INV_Misc_Bag_08" },
-  { "MAP", "Interface\\Icons\\INV_Misc_Map_01" }, { "SPELLBOOK", "Interface\\Icons\\INV_Misc_Book_09" }, { "QUEST", "Interface\\Icons\\INV_Misc_Note_01" },
-  { "CHARACTER", "Interface\\Icons\\INV_Chest_Cloth_17" }, { "TALENT", "Interface\\Icons\\Ability_Marksmanship" },
-  { "SOCIAL", "Interface\\Icons\\INV_Letter_15" }, { "FRIEND", "Interface\\Icons\\INV_Letter_15" }, { "GUILD", "Interface\\Icons\\INV_Letter_15" },
-  { "MOUNT", "Interface\\Icons\\Ability_Mount_RidingHorse" }, { "TARGET", "Interface\\Icons\\Ability_Hunter_SniperShot" }, { "RUN", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "NEWBIENUDGE", "Interface\\AddOns\\NewbieNudge\\Media\\icon" },
+  { "BAG", "Interface\\Icons\\INV_Misc_Bag_08" },
+  { "BACKPACK", "Interface\\Icons\\INV_Misc_Bag_08" },
+  { "MAP", "Interface\\Icons\\INV_Misc_Map_01" },
+  { "SPELLBOOK", "Interface\\Icons\\INV_Misc_Book_09" },
+  { "QUEST", "Interface\\Icons\\INV_Misc_Note_01" },
+  { "CHARACTER", "Interface\\Icons\\INV_Chest_Cloth_17" },
+  { "TALENT", "Interface\\Icons\\Ability_Marksmanship" },
+  { "SOCIAL", "Interface\\Icons\\INV_Letter_15" },
+  { "FRIEND", "Interface\\Icons\\INV_Letter_15" },
+  { "GUILD", "Interface\\Icons\\INV_Letter_15" },
+  { "CHAT", "Interface\\Icons\\INV_Letter_15" },
+  { "REPLY", "Interface\\Icons\\INV_Letter_15" },
+  { "WHISPER", "Interface\\Icons\\INV_Letter_15" },
+  { "MOUNT", "Interface\\Icons\\Ability_Mount_RidingHorse" },
+  { "PET", "Interface\\Icons\\Ability_Hunter_BeastCall" },
+  { "CAMERA", "Interface\\Icons\\INV_Misc_Spyglass_02" },
+  { "ZOOM", "Interface\\Icons\\INV_Misc_Spyglass_02" },
+  { "VIEW", "Interface\\Icons\\INV_Misc_Spyglass_02" },
+  { "SCREENSHOT", "Interface\\Icons\\INV_Misc_Spyglass_03" },
+  { "TARGET", "Interface\\Icons\\Ability_Hunter_SniperShot" },
+  { "ASSIST", "Interface\\Icons\\Ability_Hunter_SniperShot" },
+  { "FOCUS", "Interface\\Icons\\Ability_Hunter_SniperShot" },
+  { "INTERACT", "Interface\\Icons\\Ability_Hunter_SniperShot" },
+  { "RAID", "Interface\\Icons\\Ability_Warrior_RallyingCry" },
+  { "PARTY", "Interface\\Icons\\Ability_Warrior_RallyingCry" },
+  { "LFG", "Interface\\Icons\\Ability_Warrior_RallyingCry" },
+  { "PVP", "Interface\\Icons\\Ability_Warrior_RallyingCry" },
+  { "TRADESKILL", "Interface\\Icons\\Trade_BlackSmithing" },
+  { "PROFESSION", "Interface\\Icons\\Trade_BlackSmithing" },
+  { "MACRO", "Interface\\Icons\\INV_Misc_Note_06" },
+  { "SIT", "Interface\\Icons\\Spell_Nature_Sleep" },
+  { "JUMP", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "RUN", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "MOVE", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "STRAFE", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "TURN", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "FOLLOW", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "MENU", "Interface\\Icons\\Trade_Engineering" },
+  { "OPTIONS", "Interface\\Icons\\Trade_Engineering" },
+  { "TOGGLEUI", "Interface\\Icons\\Trade_Engineering" },
 }
-local function commandIcon(command)
-  command = tostring(command)
-  for _, pair in ipairs(COMMAND_ICONS) do
-    if command:find(pair[1], 1, true) then return pair[2] end
+local HEADER_ICONS = {
+  { "MOVEMENT", "Interface\\Icons\\Ability_Rogue_Sprint" },
+  { "CHAT", "Interface\\Icons\\INV_Letter_15" },
+  { "TARGETING", "Interface\\Icons\\Ability_Hunter_SniperShot" },
+  { "CAMERA", "Interface\\Icons\\INV_Misc_Spyglass_02" },
+  { "INTERFACE", "Interface\\Icons\\Trade_Engineering" },
+  { "MISC", "Interface\\Icons\\Trade_Engineering" },
+  { "RAID", "Interface\\Icons\\Ability_Warrior_RallyingCry" },
+  { "PET", "Interface\\Icons\\Ability_Hunter_BeastCall" },
+}
+
+local headerOf -- command -> its binding header, built once
+
+local function commandHeader(command)
+  if not headerOf then
+    headerOf = {}
+    if GetNumBindings and GetBinding then
+      for i = 1, GetNumBindings() or 0 do
+        local c, category = GetBinding(i)
+        if type(c) == "string" and type(category) == "string" then headerOf[c] = category end
+      end
+    end
+  end
+  return headerOf[command]
+end
+
+local function firstMatch(list, text)
+  for _, pair in ipairs(list) do
+    if text:find(pair[1], 1, true) then return pair[2] end
   end
   return nil
+end
+
+local function commandIcon(command)
+  command = tostring(command)
+  local marker = command:match("^RAIDTARGET(%d)$")
+  if marker then return "Interface\\TargetingFrame\\UI-RaidTargetingIcon_" .. marker end
+  return firstMatch(COMMAND_ICONS, command) or firstMatch(HEADER_ICONS, commandHeader(command) or "")
 end
 
 -- The action bar slot a binding command presses (page 1 for the main bar),
