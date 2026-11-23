@@ -405,6 +405,75 @@ local SECTIONS = {
       end
     end
   end },
+  { "gamepad", function(out)
+    local api = {}
+    for k, v in pairs(C_GamePad or {}) do api[#api + 1] = "C_GamePad." .. tostring(k) end
+    table.sort(api)
+    out[#out + 1] = "api: " .. table.concat(api, ", ")
+    if C_GamePad and C_GamePad.GetActiveDeviceID then
+      local ok, id = pcall(C_GamePad.GetActiveDeviceID)
+      out[#out + 1] = "active device: " .. Dev.Serialize(id)
+      if ok and id and C_GamePad.GetDeviceMappedState then
+        out[#out + 1] = "mapped state: " .. Dev.Serialize(C_GamePad.GetDeviceMappedState(id))
+      end
+    end
+    out[#out + 1] = ("binding set %s, action bar page %s, bonus bar offset %s"):format(
+      tostring(GetCurrentBindingSet and GetCurrentBindingSet()), tostring(GetActionBarPage and GetActionBarPage()),
+      tostring(GetBonusBarOffset and GetBonusBarOffset()))
+    -- every controller setting and its value
+    local names = {}
+    if C_Console and C_Console.GetAllCommands then
+      for _, c in ipairs(C_Console.GetAllCommands() or {}) do
+        local n = type(c) == "table" and c.command
+        if type(n) == "string" and (n:find("^GamePad") or n:find("^SoftTarget")) then names[#names + 1] = n end
+      end
+    end
+    table.sort(names)
+    for _, n in ipairs(names) do
+      out[#out + 1] = ("%s = %s"):format(n, tostring(C_CVar.GetCVar(n)))
+    end
+    -- what each pad button and combination does
+    if GetBindingAction then
+      local buttons = { "PAD1", "PAD2", "PAD3", "PAD4", "PAD5", "PAD6", "PADLSTICK", "PADRSTICK", "PADLSHOULDER",
+        "PADRSHOULDER", "PADLTRIGGER", "PADRTRIGGER", "PADDUP", "PADDDOWN", "PADDLEFT", "PADDRIGHT", "PADFORWARD",
+        "PADBACK", "PADSYSTEM", "PADSOCIAL", "PADPADDLE1", "PADPADDLE2", "PADPADDLE3", "PADPADDLE4",
+        "PADLSTICKUP", "PADLSTICKDOWN", "PADLSTICKLEFT", "PADLSTICKRIGHT",
+        "PADRSTICKUP", "PADRSTICKDOWN", "PADRSTICKLEFT", "PADRSTICKRIGHT" }
+      local mods = { "", "SHIFT-", "CTRL-", "ALT-", "ALT-SHIFT-", "CTRL-SHIFT-", "ALT-CTRL-" }
+      for _, mod in ipairs(mods) do
+        for _, b in ipairs(buttons) do
+          local action = GetBindingAction(mod .. b)
+          if action and action ~= "" then out[#out + 1] = ("%s -> %s"):format(mod .. b, tostring(action)) end
+        end
+      end
+    end
+    -- every bindable command, with its keys (shows the controller-only ones)
+    if GetNumBindings and GetBinding then
+      for i = 1, GetNumBindings() or 0 do
+        local r = { GetBinding(i) }
+        local command, category = r[1], r[2]
+        if command and not tostring(command):find("^HEADER_") then
+          local keys = {}
+          for k = 3, #r do keys[#keys + 1] = tostring(r[k]) end
+          out[#out + 1] = ("%s [%s]: %s"):format(tostring(command), tostring(category), table.concat(keys, ", "))
+        end
+      end
+    end
+    -- the client's own controller frames and tables
+    local globals = {}
+    for k, v in pairs(_G) do
+      if type(k) == "string" and (k:find("[Gg]ame[Pp]ad") ) then globals[#globals + 1] = k .. ":" .. type(v) end
+    end
+    table.sort(globals)
+    out[#out + 1] = "globals: " .. table.concat(globals, ", ")
+    local bar = _G.GamepadMainActionBarFrame
+    if type(bar) == "table" then
+      local keys = {}
+      for k, v in pairs(bar) do keys[#keys + 1] = tostring(k) .. ":" .. type(v) end
+      table.sort(keys)
+      out[#out + 1] = "GamepadMainActionBarFrame: " .. table.concat(keys, ", ")
+    end
+  end },
 }
 
 function Dev:Snapshot()

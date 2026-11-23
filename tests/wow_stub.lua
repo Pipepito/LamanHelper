@@ -957,6 +957,12 @@ C_GamePad = {}
 function C_GamePad.IsEnabled() return S().gamepad.enabled end
 function C_GamePad.GetActiveDeviceID() return S().gamepad.deviceID end
 function GetBindingText(key) return "|" end
+function GetBindingAction(key) return (S().bindings or {})[key] or "" end
+function GetNumBindings() return #(S().bindingList or {}) end
+function GetBinding(i) local b = (S().bindingList or {})[i]; if b then return b[1], b[2], b[3], b[4] end end
+function GetCurrentBindingSet() return 2 end
+function GetActionBarPage() return 1 end
+function GetBonusBarOffset() return 0 end
 
 -------------------------------------------------------------------------------
 -- Error handler, addon list, edit boxes (developer mode)

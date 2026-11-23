@@ -129,6 +129,26 @@ return {
     assert_eq(last(), L().CHAT_PREFIX .. L().DEV_SNAPSHOT_SAVED)
   end,
 
+  snapshot_records_the_controller_setup = function()
+    WOW.state.cvars = { GamePadEmulateAlt = { value = "PADPADDLE2", default = "none" }, cameraFoo = { default = "0" } }
+    WOW.state.consoleCommands = {
+      { command = "GamePadEmulateAlt", help = "", category = 4, commandType = Enum.ConsoleCommandType.Cvar },
+      { command = "cameraFoo", help = "", category = 4, commandType = Enum.ConsoleCommandType.Cvar },
+    }
+    WOW.state.bindings = { PAD1 = "JUMP", ["SHIFT-PAD2"] = "ACTIONBUTTON2" }
+    WOW.state.bindingList = { { "JUMP", "Movement", "SPACE", "PAD1" }, { "ACTIONBUTTON2", "ActionBar", "2" } }
+    load_addon()
+    NewbieNudge:HandleSlash("dev snap")
+    local text = log()[1].text
+    assert_true(text:find("[gamepad]", 1, true), text)
+    assert_true(text:find("GamePadEmulateAlt = PADPADDLE2", 1, true), text)
+    assert_true(not text:find("cameraFoo =", 1, true), "only controller settings")
+    assert_true(text:find("PAD1 -> JUMP", 1, true), text)
+    assert_true(text:find("SHIFT-PAD2 -> ACTIONBUTTON2", 1, true), text)
+    assert_true(text:find("JUMP [Movement]: SPACE, PAD1", 1, true), text)
+    assert_true(text:find("C_GamePad.IsEnabled", 1, true), text)
+  end,
+
   snapshot_records_the_bank_state = function()
     WOW.bank[Enum.BankType.Character] = { viewable = true, locked = Enum.BankLockedReason.BankConversionFailed, tabs = 0 }
     load_addon()
