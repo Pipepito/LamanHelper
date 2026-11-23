@@ -139,6 +139,9 @@ end
 
 function Options:Build()
   if self.category or not Settings or not Settings.RegisterVerticalLayoutCategory then return end
+  -- diagnosis switch (/run NewbieNudgeDB.dev = { noSettings = true } then
+  -- /reload): stay out of Blizzard's Options window entirely
+  if NN.db and NN.db.dev and NN.db.dev.noSettings then return end
   local category, layout = Settings.RegisterVerticalLayoutCategory(L.ADDON_TITLE)
   self.category, self.layout = category, layout
   local db = NN.db

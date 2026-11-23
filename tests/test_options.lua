@@ -264,4 +264,12 @@ return {
     local p = NewbieNudge.db.panel
     assert_eq({ p.iconsPerLine, p.iconFlow, p.iconSize, p.iconGap }, { 4, "columns", 32, 2 })
   end,
+  -- 2026-11-23 diagnosis: a switch that keeps NewbieNudge out of Blizzard's
+  -- Options window, to test whether its presence taints the gamepad UI
+  dev_switch_keeps_the_addon_out_of_blizzard_options = function()
+    _G.NewbieNudgeDB = { dev = { noSettings = true } }
+    load_addon()
+    assert_eq(#callsNamed("RegisterVerticalLayoutCategory"), 0)
+    assert_eq(#callsNamed("RegisterAddOnCategory"), 0)
+  end,
 }
