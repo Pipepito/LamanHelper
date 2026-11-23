@@ -221,3 +221,28 @@ does not write CVars to undo it (anti-goal).
 - Exact frame layout, sizes, fonts (follow `MapList.lua` / `Dev.lua` window style).
 - How the command list is searched and grouped.
 - Whether cooldown overlays are shown on slot icons (nice, not required).
+
+## Addendum (2026-11-23): controller mode
+
+The developer plays with the controller only; the window as built needs the
+mouse (minimap menu, drag and drop, nested menus). Approved additions:
+
+- **Picker instead of dragging.** Choosing a slot's action opens a list inside
+  the window with four tabs: Spells (known, top rank, not passive), Items (bag
+  items with a use effect), Macros (account and character), Commands (game
+  binding commands with a name, under their header; for a paddle slot the list
+  starts with "Layer"). Mouse clicks pick too; drag and drop stays.
+- **Pad navigation while the window is open, out of combat:** the window
+  frame takes pad buttons (`EnableGamePadButton`, no propagation) only while
+  shown and out of combat. D-pad moves a highlight (rows up/down, items
+  left/right; in the picker up/down moves, left/right pages), A activates
+  (Learn, open the picker, pick), B goes back (picker → window → closed),
+  X clears the highlighted slot, LB/RB switch picker tabs. Ignored while
+  learning (the learn listener gets the press). Released on hide and at
+  PLAYER_REGEN_DISABLED.
+- **Opening:** a key binding "NewbieNudge: Paddles" (Bindings.xml), which also
+  makes "open the Paddles window" a command a paddle can do; a button on the
+  Controller page in Options (developer's request). The button only shows
+  NewbieNudge's window — no setting is written from the Options window. It is
+  watched in the taint log; if the controller error returns from it, it goes.
+  This replaces the earlier "never opened from Settings" rule.
