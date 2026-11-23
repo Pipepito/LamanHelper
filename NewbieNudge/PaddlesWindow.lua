@@ -143,6 +143,7 @@ end
 -------------------------------------------------------------------------------
 
 local PER_PAGE = 10
+local PICKER_HEIGHT = 56 + PER_PAGE * 24 + 56
 local TAB_LABEL = { spells = "PADDLES_TAB_SPELLS", items = "PADDLES_TAB_ITEMS", macros = "PADDLES_TAB_MACROS",
   commands = "PADDLES_TAB_COMMANDS" }
 
@@ -161,6 +162,8 @@ function Window:RenderPicker()
   p.page = math.min(math.max(p.page or 1, 1), pages)
   local first = (p.page - 1) * PER_PAGE
   if not p.index or p.index <= first or p.index > first + PER_PAGE then p.index = first + 1 end
+  -- never rest on a group header
+  while p.list[p.index] and p.list[p.index].header and p.index < #p.list do p.index = p.index + 1 end
   ui.title:SetText(L.PADDLES_PICK_FOR:format(pickerTarget(p)))
   for i, tab in ipairs(self.TABS) do
     ui.tabs[i]:SetText(L[TAB_LABEL[tab]])
@@ -184,6 +187,7 @@ function Window:RenderPicker()
   end
   ui.empty:SetText(#p.list == 0 and L.PADDLES_NOTHING or "")
   ui.page:SetText(L.PADDLES_PAGE:format(p.page, pages))
+  if self.frame:GetHeight() < PICKER_HEIGHT then self.frame:SetHeight(PICKER_HEIGHT) end
   ui:Show()
 end
 
@@ -224,7 +228,13 @@ end
 function Window:PickerMove(delta)
   local p = self.picker
   if not (p and p.list and #p.list > 0) then return end
-  p.index = math.min(math.max((p.index or 1) + delta, 1), #p.list)
+  local i = math.min(math.max((p.index or 1) + delta, 1), #p.list)
+  while p.list[i] and p.list[i].header do
+    local nxt = i + (delta < 0 and -1 or 1)
+    if nxt < 1 or nxt > #p.list then i = p.index or i; break end
+    i = nxt
+  end
+  p.index = i
   p.page = math.floor((p.index - 1) / PER_PAGE) + 1
   self:RenderPicker()
 end
@@ -366,13 +376,15 @@ local function buildRow(frame, n)
     frame.status:SetText(L.PADDLES_PRESS)
     Window:TakePad(false)
     P():StartLearning(n, function(key, reason)
-      if frame:IsShown() and not inCombat() then Window:TakePad(true) end
+      if frame:IsVisible() and not inCombat() and not P():IsLearning() then Window:TakePad(true) end
       if reason == "refused" then frame.status:SetText(L.PADDLES_REFUSED)
       elseif reason == "combat" then frame.status:SetText(L.PADDLES_COMBAT)
       elseif reason == "cancel" then frame.status:SetText(L.PADDLES_CANCELLED)
       else frame.status:SetText("") end
       Window:Refresh()
     end)
+    -- a learn cancelled by this click may have taken the pad back
+    Window:TakePad(false)
   end)
   r.slot = slotButton(frame, n, nil)
   r.action = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -396,6 +408,9 @@ local function build()
   frame:RegisterForDrag("LeftButton")
   frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
   frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+  frame:SetScript("OnShow", function()
+    if not inCombat() and not P():IsLearning() then Window:TakePad(true) end
+  end)
   frame:SetScript("OnHide", function()
     if P():IsLearning() then P():StopLearning() end
     Window:TakePad(false)
@@ -608,7 +623,7 @@ NN:OnAnyEvent(function(event)
   if event == "PLAYER_REGEN_DISABLED" then fighting = true; takePad(false) end
   if event == "PLAYER_REGEN_ENABLED" then
     fighting = false
-    if Window.frame and Window.frame:IsShown() and not P():IsLearning() then takePad(true) end
+    if Window.frame and Window.frame:IsVisible() and not P():IsLearning() then takePad(true) end
   end
   if (event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED") and Window.frame and Window.frame:IsShown() then
     Window:Refresh()
