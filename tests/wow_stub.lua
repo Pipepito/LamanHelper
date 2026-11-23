@@ -1038,3 +1038,6 @@ function C_Item.GetItemIconByID(id) local i = S().itemInfo[id]; return i and i.i
 function C_Item.GetItemSpell(id) local i = S().itemInfo[id]; if i and i.useSpell then return i.useSpell, 1 end end
 function Region:LockHighlight() self.highlightLocked = true end
 function Region:UnlockHighlight() self.highlightLocked = false end
+function Region:GetAtlas() return self.atlas end
+C_Texture = C_Texture or {}
+function C_Texture.GetAtlasInfo(name) return (S().atlases or {})[name] end

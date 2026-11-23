@@ -405,6 +405,68 @@ local SECTIONS = {
       end
     end
   end },
+  { "gamepad icons", function(out)
+    -- what the game's controller frames draw (read only: reading changes nothing)
+    local lines, MAX = 0, 150
+    local function walk(frame, path, depth)
+      if lines >= MAX or depth > 6 or type(frame) ~= "table" then return end
+      if frame.GetRegions then
+        for _, r in ipairs({ frame:GetRegions() }) do
+          if lines >= MAX then return end
+          local kind = r.GetObjectType and r:GetObjectType()
+          if kind == "Texture" then
+            local atlas = r.GetAtlas and r:GetAtlas()
+            local tex = r.GetTexture and r:GetTexture()
+            if atlas or tex then
+              out[#out + 1] = ("%s: atlas %s texture %s"):format(path, tostring(atlas), tostring(tex))
+              lines = lines + 1
+            end
+          elseif kind == "FontString" then
+            local text = r.GetText and r:GetText()
+            if text and text ~= "" then
+              local font = r.GetFont and r:GetFont()
+              out[#out + 1] = ('%s: text "%s" font %s'):format(path, tostring(text), tostring(font))
+              lines = lines + 1
+            end
+          end
+        end
+      end
+      if frame.GetChildren then
+        for i, c in ipairs({ frame:GetChildren() }) do
+          walk(c, path .. "." .. ((c.GetName and c:GetName()) or i), depth + 1)
+        end
+      end
+    end
+    for _, name in ipairs({ "GamepadPersistentInputLegend", "GamepadMainActionBarFrame", "GamepadHudMode",
+      "GamepadRadial", "GamepadReticle" }) do
+      local f = _G[name]
+      if type(f) == "table" then walk(f, name, 1) else out[#out + 1] = name .. ": none" end
+    end
+    -- likely atlas names for pad buttons
+    if C_Texture and C_Texture.GetAtlasInfo then
+      local found = {}
+      for _, prefix in ipairs({ "Gamepad_Ltr_", "Gamepad_Shp_", "Gamepad_Gen_", "Gamepad_Rev_", "Gamepad_Xbox_",
+        "Gamepad_PS_", "Gamepad_Steam_", "gamepad-" }) do
+        for _, button in ipairs({ "A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Cross", "Circle", "Square", "Triangle",
+          "1", "2", "3", "4", "Menu", "View", "Paddle1", "L4" }) do
+          for _, size in ipairs({ "_32", "_64", "" }) do
+            local name = prefix .. button .. size
+            if C_Texture.GetAtlasInfo(name) then found[#found + 1] = name end
+          end
+        end
+      end
+      out[#out + 1] = #found > 0 and ("probed atlases: " .. table.concat(found, " exists, ") .. " exists") or "probed atlases: none"
+    end
+    -- the binding text the game shows for pad buttons (a font glyph?)
+    if GetBindingText then
+      for _, token in ipairs({ "PAD1", "PAD2", "PADLSHOULDER", "PADDUP", "PADPADDLE1" }) do
+        local text = GetBindingText(token)
+        local bytes = {}
+        if type(text) == "string" then for i = 1, math.min(#text, 12) do bytes[#bytes + 1] = text:byte(i) end end
+        out[#out + 1] = ("%s binding text %q bytes %s"):format(token, tostring(text), table.concat(bytes, " "))
+      end
+    end
+  end },
   { "gamepad", function(out)
     local api = {}
     for k, v in pairs(C_GamePad or {}) do api[#api + 1] = "C_GamePad." .. tostring(k) end

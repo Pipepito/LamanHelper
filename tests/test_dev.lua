@@ -149,6 +149,23 @@ return {
     assert_true(text:find("C_GamePad.IsEnabled", 1, true), text)
   end,
 
+  snapshot_records_the_games_pad_icons = function()
+    WOW.state.atlases = { Gamepad_Ltr_A_64 = { width = 64, height = 64, file = 123 } }
+    load_addon()
+    local legend = CreateFrame("Frame", "GamepadPersistentInputLegend", UIParent)
+    local tex = legend:CreateTexture(nil, "ARTWORK")
+    tex:SetAtlas("Gamepad_Shp_Cross_64")
+    local fs = legend:CreateFontString(nil, "OVERLAY")
+    fs:SetText("Jump")
+    NewbieNudge:HandleSlash("dev snap")
+    local text = log()[1].text
+    assert_true(text:find("[gamepad icons]", 1, true), text)
+    assert_true(text:find("atlas Gamepad_Shp_Cross_64", 1, true), "textures drawn by the game's controller frames")
+    assert_true(text:find('text "Jump"', 1, true), "their text")
+    assert_true(text:find("Gamepad_Ltr_A_64 exists", 1, true), "probed atlas names")
+    assert_true(text:find("PAD1 binding text", 1, true), "binding text bytes")
+  end,
+
   snapshot_records_the_bank_state = function()
     WOW.bank[Enum.BankType.Character] = { viewable = true, locked = Enum.BankLockedReason.BankConversionFailed, tabs = 0 }
     load_addon()
