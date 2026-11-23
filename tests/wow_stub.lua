@@ -994,3 +994,22 @@ function Region:SetVerticalScroll(v) self.verticalScroll = v end
 function Region:GetVerticalScroll() return self.verticalScroll or 0 end
 function Region:GetVerticalScrollRange() return 0 end
 function Region:SetPropagateKeyboardInput() end
+
+-- Override bindings (per owner frame name) and macros
+local function ownerBinds(owner)
+  S().overrides = S().overrides or {}
+  local name = owner:GetName() or tostring(owner)
+  S().overrides[name] = S().overrides[name] or {}
+  return S().overrides[name]
+end
+function SetOverrideBinding(owner, prio, key, command) record("SetOverrideBinding", key, command); ownerBinds(owner)[key] = command end
+function SetOverrideBindingClick(owner, prio, key, button, mouse)
+  record("SetOverrideBindingClick", key, button)
+  ownerBinds(owner)[key] = "CLICK " .. button .. ":" .. (mouse or "LeftButton")
+end
+function ClearOverrideBindings(owner) record("ClearOverrideBindings"); local t = ownerBinds(owner); for k in pairs(t) do t[k] = nil end end
+function GetMacroIndexByName(name)
+  for i, m in ipairs(S().macros or {}) do if m.name == name then return i end end
+  return 0
+end
+function GetMacroInfo(i) local m = (S().macros or {})[i]; if m then return m.name, m.icon, m.body or "" end end

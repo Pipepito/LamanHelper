@@ -30,6 +30,7 @@ Options.lua
 CVarSection.lua
 Camera.lua
 Controller.lua
+Paddles.lua
 GameSettings.lua
 Data_Buffs.lua
 Data\MapFog.lua
