@@ -70,7 +70,16 @@ local function inCombat()
   return InCombatLockdown and InCombatLockdown() == true
 end
 
+-- The game's controller and soft-targeting settings are never written: on
+-- WoW Forever doing so from addon code tainted the gamepad interface and the
+-- game blocked its protected actions (taint log, 2026-11-23).
+local function controllerSetting(cvar)
+  return cvar:find("^GamePad") ~= nil or cvar:find("^SoftTarget") ~= nil
+end
+CVarSection.IsControllerSetting = controllerSetting
+
 function CVarSection:Set(cvar, value)
+  if controllerSetting(cvar) then return false end
   if inCombat() then NN:Say(L.CVAR_IN_COMBAT); return false end
   local text = toText(value)
   if C_CVar and C_CVar.SetCVar then C_CVar.SetCVar(cvar, text) elseif SetCVar then SetCVar(cvar, text) end

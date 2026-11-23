@@ -16,8 +16,8 @@ Each language is one data file under `NewbieNudge/Locales/`; see
 Beyond the checklist it also: shows the unexplored parts of a zone on the
 world map, dimmed; lists the cheapest things to destroy when your bags are
 full; follows an Icy Veins leveling build and names the next talent; gathers
-the game's own new-player settings and the hidden controller and camera
-settings in its options; and scales up for a controller or a Steam Deck.
+the game's own new-player settings and the hidden camera settings in its
+options; and scales up for a controller or a Steam Deck.
 
 ## Install
 
@@ -171,15 +171,17 @@ addon only needs a table of talent identifiers, refreshed with
 
 ## Playing with a controller or a Steam Deck
 
-With the game's own controller support on, Options → Controller gathers the
-gamepad and soft-targeting settings Blizzard's window hides, with plain
-labels, plus two one-click presets (Steam Deck, plain controller) that never
-touch your button assignments. Once a controller is in use, the panel and
+Once a controller is in use, the panel and
 the combat strip scale up (Options → Controller sets the factor) and row
 tooltips name the pad buttons instead of mouse buttons. Four actions can be
 bound to pad combinations in the game's Key Bindings window under
 "NewbieNudge": show/hide the panel, open the top reminder, snooze the top
 reminder, open the options.
+
+NewbieNudge doesn't change the game's controller settings (button
+assignments, camera, cursor, soft targeting): on WoW Forever, changing them
+from an addon breaks the game's controller interface. They are in Esc →
+Options → Controls.
 
 ## Game settings for new players
 

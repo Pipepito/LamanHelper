@@ -5,6 +5,11 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
+## 0.4.1 - unreleased
+
+- **Controller fix:** changing controller settings (button assignments such as Alt on a paddle, camera, cursor, soft targeting) on NewbieNudge's Controller page broke WoW Forever's controller interface — the game blocked its actions and asked to disable the addon. NewbieNudge no longer changes the game's controller settings, and the Steam Deck / controller presets are gone; set them in Esc → Options → Controls. The Controller page keeps the panel scale-up and button hints.
+- Small fixes: the map's NewbieNudge button stays above pins, the map list fits under the top of the map, the profession count follows the switches, other factions' flight points are left out even without a faction from the game, zooming the map only rescales the pins, class-quest wording.
+
 ## 0.4.0 - 2026-11-22
 
 - **Minimap button** with a quick menu: lock or unlock the panel, switch its style, show the info bar, snooze everything, wake all reminders, hide the panel, open the settings. Drag it around the minimap. Also in the game's AddOns drop-down.
