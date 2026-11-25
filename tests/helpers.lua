@@ -62,7 +62,33 @@ function load_addon()
   WOW.FireEvent("ADDON_LOADED", "NewbieNudge")
   WOW.FireEvent("PLAYER_LOGIN")
   WOW.FireEvent("PLAYER_ENTERING_WORLD", true, false)
+  record_settings()
   return ns
+end
+
+-- NewbieNudge's settings, as its settings window shows them (Options.Model),
+-- turned into test records: WOW.calls gets
+--   { "page", title }  { "initializer", "header"|"button", label, entry }
+--   { "checkbox", var, tooltip }  { "slider", var, min, max, step }
+--   { "dropdown", var, options, tooltip }
+-- in window order, and WOW.settings[var] = { getter, setter, name } (first
+-- page to declare a variable wins). Called by load_addon; call it again after
+-- changing what pages show.
+function record_settings()
+  local Options = NewbieNudge and NewbieNudge.Options
+  if not (Options and Options.Model) then return end
+  for _, page in ipairs(Options.Model()) do
+    WOW.record("page", page.title)
+    for _, e in ipairs(page.entries) do
+      if e.kind == "header" or e.kind == "button" then WOW.record("initializer", e.kind, e.label, e)
+      elseif e.kind == "checkbox" then WOW.record("checkbox", e.var, e.tooltip)
+      elseif e.kind == "slider" then WOW.record("slider", e.var, e.min, e.max, e.step)
+      elseif e.kind == "dropdown" then WOW.record("dropdown", e.var, e.options, e.tooltip) end
+      if e.var and not WOW.settings[e.var] then
+        WOW.settings[e.var] = { getter = e.get, setter = e.set, name = e.label, entry = e }
+      end
+    end
+  end
 end
 
 function load_bags()

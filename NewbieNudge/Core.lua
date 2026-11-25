@@ -45,6 +45,7 @@ NN.defaults = {
   paddles = { enabled = true },
   talentBadges = true,
   vendor = { sellJunk = true, repair = true },
+  ranks = { autoSwap = true },
   tooltipPrice = true,
   infobar = { enabled = true, bags = true, gold = true, gear = true },
   minimap = { hide = false, angle = 225 },
@@ -494,7 +495,9 @@ function NN:HandleSlash(msg)
     local style = (self.db.panel.style == "icons") and "list" or "icons"
     if self.Panel then self.Panel:SetStyle(style) else self.db.panel.style = style end
     self:Say(style == "icons" and L.SLASH_STYLE_ICONS or L.SLASH_STYLE_LIST)
-  elseif command == "paddles" then
+  elseif command == "settings" then
+    if self.SettingsWindow then self.SettingsWindow:Toggle() end
+  elseif command == "back" or command == "paddles" then
     if self.PaddlesWindow then self.PaddlesWindow:Toggle() end
   elseif command == "services" then
     if self.MapPins then self.MapPins:SetShowAll(not self.db.services.showAll) else self.db.services.showAll = not self.db.services.showAll end

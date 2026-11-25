@@ -112,9 +112,9 @@ return {
     WOW.Click(ML().removeAll, "LeftButton")
     assert_eq(#NewbieNudge.Services:Marks(), 0)
     WOW.Click(ML().settings, "LeftButton")
-    local opened
-    for _, c in ipairs(WOW.calls) do if c[1] == "OpenToCategory" then opened = c[2] end end
-    assert_eq(opened, NewbieNudge.L.OPT_MAP)
+    local W = NewbieNudge.SettingsWindow
+    assert_true(W.frame:IsShown())
+    assert_eq(W.pages[W.page].title, NewbieNudge.L.OPT_MAP)
   end,
   reopens_with_the_map_when_left_open = function()
     load(function() _G.NewbieNudgeDB = { map = { listOpen = true } } end)

@@ -125,10 +125,7 @@ return {
     cvars({ cameraDistanceMaxZoomFactor = { default = "1.9" }, GamePadCameraYawSpeed = { default = "1" }, GamePadTurnWithCamera = { default = "1" } })
     console({ { "GamePadCameraYawSpeed", "yaw" }, { "GamePadTurnWithCamera", "turn" } })
     load_addon()
-    local regs = 0
-    for _, c in ipairs(callsNamed("RegisterProxySetting")) do if c[2] == "NN_cvar_GamePadCameraYawSpeed" then regs = regs + 1 end end
-    assert_eq(regs, 0, "no page offers the game's controller settings (2026-11-23)")
+    assert_nil(WOW.settings["NN_cvar_GamePadCameraYawSpeed"], "no page offers the game's controller settings (2026-11-23)")
     for _, d in ipairs(NewbieNudge.Camera:Discover()) do assert_true(d.cvar:sub(1, 7) ~= "GamePad", d.cvar) end
-    assert_eq(callsNamed("RegisterAddOnCategory")[1][2], "NewbieNudge")
   end,
 }

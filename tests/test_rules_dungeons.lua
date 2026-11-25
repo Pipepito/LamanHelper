@@ -9,12 +9,20 @@ return {
     run() -- RFC 13-18 (horde) and WC 17-24 (neutral); Deadmines is alliance
     local r = results_of("dungeon_ready")
     assert_eq(#r, 2)
-    assert_eq(r[1].text, L().DUNGEON_ROW:format("Ragefire Chasm", 13, 18))
+    assert_eq(r[1].text, L().DUNGEON_TAG_HORDE .. " " .. L().DUNGEON_ROW:format("Ragefire Chasm", 13, 18))
+    assert_eq(r[2].text, L().DUNGEON_TAG_HORDE .. " " .. L().DUNGEON_ROW:format("Wailing Caverns", 17, 24), "own land: no warning")
     r[1].onClick(); assert_eq(WOW.calls[#WOW.calls], { "OpenWorldMap", 1454 })
   end,
   client_name_preferred = function()
     setup(); WOW.state.level = 20; WOW.state.faction = "Alliance"
-    run(); assert_eq(results_of("dungeon_ready")[1].text, L().DUNGEON_ROW:format("Las Minas", 16, 26))
+    run(); assert_eq(results_of("dungeon_ready")[1].text, L().DUNGEON_TAG_ALLIANCE .. " " .. L().DUNGEON_ROW:format("Las Minas", 16, 26))
+  end,
+  other_factions_land_is_tagged_and_warned = function()
+    setup(); WOW.state.level = 18; WOW.state.faction = "Alliance"
+    run() -- Wailing Caverns has no faction lock but sits in the Barrens
+    local r = results_of("dungeon_ready")
+    assert_eq(r[#r].text, L().DUNGEON_TAG_HORDE .. " " .. L().DUNGEON_ROW:format("Wailing Caverns", 17, 24)
+      .. " " .. L().DUNGEON_ENEMY_HORDE)
   end,
   seen_after_entering_or_half_quests_done = function()
     setup(); WOW.state.level = 20; WOW.state.faction = "Alliance"

@@ -14,8 +14,7 @@ end
 local function pageCalls(title)
   local out, inPage = {}, false
   for _, c in ipairs(WOW.calls) do
-    if c[1] == "RegisterVerticalLayoutSubcategory" then inPage = (c[3] == title)
-    elseif c[1] == "RegisterAddOnCategory" then inPage = false
+    if c[1] == "page" then inPage = (c[2] == title)
     elseif inPage then out[#out + 1] = c end
   end
   return out
@@ -25,21 +24,15 @@ local function varsOf(calls)
   for _, c in ipairs(calls) do if c[1] == "checkbox" or c[1] == "slider" or c[1] == "dropdown" then out[#out + 1] = c[2] end end
   return out
 end
-local function mainPageCalls()
-  local out = {}
-  for _, c in ipairs(WOW.calls) do
-    if c[1] == "RegisterVerticalLayoutSubcategory" then break end
-    out[#out + 1] = c
-  end
-  return out
-end
+local function mainPageCalls() return pageCalls(NewbieNudge.L.OPT_GENERAL) end
 
 return {
-  registers_category_and_addon_category = function()
+  nothing_in_the_games_settings_window = function()
     withRules()
-    assert_eq(callsNamed("RegisterVerticalLayoutCategory")[1][2], "NewbieNudge")
-    assert_eq(callsNamed("RegisterAddOnCategory")[1][2], "NewbieNudge")
-    assert_eq(NewbieNudge.optionsCategoryID, "NewbieNudge")
+    assert_eq(#callsNamed("RegisterVerticalLayoutCategory"), 0)
+    assert_eq(#callsNamed("RegisterAddOnCategory"), 0)
+    assert_eq(#callsNamed("RegisterProxySetting"), 0)
+    assert_eq(callsNamed("page")[1][2], NewbieNudge.L.OPT_GENERAL, "General is the first page")
   end,
   general_controls_are_registered = function()
     withRules()
@@ -102,10 +95,11 @@ return {
     assert_true(tContains(names, "button:" .. NewbieNudge.L.OPT_RESET_SNOOZE))
     assert_true(tContains(names, "button:" .. NewbieNudge.L.OPT_RESET_POS))
   end,
-  open_options_calls_open_to_category = function()
+  open_options_shows_the_settings_window = function()
     withRules()
     NewbieNudge:OpenOptions()
-    assert_eq(callsNamed("OpenToCategory")[1][2], "NewbieNudge")
+    assert_true(NewbieNudge.SettingsWindow.frame:IsShown())
+    assert_eq(#callsNamed("OpenToCategory"), 0, "not the game's Settings window")
   end,
   helpers_exposed_for_other_modules = function()
     withRules()
@@ -116,32 +110,33 @@ return {
   end,
   camera_lives_in_its_own_subcategory = function()
     withRules()
-    local subs = callsNamed("RegisterVerticalLayoutSubcategory")
-    assert_true(#subs >= 1)
-    assert_eq(subs[1][2], "NewbieNudge")
     local names = {}
-    for _, c in ipairs(subs) do names[#names + 1] = c[3] end
+    for _, c in ipairs(callsNamed("page")) do names[#names + 1] = c[2] end
     assert_true(tContains(names, NewbieNudge.L.OPT_CAMERA))
   end,
-  dropdown_helper_registers_string_setting = function()
+  dropdown_helper_records_its_options = function()
     withRules()
     local value = "1"
-    NewbieNudge.Options.AddDropdown(NewbieNudge.Options.category, "NN_test_dd", "DD", "tt",
+    local Options = NewbieNudge.Options
+    local entries = {}
+    Options.recorder = entries
+    Options.AddDropdown(nil, "NN_test_dd", "DD", "tt",
       { { value = "0", label = "Zero" }, { value = "1", label = "One" } },
       function() return value end, function(v) value = v end)
-    local dd
-    for _, c in ipairs(callsNamed("dropdown")) do if c[2] == "NN_test_dd" then dd = c end end
-    assert_true(dd, "dropdown registered")
-    assert_eq(dd[3], { { value = "0", label = "Zero" }, { value = "1", label = "One" } })
-    assert_eq(WOW.settings["NN_test_dd"].type, "string")
-    WOW.settings["NN_test_dd"].setter("0"); assert_eq(value, "0")
+    Options.recorder = nil
+    local dd = entries[1]
+    assert_eq({ dd.kind, dd.var, dd.label, dd.tooltip }, { "dropdown", "NN_test_dd", "DD", "tt" })
+    assert_eq(dd.options, { { value = "0", label = "Zero" }, { value = "1", label = "One" } })
+    dd.set("0"); assert_eq(value, "0"); assert_eq(dd.get(), "0")
+    Options.AddCheckbox(nil, "NN_x", "X", nil, function() end, function() end)
+    assert_eq(#entries, 1, "nothing is recorded outside Options.Model")
   end,
   failing_page_does_not_block_the_category = function()
     WOW.extraFiles = { TESTS_DIR .. "/fixtures/two_rules.lua" }
     NewbieNudge_TestPage = function() error("page boom") end
     WOW.extraFiles[#WOW.extraFiles + 1] = TESTS_DIR .. "/fixtures/failing_page.lua"
     load_addon()
-    assert_eq(callsNamed("RegisterAddOnCategory")[1][2], "NewbieNudge", "category still registered")
+    assert_true(#callsNamed("page") > 5, "the other pages are still there")
     local printed = WOW.printed[#WOW.printed]
     assert_true(printed:find("page boom", 1, true), printed)
     assert_true(tostring(NewbieNudge.db.errors["options:Boom page"]):find("page boom", 1, true))
@@ -163,8 +158,8 @@ return {
   reminders_page_is_a_subcategory = function()
     withRules()
     local found = false
-    for _, c in ipairs(callsNamed("RegisterVerticalLayoutSubcategory")) do
-      if c[3] == NewbieNudge.L.OPT_REMINDERS then found = true end
+    for _, c in ipairs(callsNamed("page")) do
+      if c[2] == NewbieNudge.L.OPT_REMINDERS then found = true end
     end
     assert_true(found)
   end,
@@ -172,7 +167,7 @@ return {
     withRules()
     local page, firstRule
     for i, c in ipairs(WOW.calls) do
-      if c[1] == "RegisterVerticalLayoutSubcategory" and c[3] == NewbieNudge.L.OPT_REMINDERS then page = page or i end
+      if c[1] == "page" and c[2] == NewbieNudge.L.OPT_REMINDERS then page = page or i end
       if c[1] == "checkbox" and c[2]:find("^NN_rule_") then firstRule = firstRule or i end
     end
     assert_true(page and firstRule and firstRule > page)
@@ -182,7 +177,7 @@ return {
     local L = NewbieNudge.L
     local inPage, headers = false, {}
     for _, c in ipairs(WOW.calls) do
-      if c[1] == "RegisterVerticalLayoutSubcategory" then inPage = (c[3] == L.OPT_REMINDERS) end
+      if c[1] == "page" then inPage = (c[2] == L.OPT_REMINDERS) end
       if inPage and c[1] == "initializer" and c[2] == "header" then headers[#headers + 1] = c[3] end
     end
     assert_eq(headers, { L.OPT_GROUP_GEAR, L.OPT_GROUP_SPELLS, L.OPT_GROUP_QUESTS, L.OPT_GROUP_PROFESSIONS,
@@ -200,8 +195,8 @@ return {
     withRules()
     local L = NewbieNudge.L
     local names = {}
-    for _, c in ipairs(callsNamed("RegisterVerticalLayoutSubcategory")) do names[#names + 1] = c[3] end
-    local expected = { L.OPT_REMINDERS, L.OPT_BAGS, L.OPT_MAP, L.OPT_GS_COMBAT, L.OPT_GS_NAMES, L.OPT_GS_INTERFACE, L.OPT_CAMERA }
+    for _, c in ipairs(callsNamed("page")) do names[#names + 1] = c[2] end
+    local expected = { L.OPT_GENERAL, L.OPT_REMINDERS, L.OPT_BAGS, L.OPT_MAP, L.OPT_GS_COMBAT, L.OPT_GS_NAMES, L.OPT_GS_INTERFACE, L.OPT_CAMERA }
     if tContains(names, L.OPT_CONTROLLER) then expected[#expected + 1] = L.OPT_CONTROLLER end
     expected[#expected + 1] = L.OPT_BUILD
     expected[#expected + 1] = L.OPT_DEV
@@ -210,9 +205,9 @@ return {
   unknown_page_key_goes_last = function()
     WOW.extraFiles = { TESTS_DIR .. "/fixtures/failing_page.lua" }
     load_addon()
-    local subs = callsNamed("RegisterVerticalLayoutSubcategory")
-    assert_eq(subs[#subs][3], "Boom page")
-    assert_eq(subs[#subs - 1][3], NewbieNudge.L.OPT_DEV)
+    local pages = NewbieNudge.Options.OrderedPages()
+    assert_eq(pages[#pages].key, "boom")
+    assert_eq(pages[#pages - 1].key, "dev")
   end,
   main_page_sections = function()
     withRules()
@@ -263,13 +258,5 @@ return {
     WOW.settings["NN_panel_iconGap"].setter(2)
     local p = NewbieNudge.db.panel
     assert_eq({ p.iconsPerLine, p.iconFlow, p.iconSize, p.iconGap }, { 4, "columns", 32, 2 })
-  end,
-  -- 2026-11-23 diagnosis: a switch that keeps NewbieNudge out of Blizzard's
-  -- Options window, to test whether its presence taints the gamepad UI
-  dev_switch_keeps_the_addon_out_of_blizzard_options = function()
-    _G.NewbieNudgeDB = { dev = { noSettings = true } }
-    load_addon()
-    assert_eq(#callsNamed("RegisterVerticalLayoutCategory"), 0)
-    assert_eq(#callsNamed("RegisterAddOnCategory"), 0)
   end,
 }

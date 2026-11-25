@@ -111,9 +111,7 @@ return {
     assert_eq(NewbieNudge.db.panel.hidden, true)
     assert_true(entry(L().MENU_SHOW))
     entry(L().MENU_SETTINGS).onClick()
-    local found = false
-    for _, c in ipairs(WOW.calls) do if c[1] == "OpenToCategory" then found = true end end
-    assert_true(found)
+    assert_true(NewbieNudge.SettingsWindow.frame:IsShown(), "NewbieNudge's own settings window")
   end,
   click_opens_menu_with_title = function()
     load_addon()

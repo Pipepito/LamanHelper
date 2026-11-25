@@ -50,6 +50,14 @@ return {
     load_addon(); run_checks()
     assert_eq(#results_of("buffs"), 0)
   end,
+  passive_buff_spell_not_asked_for = function()
+    WOW.state.class = "DRUID"
+    knows({ [16864] = "Omen of Clarity", [1126] = "Mark of the Wild" })
+    for _, it in ipairs(WOW.state.spellBook.items) do if it.spellID == 16864 then it.passive = true end end
+    WOW.state.auras[1126] = true
+    load_addon(); run_checks()
+    assert_eq(#results_of("buffs"), 0)
+  end,
   unknown_group_skipped = function()
     WOW.state.class = "MAGE"
     knows({ [1459] = "Arcane Intellect" })

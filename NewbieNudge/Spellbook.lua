@@ -96,6 +96,18 @@ function Spellbook:KnowsAny(ids)
   return false
 end
 
+-- True for passive spells (talents, racials, passive "buffs" such as Omen of
+-- Clarity on clients where it is passive): nothing to cast.
+function Spellbook:IsPassive(spellID)
+  if C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell and C_SpellBook.IsSpellBookItemPassive then
+    local slot, bank = C_SpellBook.FindSpellBookSlotForSpell(spellID)
+    slot = NN.Plain(slot)
+    if slot then return C_SpellBook.IsSpellBookItemPassive(slot, bank or PLAYER_BANK) == true end
+  end
+  local f = (C_Spell and C_Spell.IsSpellPassive) or IsPassiveSpell
+  return f ~= nil and f(spellID) == true
+end
+
 function Spellbook:IsLowRank(spellID)
   if not (C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell and C_SpellBook.IsSpellBookItemLowRank) then
     return false

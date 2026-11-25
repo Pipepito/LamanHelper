@@ -5,6 +5,15 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
+## Unreleased
+
+- **Settings window made for the controller:** press Esc (or open the game menu) and pick **NewbieNudge**, right above AddOns. Every NewbieNudge settings page in one window: LB/RB switch pages, d-pad up/down picks a setting, left/right changes it, A ticks boxes and presses buttons, B closes. Each setting's explanation shows at the bottom. The mouse works too. It is what `/nudge`, `/nudge settings`, the minimap button's Settings, the map list's settings button and the "Open NewbieNudge options" key binding open now; NewbieNudge is no longer in the game's Esc > Options > AddOns list: everything moved to this window.
+- **Bag addons:** with Baganator, Bagnon, AdiBags, ArkInventory, BetterBags and the like, NewbieNudge no longer makes the backpack button or bag items glow, so the bag addon's own "hover a bag to highlight its items" keeps working. Glows elsewhere no longer block the mouse over the button they sit on.
+- **Dungeon suggestions** say whose land each dungeon is in (Alliance or Horde), and warn you when it is the other faction's — no more sending a Horde player to the Deadmines without a word.
+- **New spell ranks go on your bars by themselves:** when you learn a new rank, the older ranks of that spell on your action bars are swapped for it (after combat if you are fighting), and a chat line says so. Low ranks you put on a bar yourself afterwards are left alone. Turn it off under Options → Reminders, below "Old spell ranks on your bars".
+- **Paddles are now "Back buttons"**, and their rows are named L4, L5, R4 and R5 like the Steam Deck's back grips, instead of Paddle 1–4. Open them with `/nudge back` (`/nudge paddles` still works). They only work with the game's controller mode on: turn it off and your back buttons stop doing NewbieNudge's actions (they come back when you turn it on again), the window does not open (a chat line says where to turn it on) and the minimap menu leaves it out.
+- **Missing buffs** no longer asks you to cast buffs that come from a passive ability.
+
 ## 0.5.0 - 2026-11-23
 
 - **Back paddles:** give your controller's back paddles (Steam Deck L4/R4/L5/R5 and the like) their own actions. Open the Paddles window (minimap menu, `/nudge paddles`, Options → Controller, or a key binding), press Learn, then press the paddle. Each paddle does any game command (open your bags, the map…), casts a spell, uses an item or runs a macro. Or make it a **layer**: while you hold it, A/B/X/Y and the d-pad do eight extra actions. Works in combat; changes wait until combat ends. On the Steam Deck, map the back grips to free keys in Steam first.

@@ -35,11 +35,11 @@ return {
   section_absent_without_gamepad_api = function()
     _G.C_GamePad = nil
     load_addon()
-    assert_nil(has(callsNamed("RegisterVerticalLayoutSubcategory"), function(c) return c[3] == L().OPT_CONTROLLER end))
+    assert_nil(has(callsNamed("page"), function(c) return c[2] == L().OPT_CONTROLLER end))
   end,
   section_present_with_gamepad_api = function()
     load_addon()
-    assert_true(has(callsNamed("RegisterVerticalLayoutSubcategory"), function(c) return c[3] == L().OPT_CONTROLLER end))
+    assert_true(has(callsNamed("page"), function(c) return c[2] == L().OPT_CONTROLLER end))
   end,
   -- Task 13: the addon when a controller is in use
   session_set_by_active_event_and_sticky = function()

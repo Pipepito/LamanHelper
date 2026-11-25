@@ -44,6 +44,39 @@ local function questsHalfDone(d)
   return done * 2 >= #d.quests
 end
 
+-- Whose land the entrance sits in, by instance ID (hand-maintained; the
+-- generated data only flags the faction-locked ones). Contested or
+-- far-away zones (Ashenvale, Badlands, Tanaris...) are left out.
+local TERRITORY = {
+  [36] = "alliance",   -- The Deadmines, Westfall
+  [34] = "alliance",   -- The Stockade, inside Stormwind
+  [90] = "alliance",   -- Gnomeregan, Dun Morogh
+  [2998] = "alliance", -- Excavation Site, Wetlands
+  [3065] = "alliance", -- The Hall of Thanes
+  [389] = "horde",     -- Ragefire Chasm, inside Orgrimmar
+  [2999] = "horde",    -- Ruins of Lordaeron, under Undercity
+  [43] = "horde",      -- Wailing Caverns, The Barrens
+  [33] = "horde",      -- Shadowfang Keep, Silverpine Forest
+  [47] = "horde",      -- Razorfen Kraul, The Barrens
+  [129] = "horde",     -- Razorfen Downs, The Barrens
+  [189] = "horde",     -- Scarlet Monastery, Tirisfal Glades
+}
+NN.DungeonTerritory = TERRITORY
+
+-- Row text: the dungeon, plus whose land it is in; a warning when that is
+-- the other faction's.
+local function dungeonRowText(d, name, faction)
+  local text = L.DUNGEON_ROW:format(name, d.min, d.max)
+  local land = d.faction or TERRITORY[d.instanceID]
+  if not land then return text end
+  local tag = land == "alliance" and L.DUNGEON_TAG_ALLIANCE or L.DUNGEON_TAG_HORDE
+  text = tag .. " " .. text
+  if faction and land ~= faction then
+    text = text .. " " .. (land == "alliance" and L.DUNGEON_ENEMY_ALLIANCE or L.DUNGEON_ENEMY_HORDE)
+  end
+  return text
+end
+
 local function dungeonName(d)
   local name = GetRealZoneText and NN.Plain(GetRealZoneText(d.instanceID), "string")
   if name and name ~= "" then return name end
@@ -82,7 +115,7 @@ NN:RegisterRule({
           seen[d.instanceID] = true
         else
           results[#results + 1] = {
-            text = L.DUNGEON_ROW:format(dungeonName(d), d.min, d.max), icon = DUNGEON_ICON,
+            text = dungeonRowText(d, dungeonName(d), faction), icon = DUNGEON_ICON,
             onClick = openMapAt(d.mapID),
           }
         end

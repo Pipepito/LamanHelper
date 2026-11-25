@@ -160,14 +160,35 @@ function Highlight:ButtonForNode(nodeID)
   return nil
 end
 
+-- Bag addons that replace the default bags. With one loaded the default bag
+-- item buttons are never seen, and glowing the backpack button gets in the
+-- way of the addon's own "hover a bag to highlight its items" (reported with
+-- Baganator, 2026-11-25), so bag glows are left out entirely.
+local BAG_ADDONS = { "Baganator", "Bagnon", "AdiBags", "ArkInventory", "BetterBags", "Combuctor", "OneBag3", "cargBags_Nivaya" }
+
+function Highlight:BagAddonLoaded()
+  if self.bagAddon == nil then
+    self.bagAddon = false
+    local isLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+    if isLoaded then
+      for _, name in ipairs(BAG_ADDONS) do
+        if isLoaded(name) then self.bagAddon = name; break end
+      end
+    end
+  end
+  return self.bagAddon
+end
+
 -- Frames a result's highlight asks for: a key string, or a table with any of
 -- key (frame key), action (slots), bagslots ({bag, slot} pairs).
 function Highlight:TargetsFor(h, wanted)
+  local skipBags = self:BagAddonLoaded()
   if type(h) == "string" then
+    if skipBags and h == "bags" then return end
     local frame = self:FrameForKey(h)
     if frame then wanted[frame] = true end
   elseif type(h) == "table" then
-    if type(h.key) == "string" then
+    if type(h.key) == "string" and not (skipBags and h.key == "bags") then
       local frame = self:FrameForKey(h.key)
       if frame then wanted[frame] = true end
     end
@@ -177,7 +198,7 @@ function Highlight:TargetsFor(h, wanted)
         if button then wanted[button] = true end
       end
     end
-    if type(h.bagslots) == "table" then
+    if type(h.bagslots) == "table" and not skipBags then
       for _, pair in ipairs(h.bagslots) do
         local button = self:ButtonForBagSlot(pair[1], pair[2])
         if button then wanted[button] = true; self.bagTargets[button] = true end
@@ -223,9 +244,20 @@ local function stopPulse(glow)
   if glow.ticker then glow.ticker:Cancel(); glow.ticker = nil end
 end
 
+-- The proc glow is a frame laid over the button, bigger than it. It must
+-- never catch the mouse, or hovering the button (tooltips, other addons'
+-- OnEnter hooks) stops working while it glows.
+local function passMouseThrough(frame)
+  for _, key in ipairs({ "overlay", "SpellActivationAlert" }) do
+    local glow = frame[key]
+    if type(glow) == "table" and glow.EnableMouse then glow:EnableMouse(false) end
+  end
+end
+
 function Highlight:Show(frame)
   if ActionButton_ShowOverlayGlow then
     ActionButton_ShowOverlayGlow(frame)
+    passMouseThrough(frame)
     return
   end
   local glow = ensureFallbackGlow(frame)

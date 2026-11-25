@@ -54,6 +54,13 @@ function Controller:SetSession(on)
   if NN.BagFull and NN.BagFull.ApplyScale then NN.BagFull:ApplyScale() end
 end
 
+-- True when the game's controller mode is on (Options > Controller > Enable
+-- Controller). The Back buttons window is only offered then.
+function Controller:ModeOn()
+  if C_GamePad and C_GamePad.IsEnabled and C_GamePad.IsEnabled() == true then return true end
+  return self:GetString("GamePadEnable") == "1"
+end
+
 function Controller:Boost()
   return self.session == true and NN.db ~= nil and NN.db.controller.boost == true
 end
@@ -122,7 +129,8 @@ if C_GamePad then
     if Controller.AddPanelOptions then Controller:AddPanelOptions(category, layout) end
     -- the paddle editor is NewbieNudge's own window; this button only shows
     -- it and writes no setting (the Options window's commit tainted the
-    -- controller interface when settings were written from it)
+    -- controller interface when settings were written from it). With
+    -- controller mode off, Show says so in chat instead of opening.
     Options.AddButton(layout, L.OPT_CONTROLLER_PADDLES, L.MENU_PADDLES, function()
       if NN.PaddlesWindow then NN.PaddlesWindow:Show() end
     end)

@@ -144,7 +144,7 @@ return {
   options_page_registered = function()
     load_addon()
     local found = false
-    for _, c in ipairs(WOW.calls) do if c[1] == "RegisterVerticalLayoutSubcategory" and c[3] == L().OPT_BAGS then found = true end end
+    for _, c in ipairs(WOW.calls) do if c[1] == "page" and c[2] == L().OPT_BAGS then found = true end end
     assert_true(found)
     assert_true(WOW.settings["NN_bagfull_enabled"] and WOW.settings["NN_bagfull_quality"] and WOW.settings["NN_bagfull_onLoot"])
     WOW.settings["NN_bagfull_quality"].setter("0"); assert_eq(NewbieNudge.db.bagfull.maxQuality, 0)

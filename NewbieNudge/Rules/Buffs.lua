@@ -34,9 +34,11 @@ local function auraActive(ids)
   return false
 end
 
+-- First spell of the group the character can cast. Passive spells are
+-- skipped: their aura is always on (or never shows), there is nothing to cast.
 local function firstKnown(ids)
   for _, id in ipairs(ids) do
-    if NN.Spellbook:Knows(id) then return id end
+    if NN.Spellbook:Knows(id) and not NN.Spellbook:IsPassive(id) then return id end
   end
   return nil
 end

@@ -101,9 +101,8 @@ return {
     WOW.Click(b)
     assert_true(NewbieNudge.MapList.frame:IsShown(), "left-click opens the NewbieNudge list (v4)")
     NewbieNudge.MapReveal:OpenSettings()
-    local opened
-    for _, c in ipairs(WOW.calls) do if c[1] == "OpenToCategory" then opened = c[2] end end
-    assert_eq(opened, NewbieNudge.L.OPT_MAP, "settings open the Map subcategory, not the main page")
+    local W = NewbieNudge.SettingsWindow
+    assert_eq(W.pages[W.page].title, NewbieNudge.L.OPT_MAP, "settings open on the Map page, not the first one")
     WOW.Click(b, "RightButton")
     assert_eq(NewbieNudge.db.map.reveal, false)
     assert_true(WOW.printed[#WOW.printed]:find(NewbieNudge.L.SLASH_MAP_OFF, 1, true))

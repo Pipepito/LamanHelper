@@ -12,6 +12,14 @@ local Paddles = {}
 NN.Paddles = Paddles
 
 Paddles.MAX = 4
+-- What the controller calls each back button, in slot order (left pair, then
+-- right): the names printed on the Steam Deck's back grips. The game has no
+-- icons for them (Steam turns them into keys), so they are drawn as text.
+Paddles.NAMES = { "L4", "L5", "R4", "R5" }
+
+function Paddles:Name(n)
+  return self.NAMES[n] or tostring(n)
+end
 
 local owner = CreateFrame("Frame", "NewbieNudgePaddleOwner")
 Paddles.owner = owner
@@ -236,6 +244,8 @@ function Paddles:Apply()
   ClearOverrideBindings(owner)
   if self.ClearLayers then self:ClearLayers() end
   if not db().enabled then return end
+  -- without the game's controller mode the back buttons do nothing
+  if NN.Controller and not NN.Controller:ModeOn() then return end
   for n = 1, self.MAX do bindPaddle(n, self:Get(n)) end
 end
 
@@ -412,6 +422,20 @@ NN:OnAnyEvent(function(event)
   end
   if event == "SPELLS_CHANGED" and NN.db then Paddles:Apply() end
   if event == "PLAYER_REGEN_DISABLED" and learning then finish(nil, "combat") end
+  -- controller mode switched on or off in the game's options
+  if (event == "CVAR_UPDATE" or event == "GAME_PAD_CONNECTED" or event == "GAME_PAD_DISCONNECTED") and NN.db then
+    local on = not NN.Controller or NN.Controller:ModeOn()
+    if on ~= Paddles.modeOn then
+      Paddles.modeOn = on
+      Paddles:Apply()
+      if not on and NN.PaddlesWindow then NN.PaddlesWindow:Hide() end
+    end
+  end
 end)
+NN:RegisterEvent("CVAR_UPDATE")
+NN:RegisterEvent("GAME_PAD_DISCONNECTED")
 
-NN:AfterLogin(function() Paddles:Apply() end)
+NN:AfterLogin(function()
+  Paddles.modeOn = not NN.Controller or NN.Controller:ModeOn()
+  Paddles:Apply()
+end)

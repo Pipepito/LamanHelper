@@ -75,6 +75,26 @@ return {
     NewbieNudge.Highlight:Apply({})
     assert_eq(WOW.calls[#WOW.calls][1], "glow_hide")
   end,
+  bag_glows_skipped_when_a_bag_addon_is_loaded = function()
+    C_AddOns.IsAddOnLoaded = function(name) return name == "Baganator" end
+    load_addon()
+    local cf = WOW.NewContainerFrame(0, 16)
+    NewbieNudge.Highlight:Apply({
+      { rule = { name = "r" }, result = { text = "t", highlight = { key = "bags", bagslots = { { 0, 3 } } } }, stale = false },
+      { rule = { name = "s" }, result = { text = "u", highlight = "bags" }, stale = false },
+    })
+    assert_eq(calls("glow_show", MainMenuBarBackpackButton), 0)
+    assert_eq(calls("glow_show", cf.Items[3]), 0)
+  end,
+  proc_glow_overlay_never_catches_the_mouse = function()
+    local mouse
+    ActionButton_ShowOverlayGlow = function(frame)
+      frame.overlay = { EnableMouse = function(_, on) mouse = on end }
+    end
+    load_addon()
+    NewbieNudge.Highlight:Apply(rows({ highlight = "bags" }))
+    assert_eq(mouse, false)
+  end,
   bank_bag_frames_are_neither_hooked_nor_scanned = function()
     load_addon()
     local bag0 = WOW.NewContainerFrame(0, 16)

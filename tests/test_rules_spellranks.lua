@@ -13,7 +13,53 @@ local function fireballBook()
   }
 end
 
+-- Learns Fireball Rank 2 (143) while Rank 1 (133) is on the bars.
+local function learnRank2()
+  WOW.FireEvent("LEARNED_SPELL_IN_SKILL_LINE", 143, 1)
+  WOW.AdvanceTime(1)
+end
+
 return {
+  learning_a_rank_swaps_old_ones_on_the_bars = function()
+    fireballBook()
+    WOW.state.actions[2] = { type = "spell", id = 133 }
+    WOW.state.actions[25] = { type = "spell", id = 133 }
+    WOW.state.actions[3] = { type = "spell", id = 116 }
+    load_addon()
+    learnRank2()
+    assert_eq(WOW.state.actions[2].id, 143)
+    assert_eq(WOW.state.actions[25].id, 143)
+    assert_eq(WOW.state.actions[3].id, 116, "other spells untouched")
+    assert_nil(WOW.state.cursor)
+    assert_eq(WOW.printed[#WOW.printed], L().CHAT_PREFIX .. L().SPELL_RANKS_AUTO:format("Fireball", "Rank 2"))
+  end,
+  auto_swap_off_leaves_the_bars_alone = function()
+    fireballBook()
+    WOW.state.actions[2] = { type = "spell", id = 133 }
+    load_addon()
+    NewbieNudge.db.ranks.autoSwap = false
+    learnRank2()
+    assert_eq(WOW.state.actions[2].id, 133)
+  end,
+  in_combat_waits_until_combat_ends = function()
+    fireballBook()
+    WOW.state.actions[2] = { type = "spell", id = 133 }
+    load_addon()
+    WOW.state.inCombat = true
+    learnRank2()
+    assert_eq(WOW.state.actions[2].id, 133)
+    WOW.state.inCombat = false
+    WOW.FireEvent("PLAYER_REGEN_ENABLED")
+    assert_eq(WOW.state.actions[2].id, 143)
+  end,
+  low_rank_placed_by_hand_later_is_kept = function()
+    fireballBook()
+    load_addon()
+    learnRank2()
+    WOW.state.actions[7] = { type = "spell", id = 133 }
+    WOW.FireEvent("SPELLS_CHANGED"); WOW.AdvanceTime(1)
+    assert_eq(WOW.state.actions[7].id, 133)
+  end,
   low_rank_on_bar_is_reported_with_ranks = function()
     fireballBook()
     WOW.state.actions[2] = { type = "spell", id = 133 }

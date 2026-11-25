@@ -13,6 +13,7 @@ local function pad(button)
 end
 
 local function setup()
+  WOW.state.gamepad.enabled = true
   WOW.state.spellInfo[774] = { name = "Rejuvenation", icon = 136081 }
   WOW.state.spellBook.items[1] = { spellID = 774 }
   WOW.state.macros = { { name = "Mount", icon = 132261 } }
@@ -330,13 +331,37 @@ return {
   end,
   slash_and_menu_open_the_window = function()
     setup()
-    NewbieNudge:HandleSlash("paddles")
+    NewbieNudge:HandleSlash("back")
     assert_true(_G.NewbieNudgePaddles:IsShown())
     local found
     for _, e in ipairs(NewbieNudge.MinimapButton:MenuEntries()) do if e.label == L().MENU_PADDLES then found = e end end
     assert_true(found, "minimap menu entry")
     _G.NewbieNudgePaddles:Hide(); found.onClick()
     assert_true(_G.NewbieNudgePaddles:IsShown())
+    _G.NewbieNudgePaddles:Hide(); NewbieNudge:HandleSlash("paddles")
+    assert_true(_G.NewbieNudgePaddles:IsShown(), "old command still works")
+  end,
+  needs_controller_mode = function()
+    setup()
+    WOW.state.gamepad.enabled = false
+    NewbieNudge:HandleSlash("back")
+    assert_true(not (_G.NewbieNudgePaddles and _G.NewbieNudgePaddles:IsShown()), "window stays shut")
+    assert_eq(WOW.printed[#WOW.printed], L().CHAT_PREFIX .. L().PADDLES_NEED_CONTROLLER)
+    for _, e in ipairs(NewbieNudge.MinimapButton:MenuEntries()) do
+      assert_true(e.label ~= L().MENU_PADDLES, "no minimap menu entry")
+    end
+    WOW.state.gamepad.enabled = true
+    NewbieNudge:HandleSlash("back")
+    assert_true(_G.NewbieNudgePaddles:IsShown())
+  end,
+  rows_are_named_after_the_back_buttons = function()
+    setup()
+    W():Show()
+    local names = {}
+    for n, r in ipairs(W().rows) do names[n] = r.title.text:GetText() end
+    assert_eq(names, { "L4", "L5", "R4", "R5" })
+    W():OpenPicker(3)
+    assert_true(W().frame.picker.title:GetText():find(L().PADDLES_ROW:format("R4"), 1, true))
   end,
   rows_show_key_and_action = function()
     setup()
@@ -473,7 +498,7 @@ return {
     end
     assert_true(button, "Controller page has a Paddles button")
     local before = #WOW.calls
-    button[4].fn()
+    button[4].onClick()
     assert_true(_G.NewbieNudgePaddles:IsShown())
     for i = before + 1, #WOW.calls do
       assert_true(WOW.calls[i][1] ~= "SetCVar" and WOW.calls[i][1] ~= "SetValue", "writes no setting")

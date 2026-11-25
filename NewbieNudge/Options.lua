@@ -1,81 +1,47 @@
--- Options: a page in Blizzard's Settings window (Escape > Options > AddOns).
--- Every control is a proxy straight onto NewbieNudgeDB, so there is no second
--- copy of the settings to keep in sync.
+-- Options: every NewbieNudge setting, described as plain data for
+-- NewbieNudge's own settings window (SettingsWindow.lua; Esc menu >
+-- NewbieNudge). Nothing is registered in the game's Settings window: its
+-- commit tainted Forever's controller interface, and its AddOns list needs a
+-- mouse. Every control reads and writes NewbieNudgeDB (or a game CVar)
+-- through its getter and setter, so there is no second copy to keep in sync.
+--
+-- Pages are functions that call the Add* helpers below; Options.Model runs
+-- them and collects what they add. The (category, layout) arguments are kept
+-- so page code reads the same as before; they are always nil.
 local _, NN = ...
 local L = NN.L
 
 local Options = { pages = {} }
 NN.Options = Options
 
--- The Settings API refuses a variable registered twice; the second page to
--- ask for one gets the first page's setting back instead of an error.
-Options.registered = {}
-
-local function registerSetting(category, variable, vtype, name, default, getter, setter)
-  local existing = Options.registered[variable]
-  if existing then return existing end
-  local setting
-  if Settings.RegisterProxySetting then
-    setting = Settings.RegisterProxySetting(category, variable, vtype, name, default, getter, setter)
-    Options.registered[variable] = setting
-    return setting
-  end
-  -- Older clients: proxy through a one-key table whose __index/__newindex call us.
-  local proxy = setmetatable({}, {
-    __index = function() return getter() end,
-    __newindex = function(_, _, value) setter(value) end,
-  })
-  setting = Settings.RegisterAddOnSetting(category, variable, "value", proxy, vtype, name, default)
-  Options.registered[variable] = setting
-  return setting
+local function record(entry)
+  local list = Options.recorder
+  if list then list[#list + 1] = entry end
 end
 
-function Options.AddHeader(layout, name)
-  layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(name))
+function Options.AddHeader(_, name)
+  record({ kind = "header", label = name })
 end
 
-function Options.AddButton(layout, name, buttonText, onClick, tooltip)
-  layout:AddInitializer(CreateSettingsButtonInitializer(name, buttonText, onClick, tooltip, true))
+function Options.AddButton(_, name, buttonText, onClick, tooltip)
+  record({ kind = "button", label = name, buttonText = buttonText, onClick = onClick, tooltip = tooltip })
 end
 
-function Options.AddCheckbox(category, variable, name, tooltip, getter, setter)
-  local setting = registerSetting(category, variable, Settings.VarType.Boolean, name, getter() and true or false, getter, setter)
-  Settings.CreateCheckbox(category, setting, tooltip)
-  return setting
+function Options.AddCheckbox(_, variable, name, tooltip, getter, setter)
+  record({ kind = "checkbox", var = variable, label = name, tooltip = tooltip, get = getter, set = setter })
 end
 
-function Options.AddSlider(category, variable, name, tooltip, min, max, step, getter, setter)
-  local setting = registerSetting(category, variable, Settings.VarType.Number, name, getter(), getter, setter)
-  local sliderOptions = Settings.CreateSliderOptions(min, max, step)
-  if MinimalSliderWithSteppersMixin and sliderOptions.SetLabelFormatter then
-    sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
-  end
-  Settings.CreateSlider(category, setting, sliderOptions, tooltip)
-  return setting
+function Options.AddSlider(_, variable, name, tooltip, min, max, step, getter, setter)
+  record({ kind = "slider", var = variable, label = name, tooltip = tooltip, min = min, max = max, step = step,
+    get = getter, set = setter })
 end
 
-function Options.AddDropdown(category, variable, name, tooltip, options, getter, setter)
-  local setting = registerSetting(category, variable, Settings.VarType.String, name, getter(), getter, setter)
-  local function optionsFn()
-    local container = Settings.CreateControlTextContainer()
-    for _, option in ipairs(options) do container:Add(option.value, option.label) end
-    return container:GetData()
-  end
-  Settings.CreateDropdown(category, setting, optionsFn, tooltip)
-  return setting
+function Options.AddDropdown(_, variable, name, tooltip, options, getter, setter)
+  record({ kind = "dropdown", var = variable, label = name, tooltip = tooltip, options = options,
+    get = getter, set = setter })
 end
 
--- A subcategory under the addon's page (Map, Bags, Camera, ...).
-function Options.AddSubcategory(name, key)
-  local category, layout = Settings.RegisterVerticalLayoutSubcategory(Options.category, name)
-  Options.subcategories = Options.subcategories or {}
-  Options.subcategories[name] = category
-  if key then Options.subcategoriesByKey[key] = category end
-  return category, layout
-end
-Options.subcategoriesByKey = {}
-
--- Page order in the AddOns list. Registered pages whose key is not here
+-- Page order in the settings window. Registered pages whose key is not here
 -- follow, in registration order.
 Options.PAGE_ORDER = { "reminders", "bags", "map", "gs_combat", "gs_names", "gs_interface", "camera", "controller", "build", "dev" }
 
@@ -115,6 +81,7 @@ function Options.BuildReminders(category, layout)
         Options.AddCheckbox(category, "NN_rule_" .. name, rule.title, tooltip,
           function() return not db.disabled[name] end,
           function(value) NN:SetRuleEnabled(name, value and true or false) end)
+        if rule.options then rule.options(category, layout) end
       end
     end
   end
@@ -137,16 +104,9 @@ function Options.OrderedPages()
   return out
 end
 
-function Options:Build()
-  if self.category or not Settings or not Settings.RegisterVerticalLayoutCategory then return end
-  -- diagnosis switch (/run NewbieNudgeDB.dev = { noSettings = true } then
-  -- /reload): stay out of Blizzard's Options window entirely
-  if NN.db and NN.db.dev and NN.db.dev.noSettings then return end
-  local category, layout = Settings.RegisterVerticalLayoutCategory(L.ADDON_TITLE)
-  self.category, self.layout = category, layout
+-- The top page: panel, info bar, minimap button, new player setup.
+function Options.BuildGeneral(category, layout)
   local db = NN.db
-
-  -- General
   Options.AddHeader(layout, L.OPT_GENERAL)
   Options.AddCheckbox(category, "NN_lock", L.OPT_LOCK, L.OPT_LOCK_TT,
     function() return db.panel.locked end,
@@ -203,29 +163,36 @@ function Options:Build()
     Options.AddButton(layout, L.OPT_GS_PRESET, L.OPT_BUTTON_DO, function() NN.GameSettings:ApplyPreset() end, L.OPT_GS_PRESET_TT)
     Options.AddButton(layout, L.OPT_GS_RESET, L.OPT_BUTTON_DO, function() NN.GameSettings:Reset() end)
   end
+end
 
-  if Settings.RegisterVerticalLayoutSubcategory then
-    for _, page in ipairs(Options.OrderedPages()) do
-      local title = L[page.titleKey]
-      local pageCategory, pageLayout = Options.AddSubcategory(title, page.key)
-      -- One broken page must not take the whole options window down.
-      local ok, err = pcall(page.build, pageCategory, pageLayout)
-      if not ok then
-        db.errors["options:" .. title] = tostring(err)
-        NN:Say(L.OPT_PAGE_ERROR:format(title, tostring(err)))
+-- Every page as plain data, for NewbieNudge's own settings window:
+-- { { title, key, entries = { {kind = "header"|"checkbox"|"slider"|"dropdown"|"button", ...} } } }
+-- Built fresh on each call so labels that change (build status) are current.
+-- One broken page must not take the others down; it is reported once.
+Options.reported = {}
+
+function Options.Model()
+  local pages = {}
+  local function add(key, title, build)
+    local entries = {}
+    Options.recorder = entries
+    local ok, err = pcall(build, nil, nil)
+    Options.recorder = nil
+    if not ok then
+      if NN.db then NN.db.errors["options:" .. tostring(title)] = tostring(err) end
+      if not Options.reported[title] then
+        Options.reported[title] = true
+        NN:Say(L.OPT_PAGE_ERROR:format(tostring(title), tostring(err)))
       end
     end
+    if #entries > 0 then pages[#pages + 1] = { key = key, title = title, entries = entries } end
   end
-
-  Settings.RegisterAddOnCategory(category)
-  NN.optionsCategoryID = category:GetID()
+  add("general", L.OPT_GENERAL, Options.BuildGeneral)
+  for _, page in ipairs(Options.OrderedPages()) do add(page.key, L[page.titleKey] or page.key, page.build) end
+  return pages
 end
 
-function NN:OpenOptions()
-  if not Options.category then Options:Build() end
-  if NN.optionsCategoryID and Settings and Settings.OpenToCategory then
-    Settings.OpenToCategory(NN.optionsCategoryID)
-  end
+-- Opens NewbieNudge's settings window, on the page with that title if given.
+function NN:OpenOptions(pageTitle)
+  if NN.SettingsWindow then NN.SettingsWindow:Show(pageTitle) end
 end
-
-NN:AfterLogin(function() Options:Build() end)

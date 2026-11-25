@@ -33,7 +33,7 @@ Then start the game or type `/reload`.
 
 | Command | What it does |
 |---|---|
-| `/nudge` | Open the options page (also under Escape → Options → AddOns → NewbieNudge). |
+| `/nudge` | Open NewbieNudge's settings window (also Esc → NewbieNudge, the minimap button's menu and a key binding). In this README, "Options → X" means page X of that window. |
 | `/nudge lock` | Lock or unlock the panel. Unlocked, drag the title bar to move it. |
 | `/nudge list` | List every reminder and whether it is on, off, snoozed or not relevant. |
 | `/nudge off <name>` / `/nudge on <name>` | Turn one reminder off or on for this character. |
@@ -43,7 +43,8 @@ Then start the game or type `/reload`.
 | `/nudge minimap` | Show or hide the minimap button. |
 | `/nudge style` | Switch the panel between the full list and icons only. |
 | `/nudge bar` | Turn the info bar on top of the panel on or off. |
-| `/nudge paddles` | Open the Paddles window: actions for your controller's back paddles. |
+| `/nudge settings` | Open NewbieNudge's own settings window (also in the game's Esc menu): every options page, usable with the controller alone. |
+| `/nudge back` | Open the Back buttons window: actions for your controller's back buttons (L4, L5, R4, R5). `/nudge paddles` still works. |
 | `/nudge services` | Show or hide nearby services (repair, inns, trainers…) on the world map. |
 | `/nudge trash` | Open the "cheapest to destroy" list for your bags right now. |
 | `/nudge build <link>` | Set an Icy Veins talent build from its calculator link (`/nudge build clear` removes it, `/nudge build` shows the status). |
@@ -87,7 +88,7 @@ A round button on the edge of the minimap. Click it for a menu: lock or
 unlock the panel, switch between the full list and icons only, show the info
 bar, snooze everything on the panel for your snooze length, wake every snoozed
 reminder, hide or show the panel, open the settings. Drag it around the
-minimap edge to move it. `/nudge minimap` or Options → NewbieNudge hides it;
+minimap edge to move it. `/nudge minimap` or Options → General hides it;
 the same menu is also in the game's AddOns drop-down by the minimap when the
 client has one.
 
@@ -120,7 +121,7 @@ the unexplored-areas switch, one switch per kind of service to show on the
 map (with its icon), and your marks — click one to jump to its zone, or ✕ to
 remove it. Right-click the icon to toggle the unexplored areas.
 
-In the icons-only style, Options → NewbieNudge sets how many icons go on a
+In the icons-only style, Options → General sets how many icons go on a
 line (1 makes a column), whether they fill rows or columns, the icon size and
 the gap between them.
 
@@ -130,7 +131,7 @@ A row on top of the panel: bag space (used/total and free; orange below 6
 free, red below 3), gold, and gear condition (all your equipped items
 together; red when one item is about to break). Click bags to open them, gear
 to open your character. Hidden in combat. Each part can be turned off under
-Options → NewbieNudge → Info bar, or the whole bar with `/nudge bar`.
+Options → General → Info bar, or the whole bar with `/nudge bar`.
 
 ## World map
 
@@ -179,11 +180,12 @@ bound to pad combinations in the game's Key Bindings window under
 "NewbieNudge": show/hide the panel, open the top reminder, snooze the top
 reminder, open the options.
 
-**Back paddles.** The minimap button's menu → Paddles (or `/nudge paddles`)
-opens NewbieNudge's paddle editor. Press Learn and then the paddle: NewbieNudge
-remembers whatever the paddle sends (a key from your Steam layout, or the pad's
-own paddle button). Give each paddle a game command (open bags, character,
-map, mount…), a spell, an item or a macro by dragging it onto the paddle's
+**Back buttons.** The minimap button's menu → Back buttons (or `/nudge back`)
+opens NewbieNudge's back-button editor, with one row each for L4, L5, R4 and R5
+(the names on the Steam Deck's back grips). Press Learn and then the back
+button: NewbieNudge remembers whatever it sends (a key from your Steam layout,
+or the pad's own back button). Give each one a game command (open bags,
+character, map, mount…), a spell, an item or a macro by dragging it onto its
 slot, or make it a layer: while it is held, A/B/X/Y and the d-pad do eight
 extra actions. The game's own buttons can't be learned, and nothing changes
 during combat. The window works with the controller alone: d-pad to move, A to

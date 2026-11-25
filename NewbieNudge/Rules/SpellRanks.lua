@@ -19,6 +19,70 @@ local function swap(slots, topID, ruleName)
   NN:Schedule()
 end
 
+-------------------------------------------------------------------------------
+-- Auto swap: when a new rank is learned, the old ranks of THAT spell on the
+-- bars are replaced by it (option ranks.autoSwap). Only on learning, so a low
+-- rank the player puts on a bar on purpose (downranking) is left alone.
+-------------------------------------------------------------------------------
+
+local AutoRanks = { pending = {} }
+NN.AutoRanks = AutoRanks
+local SWAP_DELAY = 0.5
+
+function AutoRanks:Enabled()
+  return NN.db and NN.db.ranks and NN.db.ranks.autoSwap ~= false
+end
+
+-- Swaps every bar slot holding a lower rank of a pending spell name.
+function AutoRanks:Run()
+  if not self:Enabled() or not GetActionInfo then wipe(self.pending); return end
+  if next(self.pending) == nil then return end
+  if InCombatLockdown() then return end -- PLAYER_REGEN_ENABLED runs it again
+  if GetCursorInfo and GetCursorInfo() then
+    C_Timer.After(1, function() AutoRanks:Run() end) -- the player is dragging something
+    return
+  end
+  NN.Spellbook:Invalidate()
+  local swapped = {}
+  for slot = 1, MAX_ACTION_SLOT do
+    local kind, id = GetActionInfo(slot)
+    id = NN.Plain(id)
+    local name = kind == "spell" and id and C_Spell.GetSpellName(id)
+    if name and self.pending[name] then
+      local topID = NN.Spellbook:TopRankByName(name)
+      if topID and topID ~= id and NN.Spellbook:IsLowRank(id) then
+        C_Spell.PickupSpell(topID)
+        PlaceAction(slot)
+        ClearCursor()
+        swapped[name] = topID
+      end
+    end
+  end
+  wipe(self.pending)
+  for name, topID in pairs(swapped) do
+    local rank = C_Spell.GetSpellSubtext(topID)
+    NN:Say(rank and rank ~= "" and L.SPELL_RANKS_AUTO:format(name, rank) or L.SPELL_RANKS_AUTO_NORANK:format(name))
+  end
+  if next(swapped) then NN:MarkDirty("spell_ranks"); NN:Schedule() end
+end
+
+function AutoRanks:Learned(spellID)
+  if not self:Enabled() then return end
+  local name = spellID and C_Spell.GetSpellName(spellID)
+  if not name then return end
+  self.pending[name] = true
+  -- after the spellbook has caught up with the new rank
+  C_Timer.After(SWAP_DELAY, function() AutoRanks:Run() end)
+end
+
+NN:OnAnyEvent(function(event, arg1)
+  if event == "LEARNED_SPELL_IN_SKILL_LINE" then
+    AutoRanks:Learned(NN.Plain(arg1))
+  elseif event == "PLAYER_REGEN_ENABLED" then
+    AutoRanks:Run()
+  end
+end)
+
 NN:RegisterRule({
   name = "spell_ranks",
   group = "spells",
@@ -75,4 +139,9 @@ NN:RegisterRule({
     return results
   end,
   sample = function() return { { text = L.SPELL_RANKS_ROW:format("Fireball", "Rank 2", "Rank 4"), icon = 135812 } } end,
+  options = function(category)
+    NN.Options.AddCheckbox(category, "NN_ranks_autoSwap", L.OPT_RANKS_AUTO, L.OPT_RANKS_AUTO_TT,
+      function() return NN.db.ranks.autoSwap ~= false end,
+      function(value) NN.db.ranks.autoSwap = value and true or false end)
+  end,
 })

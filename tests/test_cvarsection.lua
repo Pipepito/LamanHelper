@@ -21,6 +21,19 @@ local function section()
     otherHeader = "OPT_CAMERA_OTHER", resetLabel = "OPT_CAMERA_RESET",
   })
 end
+-- A section's controls, recorded the way the settings window collects them.
+local function addControls()
+  local Options = NewbieNudge.Options
+  local entries = {}
+  Options.recorder = entries
+  section():AddControls(nil, nil)
+  Options.recorder = nil
+  for _, e in ipairs(entries) do
+    if e.kind == "header" or e.kind == "button" then WOW.record("initializer", e.kind, e.label, e)
+    elseif e.kind == "dropdown" then WOW.record("dropdown", e.var, e.options, e.tooltip) end
+    if e.var then WOW.settings[e.var] = { getter = e.get, setter = e.set } end
+  end
+end
 
 return {
   apply_counts_changes_and_skips_unknown = function()
@@ -44,8 +57,7 @@ return {
   dropdown_shows_raw_value_when_unknown = function()
     cvars({ fooA = { default = "0" }, fooB = { default = "1", value = "7" } })
     load_addon()
-    local cat, layout = NewbieNudge.Options.AddSubcategory("X")
-    section():AddControls(cat, layout)
+    addControls()
     local dd = has(callsNamed("dropdown"), function(c) return c[2] == "NN_cvar_fooB" end)
     assert_true(dd, "dropdown registered for fooB")
     assert_eq(dd[3][#dd[3]], { value = "7", label = "7" })
@@ -56,8 +68,7 @@ return {
   dropdown_setter_writes_string = function()
     cvars({ fooB = { default = "1" } })
     load_addon()
-    local cat, layout = NewbieNudge.Options.AddSubcategory("X")
-    section():AddControls(cat, layout)
+    addControls()
     WOW.settings["NN_cvar_fooB"].setter("2")
     assert_eq(C_CVar.GetCVar("fooB"), "2")
     assert_eq(WOW.settings["NN_cvar_fooB"].getter(), "2")

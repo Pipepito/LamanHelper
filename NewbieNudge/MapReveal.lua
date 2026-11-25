@@ -137,15 +137,9 @@ function MapReveal:Toggle()
   NN:Say(NN.db.map.reveal and L.SLASH_MAP_ON or L.SLASH_MAP_OFF)
 end
 
--- Opens the addon's Map settings page (falls back to the main page).
+-- Opens NewbieNudge's settings on the Map page.
 function MapReveal:OpenSettings()
-  local subs = NN.Options and NN.Options.subcategoriesByKey
-  local category = subs and subs.map
-  if category and Settings and Settings.OpenToCategory then
-    Settings.OpenToCategory(category:GetID())
-  elseif NN.OpenOptions then
-    NN:OpenOptions()
-  end
+  if NN.OpenOptions then NN:OpenOptions(L.OPT_MAP) end
 end
 
 -- A small icon on the world map: left-click opens the Map settings,

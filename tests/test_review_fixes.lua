@@ -8,9 +8,6 @@ local function fakeRule(name, opts)
   return rule
 end
 
-local function callsNamed_RegisterAddOnCategory()
-  for _, c in ipairs(WOW.calls) do if c[1] == "RegisterAddOnCategory" then return c[2] end end
-end
 
 return {
   -- Finding 1: snoozes must use wall-clock time, not seconds since boot
@@ -72,7 +69,7 @@ return {
     WOW.extraFiles = { TESTS_DIR .. "/fixtures/failing_login_hook.lua" }
     load_addon()
     assert_eq(NewbieNudge_LaterHookRan, true)
-    assert_eq(callsNamed_RegisterAddOnCategory(), "NewbieNudge")
+    assert_true(NewbieNudge.SettingsWindow, "later files still loaded")
     assert_true(tostring(NewbieNudge.db.errors["login:1"]):find("hook boom", 1, true))
     assert_true(WOW.printed[#WOW.printed]:find("hook boom", 1, true) or WOW.printed[#WOW.printed - 1]:find("hook boom", 1, true))
   end,

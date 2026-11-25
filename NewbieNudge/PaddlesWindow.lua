@@ -12,6 +12,7 @@ local EMPTY_ICON = 134400
 local COMMAND_ICON = 136243
 
 local function P() return NN.Paddles end
+local MARGIN = 12 -- see styleFrame
 -- PLAYER_REGEN_DISABLED fires before InCombatLockdown() turns true
 local fighting = false
 local function inCombat() return fighting or (InCombatLockdown and InCombatLockdown()) end
@@ -224,6 +225,7 @@ local function legend(parent, pairs)
   end
   return row
 end
+Window.Legend = function(parent, pairs) return legend(parent, pairs) end
 
 -------------------------------------------------------------------------------
 -- Picker: choose a slot's action from a list (works with the d-pad)
@@ -235,7 +237,7 @@ local TAB_LABEL = { spells = "PADDLES_TAB_SPELLS", items = "PADDLES_TAB_ITEMS", 
   commands = "PADDLES_TAB_COMMANDS" }
 
 local function pickerTarget(p)
-  local name = L.PADDLES_ROW:format(p.n)
+  local name = L.PADDLES_ROW:format(P():Name(p.n))
   if p.slot then name = name .. ": " .. slotLabel(p.slot) end
   return name
 end
@@ -380,6 +382,12 @@ local BORDER = {
   Left = { "!UI-Frame-DiamondMetal-EdgeLeft" }, Right = { "!UI-Frame-DiamondMetal-EdgeRight" },
 }
 
+-- Room kept clear inside the window so nothing sits on the border. MARGIN (top
+-- of the file) is added to every x laid out by Refresh; the DiamondMetal edge is about 12
+-- pixels wide.
+local INSET = 22
+local BOTTOM_PAD = 104
+
 local function styleFrame(frame)
   for _, part in pairs(BORDER) do if not atlasExists(part[1]) then return end end
   local b = {}
@@ -409,10 +417,13 @@ local function titleLine(frame, title)
   frame.titleLine = line
 end
 
+-- Shared with NewbieNudge's settings window (SettingsWindow.lua), same look.
+NN.PadUI = { StyleFrame = styleFrame, TitleLine = titleLine, PadName = padName, AtlasExists = atlasExists }
+
 local function buildPicker(frame)
   local ui = CreateFrame("Frame", nil, frame)
-  ui:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -10)
-  ui:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -10, 10)
+  ui:SetPoint("TOPLEFT", frame, "TOPLEFT", INSET - 2, -14)
+  ui:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(INSET - 2), 14)
   if ui.SetFrameLevel and frame.GetFrameLevel then ui:SetFrameLevel((frame:GetFrameLevel() or 1) + 20) end
   ui:EnableMouse(true)
   ui.bg = ui:CreateTexture(nil, "BACKGROUND")
@@ -544,8 +555,8 @@ end
 
 local function buildRow(frame, n)
   local r = { layer = {}, layerLabels = {} }
-  r.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  r.title:SetText(L.PADDLES_ROW:format(n))
+  -- the back button's name (L4...) drawn as a pad button marker
+  r.title = badge(frame, nil, P():Name(n))
   r.key = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   r.learn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
   r.learn:SetSize(80, 22)
@@ -578,7 +589,7 @@ end
 
 local function build()
   local frame = CreateFrame("Frame", "NewbieNudgePaddles", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-  frame:SetSize(560, 300)
+  frame:SetSize(560 + 2 * MARGIN, 300)
   frame:SetPoint("CENTER")
   frame:SetFrameStrata("DIALOG")
   frame:SetMovable(true)
@@ -602,11 +613,11 @@ local function build()
   styleFrame(frame)
   titleLine(frame, frame.title)
   local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-  close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+  close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -3, -3)
   close:SetScript("OnClick", function() frame:Hide() end)
 
   frame.enable = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
-  frame.enable:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -26)
+  frame.enable:SetPoint("TOPLEFT", frame, "TOPLEFT", INSET - 2, -28)
   frame.enable:SetScript("OnClick", function(self) P():SetEnabled(self:GetChecked()); Window:Refresh() end)
   frame.enableText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   frame.enableText:SetPoint("LEFT", frame.enable, "RIGHT", 2, 0)
@@ -723,7 +734,7 @@ end
 
 local function place(region, x, y)
   region:ClearAllPoints()
-  region:SetPoint("TOPLEFT", Window.frame, "TOPLEFT", x, y)
+  region:SetPoint("TOPLEFT", Window.frame, "TOPLEFT", x + MARGIN, y)
 end
 
 function Window:Refresh()
@@ -737,7 +748,7 @@ function Window:Refresh()
   for n, r in ipairs(self.rows) do
     grid[#grid + 1] = { r.learn, r.slot }
     local entry = P():Get(n)
-    place(r.title, 12, y - 6)
+    place(r.title, 12, y - 4)
     r.key:SetText(entry.key or L.PADDLES_NOT_SET)
     place(r.key, 90, y - 6)
     place(r.learn, 170, y - 2)
@@ -782,14 +793,20 @@ function Window:Refresh()
   if locked then frame.combat:Show() else frame.combat:Hide() end
   place(frame.tip, 12, y - 36)
   place(frame.legend, 12, y - 66)
-  frame:SetHeight(-y + 90)
+  frame:SetHeight(-y + BOTTOM_PAD)
   self.grid = grid
   self.focus = self.focus or { r = 2, c = 1 }
   self.focus.r = math.min(self.focus.r, #grid)
   showFocus()
 end
 
+-- Back buttons only make sense with the game's controller mode on.
+function Window:Available()
+  return NN.Controller == nil or NN.Controller:ModeOn()
+end
+
 function Window:Show()
+  if not self:Available() then NN:Say(L.PADDLES_NEED_CONTROLLER); return end
   if not self.frame then self.frame = build() end
   self.frame:Show()
   self:Refresh()

@@ -9,10 +9,23 @@ local function setup()
   WOW.state.spellInfo[774] = { name = "Rejuvenation", icon = 136081 }
   WOW.state.spellBook.items[1] = { spellID = 774 }
   WOW.state.macros = { { name = "Mount", icon = 132261 } }
+  WOW.state.gamepad.enabled = true -- the game's controller mode
   load_addon()
 end
 
 return {
+  no_bindings_without_controller_mode = function()
+    setup()
+    P():SetKey(1, "F9")
+    P():SetAction(1, { kind = "command", value = "TOGGLEBACKPACK" })
+    assert_eq(binds().F9, "TOGGLEBACKPACK")
+    WOW.state.gamepad.enabled = false
+    WOW.FireEvent("CVAR_UPDATE", "GamePadEnable")
+    assert_eq(count(binds()), 0, "switched off with controller mode")
+    WOW.state.gamepad.enabled = true
+    WOW.FireEvent("CVAR_UPDATE", "GamePadEnable")
+    assert_eq(binds().F9, "TOGGLEBACKPACK", "back on")
+  end,
   command_paddle_binds_the_command = function()
     setup()
     P():SetKey(1, "F9"); P():SetAction(1, { kind = "command", value = "TOGGLEBACKPACK" })

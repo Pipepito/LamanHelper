@@ -10,8 +10,7 @@ end
 local function pageCalls(title)
   local out, inPage = {}, false
   for _, c in ipairs(WOW.calls) do
-    if c[1] == "RegisterVerticalLayoutSubcategory" then inPage = (c[3] == title)
-    elseif c[1] == "RegisterAddOnCategory" then inPage = false
+    if c[1] == "page" then inPage = (c[2] == title)
     elseif inPage then out[#out + 1] = c end
   end
   return out
@@ -21,14 +20,7 @@ local function varsOf(calls)
   for _, c in ipairs(calls) do if c[1] == "checkbox" or c[1] == "slider" or c[1] == "dropdown" then out[#out + 1] = c[2] end end
   return out
 end
-local function mainPageCalls()
-  local out = {}
-  for _, c in ipairs(WOW.calls) do
-    if c[1] == "RegisterVerticalLayoutSubcategory" then break end
-    out[#out + 1] = c
-  end
-  return out
-end
+local function mainPageCalls() return pageCalls(NewbieNudge.L.OPT_GENERAL) end
 
 return {
   preset_writes_its_table_and_skips_unknown = function()
