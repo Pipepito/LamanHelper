@@ -5,7 +5,7 @@ workflow publishes that section as the GitHub release notes and the CurseForge
 changelog, so write it for players, in English. Spanish notes for friends live
 in `dist/` and are not tracked.
 
-## Unreleased
+## 0.6.0 - 2026-11-25
 
 - **Settings window made for the controller:** press Esc (or open the game menu) and pick **NewbieNudge**, right above AddOns. Every NewbieNudge settings page in one window: LB/RB switch pages, d-pad up/down picks a setting, left/right changes it, A ticks boxes and presses buttons, B closes. Each setting's explanation shows at the bottom. The mouse works too. It is what `/nudge`, `/nudge settings`, the minimap button's Settings, the map list's settings button and the "Open NewbieNudge options" key binding open now; NewbieNudge is no longer in the game's Esc > Options > AddOns list: everything moved to this window.
 - **Bag addons:** with Baganator, Bagnon, AdiBags, ArkInventory, BetterBags and the like, NewbieNudge no longer makes the backpack button or bag items glow, so the bag addon's own "hover a bag to highlight its items" keeps working. Glows elsewhere no longer block the mouse over the button they sit on.
